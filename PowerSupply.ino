@@ -12,32 +12,8 @@ LiquidCrystal lcd(0, 0, 0, 0, 0, 0);
 
 #include <Wire.h>
 
-//Inputs/outputs
-const uint8_t pinVolt = A2;
-const uint8_t pinPwm = A1;
-const uint8_t pinAmps = A3;
-const uint8_t currentIn = A0;
-const uint8_t pinPWM = 6;
-
-
-//Editable variables
-float realAmpOffset = -0.03;
-int Delay = 320;
-const float maxVoltage = 15.0;
-
-
-//Other Variables
-int pwmValue = 1;
-float targetVolt = 1.3;
-float readVolts = 0;
-float realVolts = 0;
-float RawValue = 0;
-float realCurrent = 0;
-float realCurrentValue = 0;
-float targetAmps = 0;
-unsigned long previousMillis = 0;
-unsigned long currentMillis = 0;
-float mapDivider = 0;
+#include "lib/header.h"
+#include "lib/functions.h"
 
 
 //THIS FUNCTION WILL MAP THE float VALUES IN THE GIVEN RANGE
@@ -78,13 +54,18 @@ void setup() {
 }
 
 void loop() {
-    targetVolt = analogRead(pinPwm) /
-                 mapDivider;          //mapDivider = 69.2 in my case Why 68.2? Well: I want maximum voltage of 15V. SO 1024 digital read divided by 15 =  68.2
-    targetAmps = analogRead(pinAmps) /
-                 1.024;                   //Why divided by 1.024? Well: I want maximum current of 1000mA. SO 1024 digital read divided by 1000mA =  1.024
-    RawValue = analogRead(
-            currentIn);                             //Read the feedback for current from the MAX471 sensor
-    realCurrent = (RawValue * 5.0) / 1024.0;                      //Scale the ADC, we get current value in Amps
+
+    encoder();
+
+    //mapDivider = 69.2 in my case Why 68.2? Well: I want maximum voltage of 15V. SO 1024 digital read divided by 15 =  68.2
+//    targetVolt = analogRead(pinPwm) / mapDivider;
+    terminal((uint8_t)targetVolt);
+    //Why divided by 1.024? Well: I want maximum current of 1000mA. SO 1024 digital read divided by 1000mA =  1.024
+    targetAmps = analogRead(pinAmps) / 1.024;
+    //Read the feedback for current from the MAX471 sensor
+    //Scale the ADC, we get current value in Amps
+    RawValue = analogRead(currentIn);
+    realCurrent = (RawValue * 5.0) / 1024.0;
     //Sub-strack the current error. Make tests in order to find the realAmpOffset value, in my case an error of -0.03A
     realCurrent = realCurrent - realAmpOffset;
     readVolts = analogRead(pinVolt);                           //We read the feedback voltage (0 - 1024)
@@ -133,10 +114,10 @@ void loop() {
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-    //Each Delay value we print values on the LCD screen
+    //Each screenRate value we print values on the LCD screen
     currentMillis = millis();
-    if (currentMillis - previousMillis >= Delay) {
-        previousMillis += Delay;
+    if (currentMillis - previousMillis >= screenRate) {
+        previousMillis += screenRate;
         lcd.clear();
         lcd.setCursor(0, 0);
         lcd.print(" VOLTAGE    CURRENT ");
@@ -155,6 +136,6 @@ void loop() {
         lcd.print(realCurrentValue, 0);
         //lcd.setCursor(19,1);
         lcd.print("mA");
-    }//end of currentMillis - previousMillis >= Delay
+    }//end of currentMillis - previousMillis >= screenRate
 
 }//end of void loop
