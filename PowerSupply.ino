@@ -41,7 +41,7 @@ void timer() {
 
 void setup() {
     lcd.begin(16, 4);
-    pinMode(pinPwm, INPUT);
+//    pinMode(pinPwm, INPUT);
     pinMode(pinVolt, INPUT);
     pinMode(pinAmps, INPUT);
     pinMode(currentIn, INPUT);
