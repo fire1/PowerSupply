@@ -7,35 +7,41 @@
 
 #include <Arduino.h>
 
+#define MAX_PWM_ByTimer 253
+
 //Inputs/outputs
-const uint8_t pinVolt = A2;
-const uint8_t pinAmps = A3;
-const uint8_t currentIn = A0;
-const uint8_t pinPWM = 6;
-const uint8_t pinEncoderB = 4;
-const uint8_t pinEncoderA = 3;
-const uint16_t screenRate = 320;
+const uint8_t pinVolt = A0;
+const uint8_t pinAmps = A1;
+//const uint8_t currentIn = A0;
+const uint8_t pinPWM = 5;
+const uint8_t pinEncoderC = 0;
+const uint8_t pinEncoderB = 0;
+const uint8_t pinEncoderA = 1;
+const uint16_t screenRate = 220;
 // Common counter
 volatile uint8_t index;
 
 
 //Editable variables
 float realAmpOffset = -0.03;
-const float maxVoltage = 15.0;
+const float maxVoltage = 24.65;//28.15;
 
 
 //Other Variables
-int pwmValue = 1;
-float targetVolt = 1.3;
+uint8_t pwmValue = 1;
+float targetVolt = 3.3;
 float readVolts = 0;
 float realVolts = 0;
-float RawValue = 0;
+float readAmps = 0;
 float realCurrent = 0;
 float realCurrentValue = 0;
-float targetAmps = 0;
+float targetAmps = 4;
 unsigned long previousMillis = 0;
 unsigned long currentMillis = 0;
-float mapDivider = 0;
+// float mapDividerVolt = 42.2;
+ float mapDividerVolt = 32;
+
+int dumpVolts ;
 
 //
 int val;

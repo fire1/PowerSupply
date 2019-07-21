@@ -5,52 +5,47 @@
 
 #include <Arduino.h>
 #include <LiquidCrystal.h>
+#include <PID_v1.h>
 
+#ifndef PID_v1_h
 
-// TODO resolve pins
-LiquidCrystal lcd(0, 0, 0, 0, 0, 0);
+#include "../libraries/PID/PID_v1.h"
 
-#include <Wire.h>
+#endif
+
 
 #include "lib/header.h"
 #include "lib/functions.h"
 
-
-//THIS FUNCTION WILL MAP THE float VALUES IN THE GIVEN RANGE
-float fmap(float x, float in_min, float in_max, float out_min, float out_max) {
-    return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
-}
-
-void timer() {
-    //---------------------------------------------- Set PWM frequency for D5 & D6 -------------------------------
-    // set timer 0 divisor to     1 for PWM frequency of 62500.00 Hz
-    //TCCR0B = TCCR0B & B11111000 | B00000001;
-    // set timer 0 divisor to     8 for PWM frequency of  7812.50 Hz
-    //TCCR0B = TCCR0B & B11111000 | B00000010;
-    // set timer 0 divisor to    64 for PWM frequency of   976.56 Hz (The DEFAULT)
-    TCCR0B = TCCR0B & B11111000 | B00000011;
-    // set timer 0 divisor to   256 for PWM frequency of   244.14 Hz
-    //TCCR0B = TCCR0B & B11111000 | B00000100;
-    // set timer 0 divisor to  1024 for PWM frequency of
-    //TCCR0B = TCCR0B & B11111000 | B00000101;
-
-    // pin 3 PWM frequency of 31372.55 Hz
-    //    TCCR2B = TCCR2B & B11111000 | B00000001;
-}
+// TODO resolve pins
+LiquidCrystal lcd(0, 1, 2, 9, 7, 8);
 
 
+//Define the aggressive and conservative Tuning Parameters
+double aggKp = 2, aggKi = 4, aggKd = 1;
+double consKp = 1, consKi = 0.5, consKd = 0.25;
+
+//Specify the links and initial tuning parameters
+//PID myPID(&realVolts, &pwmValue, &targetVolt, consKp, consKi, consKd, DIRECT);
+//PID myPID(&realVolts, &pwmValue, &targetVolt, 2, 5, 1, DIRECT);
+
+
+// do not use 10/11
 void setup() {
-    lcd.begin(16, 4);
+//    lcd.begin(16, 4);
 //    pinMode(pinPwm, INPUT);
     pinMode(pinVolt, INPUT);
     pinMode(pinAmps, INPUT);
-    pinMode(currentIn, INPUT);
-    pinMode(pinPWM, OUTPUT);
-    timer();
     Serial.begin(115200);
     currentMillis = millis();
     //I want maximum voltage of 15V in my case. SO 1024 digital read divided by 15 =  68.2
-    mapDivider = 1024.0 / maxVoltage;
+    mapDividerVolt = 1024.0 / maxVoltage;
+    setupPwm();
+
+//    myPID.SetMode(AUTOMATIC);
+//    myPID.SetSampleTime(50);
+//    myPID.SetTunings(10, 200, 0);
+//    myPID.SetOutputLimits(1, MAX_PWM_ByTimer);
 }
 
 void loop() {
@@ -59,21 +54,32 @@ void loop() {
 
     //mapDivider = 69.2 in my case Why 68.2? Well: I want maximum voltage of 15V. SO 1024 digital read divided by 15 =  68.2
 //    targetVolt = analogRead(pinPwm) / mapDivider;
-    terminal((uint8_t)targetVolt);
+    terminal(targetVolt);
+
     //Why divided by 1.024? Well: I want maximum current of 1000mA. SO 1024 digital read divided by 1000mA =  1.024
-    targetAmps = analogRead(pinAmps) / 1.024;
+    targetAmps = 150;
     //Read the feedback for current from the MAX471 sensor
     //Scale the ADC, we get current value in Amps
-    RawValue = analogRead(currentIn);
-    realCurrent = (RawValue * 5.0) / 1024.0;
+    readAmps = analogRead(pinAmps);
+    realCurrent = (readAmps * 5.0) / 1024.0;
     //Sub-strack the current error. Make tests in order to find the realAmpOffset value, in my case an error of -0.03A
     realCurrent = realCurrent - realAmpOffset;
-    readVolts = analogRead(pinVolt);                           //We read the feedback voltage (0 - 1024)
-    realVolts = readVolts / mapDivider;                        //Divide by 69.2 and we get range to 15V
+    dumpVolts = readVolts = analogRead(pinVolt);                           //We read the feedback voltage (0 - 1024)
+//    realVolts = readVolts / mapDividerVolt;                        //Divide by 69.2 and we get range to 15V
+    realVolts = fmap(readVolts, 147, 805, 3.32, 19.46);                        //Divide by 69.2 and we get range to 15V
 
-    realCurrentValue = realCurrent * 1000;                           //We pass from A to mA
-    realCurrentValue = constrain(realCurrentValue, 0, 2000);
+    realCurrentValue = realCurrent * 100;                           //We pass from A to mA
+    realCurrentValue = constrain(realCurrentValue, 0, 800);
 
+
+/*    double gap = abs(targetVolt - realVolts); //distance away from setpoint
+    if (gap < 0.5) {  //we're close to setpoint, use conservative tuning parameters
+        myPID.SetTunings(consKp, consKi, consKd);
+    } else {
+        //we're far from setpoint, use aggressive tuning parameters
+        myPID.SetTunings(aggKp, aggKi, aggKd);
+    }*/
+//    myPID.Compute();
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     //If the set current value is higher than the feedback current value, we make normal control of output voltage
@@ -82,13 +88,13 @@ void loop() {
         if (targetVolt > realVolts) {
             //When we decrease PWM width, the voltage gets higher at the output.
             pwmValue = pwmValue - 1;
-            pwmValue = constrain(pwmValue, 0, 255);
+            pwmValue = constrain(pwmValue, 0, MAX_PWM_ByTimer);
         }
         //If set voltage is lower than real value from feedback, we increase PWM width till we get same value
         if (targetVolt < realVolts) {
             //When we increase PWM width, the voltage gets lower at the output.
             pwmValue = pwmValue + 1;
-            pwmValue = constrain(pwmValue, 0, 255);
+            pwmValue = constrain(pwmValue, 0, MAX_PWM_ByTimer);
         }
     }//end of realCurrentValue < targetAmps
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -101,7 +107,7 @@ void loop() {
     if (realCurrentValue > targetAmps) {
         //When we increase PWM width, the voltage gets lower at the output.
         pwmValue = pwmValue + 1;
-        pwmValue = constrain(pwmValue, 0, 255);
+        pwmValue = constrain(pwmValue, 0, MAX_PWM_ByTimer);
     }
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -110,13 +116,16 @@ void loop() {
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     //We write PWM value on PWM pin out
-    analogWrite(pinPWM, pwmValue);
+    setPwm(pwmValue);
+
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 
 
     //Each screenRate value we print values on the LCD screen
     currentMillis = millis();
     if (currentMillis - previousMillis >= screenRate) {
+        debug();
         previousMillis += screenRate;
         lcd.clear();
         lcd.setCursor(0, 0);
