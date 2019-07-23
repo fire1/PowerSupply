@@ -7,7 +7,7 @@
 
 #include <Arduino.h>
 
-#define MAX_PWM_ByTimer 253
+#define MAX_PWM_ByTimer 254
 
 //Inputs/outputs
 const uint8_t pinVolt = A0;
@@ -32,7 +32,7 @@ uint8_t pwmValue = 1;
 float targetVolt = 3.3;
 float readVolts = 0;
 float realVolts = 0;
-float readAmps = 0;
+int readAmps = 0;
 float realCurrent = 0;
 float realCurrentValue = 0;
 float targetAmps = 4;
@@ -40,8 +40,9 @@ unsigned long previousMillis = 0;
 unsigned long currentMillis = 0;
 // float mapDividerVolt = 42.2;
  float mapDividerVolt = 32;
+uint16_t avrReadAmps;
 
-int dumpVolts ;
+int dumpVolts, dumpAmps ;
 
 //
 int val;

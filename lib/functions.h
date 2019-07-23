@@ -46,9 +46,9 @@ void setupPwm() {
     pinMode(pinPWM, OUTPUT);
     //---------------------------------------------- Set PWM frequency for D5 & D6 -------------------------------
 
-//    TCCR0B = TCCR0B & B11111000 | B00000001;    // set timer 0 divisor to     1 for PWM frequency of 62500.00 Hz
+    TCCR0B = TCCR0B & B11111000 | B00000001;    // set timer 0 divisor to     1 for PWM frequency of 62500.00 Hz
 //    TCCR0B = TCCR0B & B11111000 | B00000010;    // set timer 0 divisor to     8 for PWM frequency of  7812.50 Hz
-    TCCR0B = TCCR0B & B11111000 | B00000011;    // set timer 0 divisor to    64 for PWM frequency of   976.56 Hz
+//    TCCR0B = TCCR0B & B11111000 | B00000011;    // set timer 0 divisor to    64 for PWM frequency of   976.56 Hz
 //TCCR0B = TCCR0B & B11111000 | B00000100;    // set timer 0 divisor to   256 for PWM frequency of   244.14 Hz
 //TCCR0B = TCCR0B & B11111000 | B00000101;    // set timer 0 divisor to  1024 for PWM frequency of    61.04 Hz
 
@@ -75,10 +75,11 @@ void setPwm(uint8_t pwm) {
     }
 
     uint8_t compensate = 0;
-    if (targetVolt < (realVolts - 3) && pwm > (MAX_PWM_ByTimer - 3)) {
+    if (targetVolt < (realVolts - 1) && pwm == MAX_PWM_ByTimer && lastPwm == pwm) {
         analogWrite(pinPWM, 0);
         return;
     }
+    lastPwm = pwm;
 
     analogWrite(pinPWM, (MAX_PWM_ByTimer - pwm) - compensate);
 //    OCR2B = (uint8_t)MAX_PWM_ByTimer - (pwm - 1);
@@ -95,10 +96,12 @@ void debug() {
     Serial.println();
     Serial.print(F("Amp In: "));
     Serial.print(realCurrentValue);
+    Serial.print(F(" Raw "));
+    Serial.print(dumpAmps);
     Serial.print(F(" T: "));
     Serial.print(targetAmps);
 
-    Serial.print(F(" Volt In: "));
+    Serial.print(F(" //  Volt In: "));
     Serial.print(realVolts);
     Serial.print(F(" Raw "));
     Serial.print(dumpVolts);

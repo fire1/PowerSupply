@@ -57,19 +57,28 @@ void loop() {
     terminal(targetVolt);
 
     //Why divided by 1.024? Well: I want maximum current of 1000mA. SO 1024 digital read divided by 1000mA =  1.024
-    targetAmps = 150;
+    targetAmps = 3;
     //Read the feedback for current from the MAX471 sensor
     //Scale the ADC, we get current value in Amps
-    readAmps = analogRead(pinAmps);
-    realCurrent = (readAmps * 5.0) / 1024.0;
-    //Sub-strack the current error. Make tests in order to find the realAmpOffset value, in my case an error of -0.03A
-    realCurrent = realCurrent - realAmpOffset;
-    dumpVolts = readVolts = analogRead(pinVolt);                           //We read the feedback voltage (0 - 1024)
-//    realVolts = readVolts / mapDividerVolt;                        //Divide by 69.2 and we get range to 15V
-    realVolts = fmap(readVolts, 147, 805, 3.32, 19.46);                        //Divide by 69.2 and we get range to 15V
+//
+    for (index = 0; index < 4; ++index) {
+        avrReadAmps += analogRead(pinAmps);
+    }
+    dumpAmps = readAmps = avrReadAmps = avrReadAmps / 4;
+    realCurrent = map(readAmps, 170, 518, 580, 3150);
+    realCurrent = realCurrent < 0 ? 0 : realCurrent / 1000;
 
-    realCurrentValue = realCurrent * 100;                           //We pass from A to mA
-    realCurrentValue = constrain(realCurrentValue, 0, 800);
+
+
+
+    //Sub-strack the current error. Make tests in order to find the realAmpOffset value, in my case an error of -0.03A
+//    realCurrent = realCurrent - realAmpOffset;
+    dumpVolts = readVolts = analogRead(pinVolt);
+//    realVolts = readVolts / mapDividerVolt;                        //Divide by 69.2 and we get range to 15V
+    realVolts = fmap(readVolts, 11, 379, 0.86, 10.5);                        //Divide by 69.2 and we get range to 15V
+
+    realCurrentValue = realCurrent;                           //We pass from A to mA
+//    realCurrentValue = constrain(realCurrentValue, 0, 800);
 
 
 /*    double gap = abs(targetVolt - realVolts); //distance away from setpoint
