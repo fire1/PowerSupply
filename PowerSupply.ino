@@ -57,16 +57,24 @@ void loop() {
     terminal(targetVolt);
 
     //Why divided by 1.024? Well: I want maximum current of 1000mA. SO 1024 digital read divided by 1000mA =  1.024
-    targetAmps = 3;
+    targetAmps = 18;
     //Read the feedback for current from the MAX471 sensor
     //Scale the ADC, we get current value in Amps
 //
+
+    //
+    // Amperage calculation
     for (index = 0; index < 4; ++index) {
         avrReadAmps += analogRead(pinAmps);
     }
     dumpAmps = readAmps = avrReadAmps = avrReadAmps / 4;
-    realCurrent = map(readAmps, 170, 518, 580, 3150);
+    if (readAmps > 232) {
+        realCurrent = map(readAmps, 232, 550, 900, 5300);
+    } else {
+        realCurrent = map(readAmps, 30, 232, 55, 900);
+    }
     realCurrent = realCurrent < 0 ? 0 : realCurrent / 1000;
+    realCurrentValue = realCurrent;                           //We pass from A to mA
 
 
 
@@ -77,7 +85,6 @@ void loop() {
 //    realVolts = readVolts / mapDividerVolt;                        //Divide by 69.2 and we get range to 15V
     realVolts = fmap(readVolts, 11, 379, 0.86, 10.5);                        //Divide by 69.2 and we get range to 15V
 
-    realCurrentValue = realCurrent;                           //We pass from A to mA
 //    realCurrentValue = constrain(realCurrentValue, 0, 800);
 
 
