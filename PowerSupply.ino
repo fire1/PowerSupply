@@ -21,15 +21,6 @@
 LiquidCrystal lcd(0, 1, 2, 9, 7, 8);
 
 
-//Define the aggressive and conservative Tuning Parameters
-double aggKp = 2, aggKi = 4, aggKd = 1;
-double consKp = 1, consKi = 0.5, consKd = 0.25;
-
-//Specify the links and initial tuning parameters
-//PID myPID(&realVolts, &pwmValue, &targetVolt, consKp, consKi, consKd, DIRECT);
-//PID myPID(&realVolts, &pwmValue, &targetVolt, 2, 5, 1, DIRECT);
-
-
 // do not use 10/11
 void setup() {
 //    lcd.begin(16, 4);
@@ -41,26 +32,15 @@ void setup() {
     //I want maximum voltage of 15V in my case. SO 1024 digital read divided by 15 =  68.2
     mapDividerVolt = 1024.0 / maxVoltage;
     setupPwm();
-
-//    myPID.SetMode(AUTOMATIC);
-//    myPID.SetSampleTime(50);
-//    myPID.SetTunings(10, 200, 0);
-//    myPID.SetOutputLimits(1, MAX_PWM_ByTimer);
 }
 
 void loop() {
 
     encoder();
-
-    //mapDivider = 69.2 in my case Why 68.2? Well: I want maximum voltage of 15V. SO 1024 digital read divided by 15 =  68.2
-//    targetVolt = analogRead(pinPwm) / mapDivider;
     terminal(targetVolt);
 
-    //Why divided by 1.024? Well: I want maximum current of 1000mA. SO 1024 digital read divided by 1000mA =  1.024
     targetAmps = 3;
-    //Read the feedback for current from the MAX471 sensor
-    //Scale the ADC, we get current value in Amps
-//
+
     for (index = 0; index < 4; ++index) {
         avrReadAmps += analogRead(pinAmps);
     }
@@ -97,13 +77,13 @@ void loop() {
         if (targetVolt > realVolts) {
             //When we decrease PWM width, the voltage gets higher at the output.
             pwmValue = pwmValue - 1;
-            pwmValue = constrain(pwmValue, 0, MAX_PWM_ByTimer);
+            pwmValue = constrain(pwmValue, 0, maxPwmControl);
         }
         //If set voltage is lower than real value from feedback, we increase PWM width till we get same value
         if (targetVolt < realVolts) {
             //When we increase PWM width, the voltage gets lower at the output.
             pwmValue = pwmValue + 1;
-            pwmValue = constrain(pwmValue, 0, MAX_PWM_ByTimer);
+            pwmValue = constrain(pwmValue, 0, maxPwmControl);
         }
     }//end of realCurrentValue < targetAmps
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -116,7 +96,7 @@ void loop() {
     if (realCurrentValue > targetAmps) {
         //When we increase PWM width, the voltage gets lower at the output.
         pwmValue = pwmValue + 1;
-        pwmValue = constrain(pwmValue, 0, MAX_PWM_ByTimer);
+        pwmValue = constrain(pwmValue, 0, maxPwmControl);
     }
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 

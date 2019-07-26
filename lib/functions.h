@@ -28,16 +28,7 @@ void terminal(float &container) {
     if (Serial.available()) {
         float val = Serial.parseFloat(); //read int or parseFloat for ..float...
         if (val > 0) {
-//            if (val > 24) {
-//                container = 24;
-//                return;
-//            }
             container = val;
-
-//            OCR2B = (uint8_t)val;
-//            Serial.println();
-//            Serial.print(F("Set point is "));
-//            Serial.println(val);
         }
     }
 }
@@ -70,20 +61,23 @@ uint8_t lastPwm = 0;
 void setPwm(uint8_t pwm) {
     if (pwm == lastPwm) return;
     lastPwm = pwm;
-    if (val > MAX_PWM_ByTimer) {
-        val = MAX_PWM_ByTimer;
+    if (val > maxPwmControl) {
+        val = maxPwmControl;
     }
 
     uint8_t compensate = 0;
-    if (targetVolt < (realVolts - 1) && pwm == MAX_PWM_ByTimer && lastPwm == pwm) {
+    if (targetVolt <= (realVolts - 1) && pwm == maxPwmControl && lastPwm == pwm) {
         analogWrite(pinPWM, 0);
         return;
     }
-    lastPwm = pwm;
 
-    analogWrite(pinPWM, (MAX_PWM_ByTimer - pwm) - compensate);
-//    OCR2B = (uint8_t)MAX_PWM_ByTimer - (pwm - 1);
-//    Serial.println(pwm -1);
+    if (targetVolt >= (realVolts + 1) && pwm == maxPwmControl && lastPwm == pwm) {
+        analogWrite(pinPWM, 255);
+        return;
+    }
+    
+    lastPwm = pwm;
+    analogWrite(pinPWM, (maxPwmControl - pwm) - compensate);
 }
 
 //THIS FUNCTION WILL MAP THE float VALUES IN THE GIVEN RANGE
@@ -111,6 +105,23 @@ void debug() {
     Serial.print(F(" PWM: "));
     Serial.print(pwmValue);
 
+}
+/**
+ *
+ * @param out
+ * @param value
+ */
+void lcdAmps(char *out, double value) {
+    sprintf(out, "%1.3f", value);
+}
+
+/**
+ *
+ * @param out
+ * @param value
+ */
+void lcdVolt(char *out, double value) {
+    sprintf(out, "%2.2f", value);
 }
 
 #endif //POWERSUPPLY_FUNCTIONS_H
