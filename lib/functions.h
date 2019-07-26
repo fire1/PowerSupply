@@ -55,6 +55,24 @@ void setupPwm() {
 
 }
 
+void sensVolts(){
+    dumpVolts = readVolts = analogRead(pinVolt);
+    realVolts = fmap(readVolts, 11, 379, 0.86, 10.5);
+}
+
+void sensAmps(){
+    for (index = 0; index < 4; ++index) {
+        avrReadAmps += analogRead(pinAmps);
+    }
+    dumpAmps = readAmps = avrReadAmps = avrReadAmps / 4;
+    if (readAmps > 232) {
+        realCurrent = map(readAmps, 232, 550, 900, 5300);
+    } else {
+        realCurrent = map(readAmps, 30, 232, 55, 900);
+    }
+    realCurrent = realCurrent < 0 ? 0 : realCurrent / 1000;
+    realCurrentValue = realCurrentValue + realCurrent / 2;
+}
 
 uint8_t lastPwm = 0;
 
@@ -106,6 +124,33 @@ void debug() {
     Serial.print(pwmValue);
 
 }
+
+void parse(){
+    //If the set current value is higher than the feedback current value, we make normal control of output voltage
+    if (realCurrentValue < targetAmps) {
+        //Now, if set voltage is higher than real value from feedback, we decrease PWM width till we get same value
+        if (targetVolt > realVolts) {
+            //When we decrease PWM width, the voltage gets higher at the output.
+            pwmValue = pwmValue - 1;
+            pwmValue = constrain(pwmValue, 0, maxPwmControl);
+        }
+        //If set voltage is lower than real value from feedback, we increase PWM width till we get same value
+        if (targetVolt < realVolts) {
+            //When we increase PWM width, the voltage gets lower at the output.
+            pwmValue = pwmValue + 1;
+            pwmValue = constrain(pwmValue, 0, maxPwmControl);
+        }
+    }//end of realCurrentValue < targetAmps
+
+    /*if the set current value is lower than the feedback current value, that means we need to lower the voltage at the output
+    in order to amintain the same current value*/
+    if (realCurrentValue > targetAmps) {
+        //When we increase PWM width, the voltage gets lower at the output.
+        pwmValue = pwmValue + 1;
+        pwmValue = constrain(pwmValue, 0, maxPwmControl);
+    }
+}
+
 /**
  *
  * @param out
@@ -122,6 +167,34 @@ void lcdAmps(char *out, double value) {
  */
 void lcdVolt(char *out, double value) {
     sprintf(out, "%2.2f", value);
+}
+
+/**
+ *
+ * @param lcdVolts
+ * @param lcdAmps
+ */
+void display(){
+    lcd.clear();
+    lcd.setCursor(0, 0);
+    lcd.print(" VOLTAGE    CURRENT ");
+
+    lcd.setCursor(0, 1);
+    lcd.print(targetVolt, 1);
+    lcd.print("V       ");
+
+    lcd.print(targetAmps, 0);
+    lcd.print("mA");
+
+    lcdAmps(printValues,realVolts);
+    lcd.setCursor(0, 3);
+    lcd.print(printValues, 1);
+    lcd.print("V       ");
+
+    lcdAmps(printValues,realCurrentValue);
+    lcd.print(printValues, 0);
+    //lcd.setCursor(19,1);
+    lcd.print("А");
 }
 
 #endif //POWERSUPPLY_FUNCTIONS_H

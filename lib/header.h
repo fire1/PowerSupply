@@ -34,16 +34,11 @@ float readVolts = 0;
 float realVolts = 0;
 int readAmps = 0;
 double realCurrent = 0;
-float realCurrentValue = 0;
 double targetAmps = 0.500;
 char printValues[5];
-float realCurrent = 0;
 double realCurrentValue = 0;
-float targetAmps = 4;
 unsigned long previousMillis = 0;
 unsigned long currentMillis = 0;
-// float mapDividerVolt = 42.2;
-float mapDividerVolt = 32;
 uint16_t avrReadAmps;
 
 int dumpVolts, dumpAmps;
@@ -53,5 +48,7 @@ int val;
 uint8_t encoderPos = 0;
 uint8_t encoderPinALast = LOW;
 
+
+LiquidCrystal lcd(0, 1, 2, 9, 7, 8);
 
 #endif //POWERSUPPLY_POWERSUPPLY_H
