@@ -37,19 +37,14 @@ void loop() {
     sensAmps();
     sensVolts();
 
+    if ((realVolts > targetVolt + 1 && realVolts < targetVolt - 1))
+        while (realVolts > targetVolt + 1 && realVolts < targetVolt - 1) {
+            sensVolts();
+            parse();
+            setPwm(pwmValue);
+        }
 
-    while (realVolts > targetVolt + 1 && realVolts < targetVolt - 1) {
-        sensVolts();
-        parse();
-        setPwm(pwmValue);
-    }
-
-    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    //We write PWM value on PWM pin out
     setPwm(pwmValue);
-
-    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 
 
     //Each screenRate value we print values on the LCD screen

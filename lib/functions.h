@@ -6,7 +6,6 @@
 #define POWERSUPPLY_FUNCTIONS_H
 
 #include <Arduino.h>
-
 #include "header.h"
 
 void encoder() {
@@ -55,12 +54,13 @@ void setupPwm() {
 
 }
 
-void sensVolts(){
+
+void sensVolts() {
     dumpVolts = readVolts = analogRead(pinVolt);
-    realVolts = fmap(readVolts, 11, 379, 0.86, 10.5);
+    realVolts = map(readVolts, 11, 379, 86, 105) / 100;
 }
 
-void sensAmps(){
+void sensAmps() {
     for (index = 0; index < 4; ++index) {
         avrReadAmps += analogRead(pinAmps);
     }
@@ -93,15 +93,11 @@ void setPwm(uint8_t pwm) {
         analogWrite(pinPWM, 255);
         return;
     }
-    
+
     lastPwm = pwm;
     analogWrite(pinPWM, (maxPwmControl - pwm) - compensate);
 }
 
-//THIS FUNCTION WILL MAP THE float VALUES IN THE GIVEN RANGE
-float fmap(float x, float in_min, float in_max, float out_min, float out_max) {
-    return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
-}
 
 void debug() {
 
@@ -125,7 +121,7 @@ void debug() {
 
 }
 
-void parse(){
+void parse() {
     //If the set current value is higher than the feedback current value, we make normal control of output voltage
     if (realCurrentValue < targetAmps) {
         //Now, if set voltage is higher than real value from feedback, we decrease PWM width till we get same value
@@ -174,7 +170,7 @@ void lcdVolt(char *out, double value) {
  * @param lcdVolts
  * @param lcdAmps
  */
-void display(){
+void display() {
     lcd.clear();
     lcd.setCursor(0, 0);
     lcd.print(" VOLTAGE    CURRENT ");
@@ -186,12 +182,12 @@ void display(){
     lcd.print(targetAmps, 0);
     lcd.print("mA");
 
-    lcdAmps(printValues,realVolts);
+    lcdAmps(printValues, realVolts);
     lcd.setCursor(0, 3);
     lcd.print(printValues, 1);
     lcd.print("V       ");
 
-    lcdAmps(printValues,realCurrentValue);
+    lcdAmps(printValues, realCurrentValue);
     lcd.print(printValues, 0);
     //lcd.setCursor(19,1);
     lcd.print("А");
