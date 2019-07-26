@@ -6,7 +6,7 @@
 #define POWERSUPPLY_POWERSUPPLY_H
 
 #include <Arduino.h>
-
+#include <LiquidCrystal.h>
 #define maxPwmControl 254
 
 //Inputs/outputs
@@ -48,7 +48,7 @@ int val;
 uint8_t encoderPos = 0;
 uint8_t encoderPinALast = LOW;
 
-
-LiquidCrystal lcd(0, 1, 2, 9, 7, 8);
+// 2, 3 INTERRUPTS for rotary
+LiquidCrystal lcd(0, 1, 4, 7, 8, 9);
 
 #endif //POWERSUPPLY_POWERSUPPLY_H

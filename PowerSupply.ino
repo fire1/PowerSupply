@@ -5,7 +5,7 @@
  */
 
 #include <Arduino.h>
-#include <LiquidCrystal.h>
+
 
 
 #include "lib/header.h"
