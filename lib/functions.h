@@ -57,7 +57,8 @@ void setupPwm() {
 
 void sensVolts() {
     dumpVolts = readVolts = analogRead(pinVolt);
-    realVolts = map(readVolts, 11, 379, 86, 105) / 100;
+    // realVolts = fmap(readVolts, 11, 379, 0.86, 10.5);
+    realVolts = map(readVolts, 140, 940, 411, 2700) * 0.01;
 }
 
 void sensAmps() {
@@ -70,56 +71,30 @@ void sensAmps() {
     } else {
         realCurrent = map(readAmps, 30, 232, 55, 900);
     }
-    realCurrent = realCurrent < 0 ? 0 : realCurrent / 1000;
-    realCurrentValue = realCurrentValue + realCurrent / 2;
+    realCurrent = realCurrent < 0 ? 0 : realCurrent * 0.001;
+    realCurrentValue = realCurrent / 2;
 }
 
 uint8_t lastPwm = 0;
 
 void setPwm(uint8_t pwm) {
-    if (pwm == lastPwm) return;
-    lastPwm = pwm;
-    if (val > maxPwmControl) {
-        val = maxPwmControl;
+
+    if (lastPwm == pwm && pwm == maxPwmControl) {
+//        pwm -=1;
     }
 
     uint8_t compensate = 0;
-    if (targetVolt <= (realVolts - 1) && pwm == maxPwmControl && lastPwm == pwm) {
-        analogWrite(pinPWM, 0);
-        return;
+    if (targetVolt > (realVolts - 2) && pwm == maxPwmControl && lastPwm == pwm) {
+        compensate = 0;
     }
 
-    if (targetVolt >= (realVolts + 1) && pwm == maxPwmControl && lastPwm == pwm) {
-        analogWrite(pinPWM, 255);
-        return;
+    if (targetVolt <= (realVolts + 1)) {
+//        pwmValue--;
     }
-
     lastPwm = pwm;
-    analogWrite(pinPWM, (maxPwmControl - pwm) - compensate);
+    analogWrite(pinPWM, pwm);
 }
 
-
-void debug() {
-
-    Serial.println();
-    Serial.print(F("Amp In: "));
-    Serial.print(realCurrentValue);
-    Serial.print(F(" Raw "));
-    Serial.print(dumpAmps);
-    Serial.print(F(" T: "));
-    Serial.print(targetAmps);
-
-    Serial.print(F(" //  Volt In: "));
-    Serial.print(realVolts);
-    Serial.print(F(" Raw "));
-    Serial.print(dumpVolts);
-    Serial.print(F(" T: "));
-    Serial.print(targetVolt);
-
-    Serial.print(F(" PWM: "));
-    Serial.print(pwmValue);
-
-}
 
 void parse() {
     //If the set current value is higher than the feedback current value, we make normal control of output voltage
@@ -127,14 +102,14 @@ void parse() {
         //Now, if set voltage is higher than real value from feedback, we decrease PWM width till we get same value
         if (targetVolt > realVolts) {
             //When we decrease PWM width, the voltage gets higher at the output.
-            pwmValue = pwmValue - 1;
-            pwmValue = constrain(pwmValue, 0, maxPwmControl);
+            pwmValue = pwmValue + 1;
+            pwmValue = constrain(pwmValue, minPwmControl, maxPwmControl);
         }
         //If set voltage is lower than real value from feedback, we increase PWM width till we get same value
         if (targetVolt < realVolts) {
             //When we increase PWM width, the voltage gets lower at the output.
-            pwmValue = pwmValue + 1;
-            pwmValue = constrain(pwmValue, 0, maxPwmControl);
+            pwmValue = pwmValue - 1;
+            pwmValue = constrain(pwmValue, minPwmControl, maxPwmControl);
         }
     }//end of realCurrentValue < targetAmps
 
@@ -142,10 +117,46 @@ void parse() {
     in order to amintain the same current value*/
     if (realCurrentValue > targetAmps) {
         //When we increase PWM width, the voltage gets lower at the output.
-        pwmValue = pwmValue + 1;
-        pwmValue = constrain(pwmValue, 0, maxPwmControl);
+        pwmValue = pwmValue - 1;
+        pwmValue = constrain(pwmValue, minPwmControl, maxPwmControl);
     }
 }
+
+
+char displayVolt(float value, char *output) {
+
+    if (value < -99) {
+        value = -99;
+    }
+
+    int dig1 = int(value) * 10; // 210
+    int dig2 = int((value * 10) - dig1);
+
+    dig1 = dig1 / 10;
+    if (dig2 < 0) {
+        dig2 = dig2 * -1;
+    }
+
+    sprintf(output, "%02d.%02d", dig1, dig2);
+}
+
+char displayAmps(double value, char *output) {
+
+    if (value < -99) {
+        value = -99;
+    }
+
+    int dig1 = int(value) * 100; // 210
+    int dig2 = int((value * 100) - dig1);
+
+    dig1 = dig1 / 100;
+    if (dig2 < 0) {
+        dig2 = dig2 * -1;
+    }
+
+    sprintf(output, "%01d.%03d", dig1, dig2);
+}
+
 
 /**
  *
@@ -153,7 +164,7 @@ void parse() {
  * @param value
  */
 void lcdAmps(char *out, double value) {
-    sprintf(out, "%1.3f", value);
+    dtostrf(value, 1, 3, out);
 }
 
 /**
@@ -162,35 +173,57 @@ void lcdAmps(char *out, double value) {
  * @param value
  */
 void lcdVolt(char *out, double value) {
-    sprintf(out, "%2.2f", value);
+    /* 4 is mininum width, 2 is precision; float value is copied onto str_temp*/
+    dtostrf(value, 2, 2, out);
 }
 
-/**
- *
- * @param lcdVolts
- * @param lcdAmps
- */
+
 void display() {
     lcd.clear();
     lcd.setCursor(0, 0);
     lcd.print(" VOLTAGE    CURRENT ");
 
-    lcd.setCursor(0, 1);
+    lcd.setCursor(1, 1);
     lcd.print(targetVolt, 1);
     lcd.print("V       ");
 
     lcd.print(targetAmps, 0);
-    lcd.print("mA");
+    lcd.print("A");
 
-    lcdAmps(printValues, realVolts);
+//    lcdVolt(printValues, realVolts);
     lcd.setCursor(0, 3);
-    lcd.print(printValues, 1);
+    lcd.print(printValues);
     lcd.print("V       ");
 
-    lcdAmps(printValues, realCurrentValue);
-    lcd.print(printValues, 0);
+//    lcdAmps(printValues, realCurrentValue);
+    lcd.print(printValues);
     //lcd.setCursor(19,1);
     lcd.print("А");
+}
+
+
+void debug() {
+
+    Serial.println();
+    Serial.print(F("Amp In: "));
+    displayAmps(realCurrent, printValues);
+    Serial.write(printValues);
+    Serial.print(F(" Raw "));
+    Serial.print(dumpAmps);
+    Serial.print(F(" T: "));
+    Serial.print(targetAmps);
+
+    Serial.print(F(" //  Volt In: "));
+    displayVolt(realVolts, printValues);
+    Serial.print(printValues);
+    Serial.print(F(" Raw "));
+    Serial.print(dumpVolts);
+    Serial.print(F(" T: "));
+    Serial.print(targetVolt);
+
+    Serial.print(F(" PWM: "));
+    Serial.print(pwmValue);
+
 }
 
 #endif //POWERSUPPLY_FUNCTIONS_H

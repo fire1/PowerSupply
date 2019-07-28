@@ -4,8 +4,9 @@
  * version $Id$
  */
 
-#include <Arduino.h>
+//#define DEBUG
 
+#include <Arduino.h>
 
 
 #include "lib/header.h"
@@ -17,15 +18,21 @@
 
 // do not use 10/11
 void setup() {
-//    lcd.begin(16, 4);
-//    pinMode(pinPwm, INPUT);
+    setupPwm();
+#ifdef DEBUG
+    Serial.begin(115200);
+#else
+    lcd.begin(20, 4);
+#endif
+    pinMode(pinEncoderA, INPUT_PULLUP);
+    pinMode(pinEncoderB, INPUT_PULLUP);
     pinMode(pinVolt, INPUT);
     pinMode(pinAmps, INPUT);
-    Serial.begin(115200);
+    pinMode(pinLed, OUTPUT);
+    analogWrite(pinPWM, 0);
     currentMillis = millis();
-    setupPwm();
 }
-
+//void loop(){};
 void loop() {
 
     encoder();
@@ -38,13 +45,21 @@ void loop() {
     sensAmps();
     sensVolts();
 
-    if ((realVolts > targetVolt + 1 && realVolts < targetVolt - 1))
-        while (realVolts > targetVolt + 1 && realVolts < targetVolt - 1) {
+
+    if ((realVolts > targetVolt + 1 || realVolts < targetVolt - 1)) {
+        offset = 0;
+        while (realVolts > targetVolt + 1 && realVolts < targetVolt - 1 && offset < 228) {
             sensVolts();
             parse();
             setPwm(pwmValue);
+            digitalWrite(pinLed, HIGH);
+            delayMicroseconds(10);
+            offset++;
         }
+    }
 
+    digitalWrite(pinLed, LOW);
+    parse();
     setPwm(pwmValue);
 
 
@@ -52,8 +67,12 @@ void loop() {
     currentMillis = millis();
     if (currentMillis - previousMillis >= screenRate) {
         previousMillis += screenRate;
+        digitalWrite(pinLed, HIGH);
+#ifdef DEBUG
         debug();
+#else
         display();
+#endif
     }
 
 }//end of void loop
