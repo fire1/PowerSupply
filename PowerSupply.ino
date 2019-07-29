@@ -36,7 +36,7 @@ void setup() {
 void loop() {
 
     encoder();
-    terminal(targetVolt);
+    terminal();
 
     //Why divided by 1.024? Well: I want maximum current of 1000mA. SO 1024 digital read divided by 1000mA =  1.024
     targetAmps = 10;
@@ -50,7 +50,7 @@ void loop() {
         offset = 0;
         while (realVolts > targetVolt + 1 && realVolts < targetVolt - 1 && offset < 228) {
             sensVolts();
-            parse();
+            parsePwm();
             setPwm(pwmValue);
             digitalWrite(pinLed, HIGH);
             delayMicroseconds(10);
@@ -59,7 +59,7 @@ void loop() {
     }
 
     digitalWrite(pinLed, LOW);
-    parse();
+    parsePwm();
     setPwm(pwmValue);
 
 

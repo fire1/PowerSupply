@@ -23,11 +23,15 @@ void encoder() {
 
 }
 
-void terminal(float &container) {
+void terminal() {
     if (Serial.available()) {
-        float val = Serial.parseFloat(); //read int or parseFloat for ..float...
-        if (val > 0) {
-            container = val;
+        String where = Serial.readStringUntil('=');
+        if (where == F("v")) {
+            targetVolt = (uint16_t) Serial.readStringUntil('\n').toFloat();
+        }
+
+        if (where == F("a")) {
+            targetAmps = (uint16_t) Serial.readStringUntil('\n').toFloat();
         }
     }
 }
@@ -96,7 +100,7 @@ void setPwm(uint8_t pwm) {
 }
 
 
-void parse() {
+void parsePwm() {
     //If the set current value is higher than the feedback current value, we make normal control of output voltage
     if (realCurrentValue < targetAmps) {
         //Now, if set voltage is higher than real value from feedback, we decrease PWM width till we get same value
@@ -111,7 +115,7 @@ void parse() {
             pwmValue = pwmValue - 1;
             pwmValue = constrain(pwmValue, minPwmControl, maxPwmControl);
         }
-    }//end of realCurrentValue < targetAmps
+    }
 
     /*if the set current value is lower than the feedback current value, that means we need to lower the voltage at the output
     in order to amintain the same current value*/
@@ -122,7 +126,12 @@ void parse() {
     }
 }
 
-
+/**
+ *
+ * @param value
+ * @param output
+ * @return
+ */
 char displayVolt(float value, char *output) {
 
     if (value < -99) {
@@ -140,6 +149,12 @@ char displayVolt(float value, char *output) {
     sprintf(output, "%02d.%02d", dig1, dig2);
 }
 
+/**
+ *
+ * @param value
+ * @param output
+ * @return
+ */
 char displayAmps(double value, char *output) {
 
     if (value < -99) {
