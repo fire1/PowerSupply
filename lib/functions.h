@@ -65,11 +65,22 @@ void sensVolts() {
     realVolts = map(readVolts, 140, 940, 411, 2700) * 0.01;
 }
 
+void testAmps(){
+    int refVolt = 940; // Max volt read as reference
+    int refAmps = 550; // Max amps read as reference;
+    double bla = ((readVolts / refVolt) * (avrReadAmps / refAmps)) * 10;
+}
+
+// https://circuits4you.com/2016/05/13/dc-current-measurement-arduino/
+// V=I x R
 void sensAmps() {
     for (index = 0; index < 4; ++index) {
         avrReadAmps += analogRead(pinAmps);
     }
     dumpAmps = readAmps = avrReadAmps = avrReadAmps / 4;
+
+    testAmps();
+
     if (readAmps > 232) {
         realCurrent = map(readAmps, 232, 550, 900, 5300);
     } else {

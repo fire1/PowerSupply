@@ -28,7 +28,7 @@ const uint8_t pinEncoderA = 3;
 const uint16_t screenRate = 16000;
 const uint8_t pinLed = 13;
 // Common counter
-volatile uint8_t index,offset;
+volatile uint8_t index, offset;
 
 
 //Editable variables
@@ -61,5 +61,14 @@ uint8_t encoderPinALast = LOW;
 
 // 2, 3 INTERRUPTS for rotary
 LiquidCrystal lcd(1, 0, 4, 7, 8, 9);
+
+//int AmpTable[3][4] = {
+//        // Format of table
+//        // Volt min,Volt max, Amp min, Amp max
+//        {30,  140, 3, 411},
+//        {1,  2, 3, 4},
+//        {1,  2, 3, 4}
+//};
+
 
 #endif //POWERSUPPLY_POWERSUPPLY_H
