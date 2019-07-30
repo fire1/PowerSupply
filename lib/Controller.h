@@ -23,6 +23,8 @@ class Controller {
     double targetAmps = 0.500;
     double ampSmooth = 0;
 
+    double testAmp;
+
     void setupPwm() {
         pinMode(pinPWM, OUTPUT);
         //---------------------------------------------- Set PWM frequency for D5 & D6 -------------------------------
@@ -56,7 +58,8 @@ class Controller {
     void testAmps() {
         int refVolt = 940; // Max volt read as reference
         int refAmps = 550; // Max amps read as reference;
-        double bla = ((readVolts / refVolt) * (avrReadAmps / refAmps)) * 10;
+        testAmp = ((readVolts / refVolt) * (avrReadAmps / refAmps)) * 10;
+
     }
 
     void sensAmps() {
@@ -64,8 +67,6 @@ class Controller {
             avrReadAmps += analogRead(pinAmps);
         }
         dumpAmps = readAmps = avrReadAmps = avrReadAmps / 4;
-
-        testAmps();
 
         if (readAmps > 232) {
             liveAmps = map(readAmps, 232, 550, 900, 5300);
@@ -201,6 +202,11 @@ public:
 
     double lcdAmps() {
         return ampSmooth;
+    }
+
+
+    double testAmperage(){
+        return  testAmp;
     }
 };
 

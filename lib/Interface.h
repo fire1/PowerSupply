@@ -187,6 +187,8 @@ public:
         Serial.print(cnr->getDumpAmps());
         Serial.print(F(" T: "));
         Serial.print(cnr->getTargetAmps());
+        Serial.print(F(" Test Amps "));
+        Serial.print(cnr->testAmperage());
 
         Serial.print(F(" //  Volt In: "));
         displayVolt(cnr->getLiveVolt(), printValues);
