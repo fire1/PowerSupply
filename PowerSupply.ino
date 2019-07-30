@@ -7,18 +7,24 @@
 //#define DEBUG
 
 #include <Arduino.h>
+#include "lib/Controller.h"
+#include "lib/Interface.h"
 
 
-#include "lib/header.h"
-#include "lib/functions.h"
+#include "PowerSupply.h"
 
+LiquidCrystal lcd(1, 0, 4, 7, 8, 9);
+Controller pw;
+Interface ui(lcd, pw);
 // TODO resolve pins
 
 
+unsigned long previousMillis = 0;
+unsigned long currentMillis = 0;
 
 // do not use 10/11
 void setup() {
-    setupPwm();
+    pw.begin();
 #ifdef DEBUG
     Serial.begin(115200);
 #else
@@ -26,38 +32,15 @@ void setup() {
 #endif
     pinMode(pinEncoderA, INPUT_PULLUP);
     pinMode(pinEncoderB, INPUT_PULLUP);
-    pinMode(pinVolt, INPUT);
-    pinMode(pinAmps, INPUT);
-    pinMode(pinLed, OUTPUT);
-    analogWrite(pinPWM, 0);
+
     currentMillis = millis();
 }
+
 //void loop(){};
 void loop() {
+    ui.terminal();
+    pw.manage();
 
-    encoder();
-    terminal();
-
-    // Amperage calculation
-    sensAmps();
-    sensVolts();
-
-
-    if ((realVolts > targetVolt + 1 || realVolts < targetVolt - 1)) {
-        offset = 0;
-        while (realVolts > targetVolt + 1 && realVolts < targetVolt - 1 && offset < 228) {
-            sensVolts();
-            parsePwm();
-            setPwm(pwmValue);
-            digitalWrite(pinLed, HIGH);
-            delayMicroseconds(10);
-            offset++;
-        }
-    }
-
-    digitalWrite(pinLed, LOW);
-    parsePwm();
-    setPwm(pwmValue);
 
 
     //Each screenRate value we print values on the LCD screen
@@ -68,7 +51,7 @@ void loop() {
 #ifdef DEBUG
         debug();
 #else
-        display();
+        ui.draw();
 #endif
     }
 
