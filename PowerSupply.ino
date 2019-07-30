@@ -4,7 +4,7 @@
  * version $Id$
  */
 
-//#define DEBUG
+#define DEBUG
 
 #include <Arduino.h>
 #include "lib/Controller.h"
@@ -44,7 +44,7 @@ void loop() {
         previousMillis += screenRate;
         digitalWrite(pinLed, HIGH);
 #ifdef DEBUG
-        debug();
+        ui.debug();
 #else
         ui.draw();
 #endif

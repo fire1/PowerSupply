@@ -195,11 +195,11 @@ public:
     }
 
 
-    double lcdVolt(){
+    double lcdVolt() {
         return liveVolts;
     }
 
-    double lcdAmps(){
+    double lcdAmps() {
         return ampSmooth;
     }
 };

@@ -160,10 +160,18 @@ public:
             String where = Serial.readStringUntil('=');
             if (where == F("v")) {
                 cnr->setVoltage(Serial.readStringUntil('\n').toFloat());
+                Serial.println();
+                Serial.print(F("VOLTAGE: "));
+                Serial.print(cnr->getTargetVolt());
+                Serial.println();
             }
 
             if (where == F("a")) {
                 cnr->setAmperage(Serial.readStringUntil('\n').toFloat());
+                Serial.println();
+                Serial.print(F("CURRENT: "));
+                Serial.print(cnr->getTargetAmps());
+                Serial.println();
             }
         }
         encoder();

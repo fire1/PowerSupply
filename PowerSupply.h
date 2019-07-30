@@ -18,8 +18,8 @@
 #define minPwmControl 1
 
 //Inputs/outputs
-const uint8_t pinVolt = A0;
-const uint8_t pinAmps = A1;
+const uint8_t pinVolt = A1;
+const uint8_t pinAmps = A0;
 //const uint8_t currentIn = A0;
 const uint8_t pinPWM = 5;
 const uint8_t pinEncoderC = 0;
