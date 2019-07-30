@@ -30,19 +30,14 @@ void setup() {
 #else
     lcd.begin(20, 4);
 #endif
-    pinMode(pinEncoderA, INPUT_PULLUP);
-    pinMode(pinEncoderB, INPUT_PULLUP);
-
+    ui.begin();
     currentMillis = millis();
 }
 
 //void loop(){};
 void loop() {
-    ui.terminal();
+    ui.listener();
     pw.manage();
-
-
-
     //Each screenRate value we print values on the LCD screen
     currentMillis = millis();
     if (currentMillis - previousMillis >= screenRate) {

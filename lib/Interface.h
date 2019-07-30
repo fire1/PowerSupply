@@ -36,7 +36,7 @@ private:
                 encoderPos++;
             }
             Serial.print(encoderPos);
-            Serial.print("/");
+            Serial.print(F("/"));
         }
         encoderPinALast = n;
 
@@ -103,11 +103,12 @@ private:
             lcd->setCursor(1, 0);
             lcd->print(F("VOLTAGE"));
         }
+
         lcd->setCursor(3, 1);
         displayVolt(cnr->getTargetVolt(), printValues);
         lcd->print(printValues);
         lcd->print(valChar);
-        lcd->setCursor(8, 0);
+        lcd->setCursor(9, 0);
         displayVolt(cnr->lcdVolt(), printValues);
         lcd->print(printValues);
         lcd->print(valChar);
@@ -129,7 +130,7 @@ private:
         displayAmps(cnr->getTargetAmps(), printValues);
         lcd->print(printValues);
         lcd->print(valChar);
-        lcd->setCursor(8, 2);
+        lcd->setCursor(9, 2);
         displayAmps(cnr->lcdAmps(), printValues);
         lcd->print(printValues);
         lcd->print(valChar);
@@ -142,16 +143,19 @@ private:
     }
 
 public:
-    Interface(LiquidCrystal lc, Controller cn) : lcd(&lc), cnr(&cn) {
-
-    }
-
+    Interface(LiquidCrystal &lc, Controller &cn) : lcd(&lc), cnr(&cn) {}
 
     void draw() {
         drawMain();
     }
 
-    void terminal() {
+    void begin(){
+        pinMode(pinEncoderA, INPUT_PULLUP);
+        pinMode(pinEncoderB, INPUT_PULLUP);
+    }
+
+
+    void listener() {
         if (Serial.available()) {
             String where = Serial.readStringUntil('=');
             if (where == F("v")) {
@@ -162,6 +166,7 @@ public:
                 cnr->setAmperage(Serial.readStringUntil('\n').toFloat());
             }
         }
+        encoder();
     }
 
     void debug() {
