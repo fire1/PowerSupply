@@ -35,6 +35,9 @@ volatile uint8_t index, offset;
 float realAmpOffset = -0.03;
 const float maxVoltage = 24.65;//28.15;
 
+boolean lcdTitles = false;
+char printValues[6];
+String valChar;
 
 //Other Variables
 uint8_t pwmValue = 1;
@@ -44,22 +47,18 @@ float realVolts = 0;
 int readAmps = 0;
 double realCurrent = 0;
 double targetAmps = 0.500;
-char printValues[6];
-double realCurrentValue = 0;
+double realCurrentSmooth = 0;
 unsigned long previousMillis = 0;
 unsigned long currentMillis = 0;
 uint16_t avrReadAmps;
-
 int dumpVolts, dumpAmps;
-
-//
-int val;
 uint8_t encoderPos = 0;
 uint8_t encoderPinALast = LOW;
 
 //   LiquidCrystal(uint8_t rs, uint8_t enable,
 
 // 2, 3 INTERRUPTS for rotary
+// ( rs, enable, d0,  d1,  d2,  d3)
 LiquidCrystal lcd(1, 0, 4, 7, 8, 9);
 
 //int AmpTable[3][4] = {

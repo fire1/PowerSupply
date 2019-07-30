@@ -65,7 +65,7 @@ void sensVolts() {
     realVolts = map(readVolts, 140, 940, 411, 2700) * 0.01;
 }
 
-void testAmps(){
+void testAmps() {
     int refVolt = 940; // Max volt read as reference
     int refAmps = 550; // Max amps read as reference;
     double bla = ((readVolts / refVolt) * (avrReadAmps / refAmps)) * 10;
@@ -87,7 +87,7 @@ void sensAmps() {
         realCurrent = map(readAmps, 30, 232, 55, 900);
     }
     realCurrent = realCurrent < 0 ? 0 : realCurrent * 0.001;
-    realCurrentValue = realCurrent / 2;
+    realCurrentSmooth = realCurrent / 2;
 }
 
 uint8_t lastPwm = 0;
@@ -113,7 +113,7 @@ void setPwm(uint8_t pwm) {
 
 void parsePwm() {
     //If the set current value is higher than the feedback current value, we make normal control of output voltage
-    if (realCurrentValue < targetAmps) {
+    if (realCurrent < targetAmps) {
         //Now, if set voltage is higher than real value from feedback, we decrease PWM width till we get same value
         if (targetVolt > realVolts) {
             //When we decrease PWM width, the voltage gets higher at the output.
@@ -130,7 +130,7 @@ void parsePwm() {
 
     /*if the set current value is lower than the feedback current value, that means we need to lower the voltage at the output
     in order to amintain the same current value*/
-    if (realCurrentValue > targetAmps) {
+    if (realCurrent > targetAmps) {
         //When we increase PWM width, the voltage gets lower at the output.
         pwmValue = pwmValue - 1;
         pwmValue = constrain(pwmValue, minPwmControl, maxPwmControl);
@@ -205,26 +205,41 @@ void lcdVolt(char *out, double value) {
 
 
 void display() {
-    lcd.clear();
-    lcd.setCursor(0, 0);
-    lcd.print(" VOLTAGE    CURRENT ");
 
-    lcd.setCursor(1, 1);
-    lcd.print(targetVolt, 1);
-    lcd.print("V       ");
+    valChar = F("V");
 
-    lcd.print(targetAmps, 0);
-    lcd.print("A");
-
-//    lcdVolt(printValues, realVolts);
-    lcd.setCursor(0, 3);
+    if (!lcdTitles) {
+        lcd.clear();
+        lcd.setCursor(1, 0);
+        lcd.print(F("VOLTAGE"));
+    }
+    lcd.setCursor(3, 1);
+    displayVolt(targetVolt, printValues);
     lcd.print(printValues);
-    lcd.print("V       ");
-
-//    lcdAmps(printValues, realCurrentValue);
+    lcd.print(valChar);
+    lcd.setCursor(8, 0);
+    displayVolt(realVolts, printValues);
     lcd.print(printValues);
-    //lcd.setCursor(19,1);
-    lcd.print("А");
+    lcd.print(valChar);
+
+    valChar = F("A");
+    if (!lcdTitles) {
+        lcd.setCursor(1, 2);
+        lcd.print(F("CURRENT"));
+    }
+
+    lcd.setCursor(3, 3);
+    displayAmps(targetAmps, printValues);
+    lcd.print(printValues);
+    lcd.print(valChar);
+    lcd.setCursor(8, 2);
+    displayAmps(realCurrentSmooth, printValues);
+    lcd.print(printValues);
+    lcd.print(valChar);
+
+    if (!lcdTitles) {
+        lcdTitles = true;
+    }
 }
 
 

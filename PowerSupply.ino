@@ -38,9 +38,6 @@ void loop() {
     encoder();
     terminal();
 
-    //Why divided by 1.024? Well: I want maximum current of 1000mA. SO 1024 digital read divided by 1000mA =  1.024
-    targetAmps = 10;
-
     // Amperage calculation
     sensAmps();
     sensVolts();
