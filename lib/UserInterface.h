@@ -136,8 +136,6 @@ private:
         lcd->print(valChar);
 
 
-
-
         valChar = F("A");
         lcd->setCursor(14, 2);
         displayAmps(cnr->lcdAmps(), printValues);
