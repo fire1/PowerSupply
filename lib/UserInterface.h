@@ -79,7 +79,7 @@ private:
         }
 
         int dig1 = int(value) * 100; // 210
-        int dig2 = int((value * 100) - dig1);
+        int dig2 = int((value * 1000) - dig1);
 
         dig1 = dig1 / 100;
         if (dig2 < 0) {
@@ -106,35 +106,40 @@ private:
             lcd->setCursor(1, 2);
             lcd->print(F("CURRENT"));
 
-            lcd->setCursor(19, 0);
+            lcd->setCursor(10, 0);
             (powerMode) ? lcd->write((byte)1) : lcd->write((byte)0); // or 0
+
+            if (editAmps && lcdBlinks) {
+//            valChar = F(">");
+                lcd->setCursor(0, 3);
+                lcd->write(B01111110);
+            }
+
+            valChar = F("A");
+            lcd->setCursor(3, 3);
+            displayAmps(cnr->getTargetAmps(), printValues);
+            lcd->print(printValues);
+            lcd->print(valChar);
+
+            valChar = F("V");
+            lcd->setCursor(3, 1);
+            displayVolt(cnr->getTargetVolt(), printValues);
+            lcd->print(printValues);
+            lcd->print(valChar);
+
         }
 
         valChar = F("V");
-
-        lcd->setCursor(3, 1);
-        displayVolt(cnr->getTargetVolt(), printValues);
-        lcd->print(printValues);
-        lcd->print(valChar);
-        lcd->setCursor(9, 0);
+        lcd->setCursor(14, 0);
         displayVolt(cnr->lcdVolt(), printValues);
         lcd->print(printValues);
         lcd->print(valChar);
 
 
-        if (editAmps && lcdBlinks) {
-//            valChar = F(">");
-            lcd->setCursor(0, 3);
-            lcd->write(B01111110);
-        }
+
 
         valChar = F("A");
-
-        lcd->setCursor(3, 3);
-        displayAmps(cnr->getTargetAmps(), printValues);
-        lcd->print(printValues);
-        lcd->print(valChar);
-        lcd->setCursor(9, 2);
+        lcd->setCursor(14, 2);
         displayAmps(cnr->lcdAmps(), printValues);
         lcd->print(printValues);
         lcd->print(valChar);
@@ -187,7 +192,7 @@ public:
 
         Serial.println();
         Serial.print(F("Amp In: "));
-        displayAmps(cnr->getLiveAmps(), printValues);
+        displayAmps(cnr->lcdAmps(), printValues);
         Serial.write(printValues);
         Serial.print(F(" Raw "));
         Serial.print(cnr->getDumpAmps());

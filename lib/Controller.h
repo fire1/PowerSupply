@@ -17,6 +17,7 @@ class Controller {
     float liveVolts = 0;
     float readVolts = 0;
     uint16_t avrReadAmps;
+    uint32_t ampSmoothIndex;
     int dumpVolts, dumpAmps;
     int readAmps = 0;
     double liveAmps = 0;
@@ -63,18 +64,22 @@ class Controller {
     }
 
     void sensAmps() {
-        for (index = 0; index < 4; ++index) {
+        for (index = 0; index < 3; ++index) {
             avrReadAmps += analogRead(pinAmps);
+            delayMicroseconds(2);
         }
-        dumpAmps = readAmps = avrReadAmps = avrReadAmps / 4;
-
-        if (readAmps > 232) {
-            liveAmps = map(readAmps, 232, 550, 900, 5300);
-        } else {
-            liveAmps = map(readAmps, 30, 232, 55, 900);
+        dumpAmps = readAmps = avrReadAmps = avrReadAmps / 3;
+        testAmps();
+        if (readAmps < 30) {
+            liveAmps = map(readAmps, 19, 40, 120, 250);
+        } else if (readAmps < 61){
+            liveAmps = map(readAmps, 20, 45, 205, 630);
+        } else if (readAmps > 60){
+            liveAmps = map(readAmps, 56, 550, 670, 5700);
         }
         liveAmps = liveAmps < 0 ? 0 : liveAmps * 0.001;
-        ampSmooth = liveAmps / 2;
+        ampSmooth += liveAmps;
+        ampSmoothIndex++;
     }
 
     uint8_t lastPwm = 0;
@@ -201,12 +206,15 @@ public:
     }
 
     double lcdAmps() {
-        return ampSmooth;
+        double result = ampSmooth / ampSmoothIndex;
+        ampSmooth = result;
+        ampSmoothIndex = 1;
+        return result;
     }
 
 
-    double testAmperage(){
-        return  testAmp;
+    double testAmperage() {
+        return testAmp;
     }
 };
 
