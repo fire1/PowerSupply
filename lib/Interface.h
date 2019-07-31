@@ -123,9 +123,9 @@ private:
 
 
         if (editAmps && lcdBlinks) {
-            valChar = F(">");
+//            valChar = F(">");
             lcd->setCursor(0, 3);
-            lcd->print(valChar);
+            lcd->write(B01111110);
         }
 
         valChar = F("A");
