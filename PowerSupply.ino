@@ -4,7 +4,7 @@
  * version $Id$
  */
 
-#define DEBUG
+//#define DEBUG
 
 #include <Arduino.h>
 #include "lib/Controller.h"

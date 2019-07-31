@@ -39,6 +39,29 @@ const float maxVoltage = 24.65;//28.15;
 
 char printValues[6];
 
+byte charLinear[] = {
+        B01000,
+        B01000,
+        B01000,
+        B01100,
+        B00000,
+        B11111,
+        B00000,
+        B10101
+};
+
+byte charSwitch[] = {
+        B00100,
+        B01000,
+        B00100,
+        B01000,
+        B00000,
+        B10101,
+        B00000,
+        B10101
+};
+
+
 //Other Variables
 
 

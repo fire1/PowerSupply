@@ -21,6 +21,7 @@ private:
     boolean lcdBlinks = false;
     boolean editVolt = false;
     boolean editAmps = false;
+    boolean powerMode = true;
     uint8_t encoderPos = 0;
     uint8_t encoderPinALast = LOW;
     String valChar;
@@ -94,15 +95,22 @@ private:
             valChar = F(">");
             lcd->setCursor(0, 1);
             lcd->print(valChar);
-        }
 
-        valChar = F("V");
+        }
 
         if (!lcdTitles) {
             lcd->clear();
             lcd->setCursor(1, 0);
             lcd->print(F("VOLTAGE"));
+
+            lcd->setCursor(1, 2);
+            lcd->print(F("CURRENT"));
+
+            lcd->setCursor(19, 0);
+            (powerMode) ? lcd->write((byte)1) : lcd->write((byte)0); // or 0
         }
+
+        valChar = F("V");
 
         lcd->setCursor(3, 1);
         displayVolt(cnr->getTargetVolt(), printValues);
@@ -121,10 +129,6 @@ private:
         }
 
         valChar = F("A");
-        if (!lcdTitles) {
-            lcd->setCursor(1, 2);
-            lcd->print(F("CURRENT"));
-        }
 
         lcd->setCursor(3, 3);
         displayAmps(cnr->getTargetAmps(), printValues);
@@ -149,9 +153,11 @@ public:
         drawMain();
     }
 
-    void begin(){
+    void begin() {
         pinMode(pinEncoderA, INPUT_PULLUP);
         pinMode(pinEncoderB, INPUT_PULLUP);
+        lcd->createChar(0, charLinear);
+        lcd->createChar(1, charSwitch);
     }
 
 
