@@ -8,14 +8,14 @@
 
 #include <Arduino.h>
 #include "lib/Controller.h"
-#include "lib/Interface.h"
+#include "lib/UserInterface.h"
 
 
 #include "PowerSupply.h"
 
 LiquidCrystal lcd(1, 0, 4, 7, 8, 9);
 Controller pw;
-Interface ui(lcd, pw);
+UserInterface ui(lcd, pw);
 // TODO resolve pins
 
 

@@ -15,7 +15,7 @@
 
 #endif
 
-class Interface {
+class UserInterface {
 private:
     boolean lcdTitles = false;
     boolean lcdBlinks = false;
@@ -147,7 +147,7 @@ private:
     }
 
 public:
-    Interface(LiquidCrystal &lc, Controller &cn) : lcd(&lc), cnr(&cn) {}
+    UserInterface(LiquidCrystal &lc, Controller &cn) : lcd(&lc), cnr(&cn) {}
 
     void draw() {
         drawMain();
