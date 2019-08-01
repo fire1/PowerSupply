@@ -62,17 +62,17 @@ class Controller {
 //        int refAmps = 550; // Max amps read as reference;
 //        testAmp = ((readVolts / refVolt) * (avrReadAmps / refAmps)) * 10;
 
-        float deflectVolt = map((int) liveVolts, 1, 30, 625, 1036 /*11.96428*/) * 0.01; // deflection curve by voltage
-        testAmp = readAmps * deflectVolt;
+        float deflectVolt = map((int) liveVolts, 0, 30, 935, 1196/*1036*/ /*11.96428*/) * 0.1; // deflection curve by voltage
+        testAmp = readAmps * deflectVolt *0.1;
 
     }
 
     void sensAmps() {
-        for (index = 0; index < 2; ++index) {
+        for (index = 0; index < 4; ++index) {
             avrReadAmps += analogRead(pinAmps);
             delayMicroseconds(1);
         }
-        dumpAmps = readAmps = avrReadAmps = avrReadAmps / 2;
+        dumpAmps = readAmps = avrReadAmps = avrReadAmps / 4;
         testAmps();
 
 
@@ -83,7 +83,8 @@ class Controller {
         } else if (readAmps > 60) {
             liveAmps = map(readAmps, 56, 550, 670, 5700);
         }
-        liveAmps = liveAmps < 0 ? 0 : liveAmps * 0.001;
+//        liveAmps = liveAmps < 0 ? 0 : liveAmps * 0.001;
+        liveAmps = testAmp * 0.001;
         ampSmooth += liveAmps;
         ampSmoothIndex++;
     }

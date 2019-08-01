@@ -25,7 +25,7 @@ const uint8_t pinPWM = 5;
 const uint8_t pinEncoderC = 0;
 const uint8_t pinEncoderB = 2;
 const uint8_t pinEncoderA = 3;
-const uint16_t screenRate = 16000;
+const uint16_t screenRate = 18000;
 const uint8_t pinLed = 13;
 // Common counter
 
