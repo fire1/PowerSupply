@@ -54,27 +54,33 @@ class Controller {
         liveVolts = map(readVolts, 140, 940, 411, 2700) * 0.01;
     }
 
+// 6.25
 // https://circuits4you.com/2016/05/13/dc-current-measurement-arduino/
 // V=I x R
     void testAmps() {
-        int refVolt = 940; // Max volt read as reference
-        int refAmps = 550; // Max amps read as reference;
-        testAmp = ((readVolts / refVolt) * (avrReadAmps / refAmps)) * 10;
+//        int refVolt = 940; // Max volt read as reference
+//        int refAmps = 550; // Max amps read as reference;
+//        testAmp = ((readVolts / refVolt) * (avrReadAmps / refAmps)) * 10;
+
+        float deflectVolt = map((int) liveVolts, 1, 30, 625, 1036 /*11.96428*/) * 0.01; // deflection curve by voltage
+        testAmp = readAmps * deflectVolt;
 
     }
 
     void sensAmps() {
-        for (index = 0; index < 3; ++index) {
+        for (index = 0; index < 2; ++index) {
             avrReadAmps += analogRead(pinAmps);
-            delayMicroseconds(2);
+            delayMicroseconds(1);
         }
-        dumpAmps = readAmps = avrReadAmps = avrReadAmps / 3;
+        dumpAmps = readAmps = avrReadAmps = avrReadAmps / 2;
         testAmps();
+
+
         if (readAmps < 30) {
             liveAmps = map(readAmps, 19, 40, 120, 250);
-        } else if (readAmps < 61){
+        } else if (readAmps < 61) {
             liveAmps = map(readAmps, 20, 45, 205, 630);
-        } else if (readAmps > 60){
+        } else if (readAmps > 60) {
             liveAmps = map(readAmps, 56, 550, 670, 5700);
         }
         liveAmps = liveAmps < 0 ? 0 : liveAmps * 0.001;
