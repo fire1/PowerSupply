@@ -15,7 +15,7 @@
 
 LiquidCrystal lcd(1, 0, 4, 7, 8, 9);
 Controller pw;
-UserInterface ui(lcd, pw);
+UserInterface ui(lcd, pw, encoder);
 // TODO resolve pins
 
 

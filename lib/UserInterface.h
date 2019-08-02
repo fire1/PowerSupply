@@ -6,6 +6,22 @@
 #define POWERSUPPLY_INTERFACE_H
 
 #include <Arduino.h>
+#include <EnableInterrupt.h>
+
+#ifndef EnableInterrupt_h
+
+#include "../../libraries/EnableInterrupt/EnableInterrupt.h"
+
+#endif
+
+#include <RotaryEncoder.h>
+
+#ifndef RotaryEncoder_h
+
+#include "../../libraries/RotaryEncoder/RotaryEncoder.h"
+
+#endif
+
 #include "../PowerSupply.h"
 #include "Controller.h"
 
@@ -14,6 +30,10 @@
 #include "../../libraries/LiquidCrystal/src/LiquidCrystal.h"
 
 #endif
+RotaryEncoder encoder(pinEncoderA, pinEncoderB);
+void interruptFunction() {
+    encoder.tick();
+}
 
 class UserInterface {
 private:
@@ -27,21 +47,8 @@ private:
     String valChar;
     LiquidCrystal *lcd;
     Controller *cnr;
+    RotaryEncoder *enc;
 
-    void encoder() {
-        uint8_t n = digitalRead(pinEncoderA);
-        if ((encoderPinALast == LOW) && (n == HIGH)) {
-            if (digitalRead(pinEncoderB) == LOW) {
-                encoderPos--;
-            } else {
-                encoderPos++;
-            }
-            Serial.print(encoderPos);
-            Serial.print(F("/"));
-        }
-        encoderPinALast = n;
-
-    }
 
 /**
  *
@@ -107,7 +114,7 @@ private:
             lcd->print(F("CURRENT"));
 
             lcd->setCursor(10, 0);
-            (powerMode) ? lcd->write((byte)1) : lcd->write((byte)0); // or 0
+            (powerMode) ? lcd->write((byte) 1) : lcd->write((byte) 0); // or 0
 
             if (editAmps && lcdBlinks) {
 //            valChar = F(">");
@@ -150,15 +157,20 @@ private:
     }
 
 public:
-    UserInterface(LiquidCrystal &lc, Controller &cn) : lcd(&lc), cnr(&cn) {}
+    UserInterface(LiquidCrystal &lc, Controller &cn, RotaryEncoder &ec) : lcd(&lc), cnr(&cn), enc(&ec) {}
 
     void draw() {
         drawMain();
     }
 
     void begin() {
+
+        enableInterrupt(pinEncoderA, interruptFunction, CHANGE);
+        enableInterrupt(pinEncoderB, interruptFunction, CHANGE);
+
         pinMode(pinEncoderA, INPUT_PULLUP);
         pinMode(pinEncoderB, INPUT_PULLUP);
+
         lcd->createChar(0, charLinear);
         lcd->createChar(1, charSwitch);
     }
@@ -183,7 +195,7 @@ public:
                 Serial.println();
             }
         }
-        encoder();
+
     }
 
     void debug() {
@@ -210,6 +222,10 @@ public:
         Serial.print(F(" PWM: "));
         Serial.print(cnr->getPwmValue());
 
+        Serial.print(F(" ENC: "));
+        Serial.print(enc->getDirection());
+        Serial.print(F(" / "));
+        Serial.print(enc->getPosition());
     }
 
 };
