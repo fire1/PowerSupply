@@ -12,15 +12,21 @@
 
 
 #include "PowerSupply.h"
+#include "lib/AnalogButtons.h"
+
 
 LiquidCrystal lcd(1, 0, 4, 7, 8, 9);
+
+RotaryEncoder ec(pinEncoderA, pinEncoderB);
+AnalogButtons bt;
 Controller pw;
-UserInterface ui(lcd, pw, encoder);
-// TODO resolve pins
+UserInterface ui(lcd, pw, ec, bt);
 
 
-unsigned long previousMillis = 0;
-unsigned long currentMillis = 0;
+void interruptFunction() {
+    ec.tick();
+}
+
 
 // do not use 10/11
 void setup() {
@@ -31,6 +37,7 @@ void setup() {
     lcd.begin(20, 4);
 #endif
     ui.begin();
+    bt.begin();
     currentMillis = millis();
 }
 
@@ -40,8 +47,9 @@ void loop() {
     pw.manage();
     //Each screenRate value we print values on the LCD screen
     currentMillis = millis();
-    if (currentMillis - previousMillis >= screenRate) {
-        previousMillis += screenRate;
+    bt.listener();
+    if (currentMillis - previousMillis >= screenRefresh) {
+        previousMillis += screenRefresh;
         digitalWrite(pinLed, HIGH);
 #ifdef DEBUG
         ui.debug();

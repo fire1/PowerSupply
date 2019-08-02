@@ -20,22 +20,16 @@
 //Inputs/outputs
 const uint8_t pinVolt = A1;
 const uint8_t pinAmps = A0;
-//const uint8_t currentIn = A0;
 const uint8_t pinPWM = 5;
-const uint8_t pinEncoderC = 0;
 const uint8_t pinEncoderB = 2;
 const uint8_t pinEncoderA = 3;
 const uint8_t pinAnalogBt = A3;
-const uint16_t screenRate = 18000;
+const uint16_t screenRefresh = 18000;
 const uint8_t pinLed = 13;
-// Common counter
 
 
-
-//Editable variables
-float realAmpOffset = -0.03;
-const float maxVoltage = 24.65;//28.15;
-
+unsigned long previousMillis = 0;
+volatile unsigned long currentMillis = 0;
 
 
 char printValues[6];

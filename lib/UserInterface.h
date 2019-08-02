@@ -24,16 +24,16 @@
 
 #include "../PowerSupply.h"
 #include "Controller.h"
+#include "AnalogButtons.h"
 
 #ifndef LiquidCrystal_h
 
 #include "../../libraries/LiquidCrystal/src/LiquidCrystal.h"
 
 #endif
-RotaryEncoder encoder(pinEncoderA, pinEncoderB);
-void interruptFunction() {
-    encoder.tick();
-}
+
+
+void static interruptFunction();
 
 class UserInterface {
 private:
@@ -41,13 +41,15 @@ private:
     boolean lcdBlinks = false;
     boolean editVolt = false;
     boolean editAmps = false;
+    boolean openEdit = false;
     boolean powerMode = true;
-    uint8_t encoderPos = 0;
-    uint8_t encoderPinALast = LOW;
+    boolean toggleSet = false;
+    unsigned long timeout;
     String valChar;
     LiquidCrystal *lcd;
     Controller *cnr;
     RotaryEncoder *enc;
+    AnalogButtons *abt;
 
 
 /**
@@ -98,14 +100,14 @@ private:
 
 
     void drawMain() {
-        if (editVolt && lcdBlinks) {
-            valChar = F(">");
-            lcd->setCursor(0, 1);
-            lcd->print(valChar);
-
-        }
-
         if (!lcdTitles) {
+
+            if (editVolt && lcdBlinks) {
+                valChar = F(">");
+                lcd->setCursor(0, 1);
+                lcd->print(valChar);
+
+            }
             lcd->clear();
             lcd->setCursor(1, 0);
             lcd->print(F("VOLTAGE"));
@@ -156,27 +158,7 @@ private:
         lcdBlinks = !lcdBlinks;
     }
 
-public:
-    UserInterface(LiquidCrystal &lc, Controller &cn, RotaryEncoder &ec) : lcd(&lc), cnr(&cn), enc(&ec) {}
-
-    void draw() {
-        drawMain();
-    }
-
-    void begin() {
-
-        enableInterrupt(pinEncoderA, interruptFunction, CHANGE);
-        enableInterrupt(pinEncoderB, interruptFunction, CHANGE);
-
-        pinMode(pinEncoderA, INPUT_PULLUP);
-        pinMode(pinEncoderB, INPUT_PULLUP);
-
-        lcd->createChar(0, charLinear);
-        lcd->createChar(1, charSwitch);
-    }
-
-
-    void listener() {
+    void terminal() {
         if (Serial.available()) {
             String where = Serial.readStringUntil('=');
             if (where == F("v")) {
@@ -195,8 +177,70 @@ public:
                 Serial.println();
             }
         }
-
     }
+
+    void updateTimeout() {
+        timeout = currentMillis + screenRefresh * 6;
+    }
+
+public:
+    /**
+     *
+     * @param lc
+     * @param cn
+     * @param ec
+     * @param bt
+     */
+    UserInterface(LiquidCrystal &lc, Controller &cn, RotaryEncoder &ec, AnalogButtons &bt) :
+            lcd(&lc), cnr(&cn), enc(&ec), abt(&bt) {}
+
+    void draw() {
+        drawMain();
+    }
+
+    void listener() {
+        terminal();
+
+        //
+        // Open menu and edit voltages
+        if (abt->getButton() == AnalogButtons::btnEncoder && !toggleSet) {
+            toggleSet = true;
+            openEdit = true;
+            editVolt = true;
+            editAmps = false;
+            updateTimeout();
+        }
+
+        if (abt->getButton() == AnalogButtons::btnEncoder && toggleSet) {
+            toggleSet = false;
+            openEdit = true;
+            editVolt = false;
+            editAmps = true;
+            updateTimeout();
+        }
+
+
+        if (currentMillis > timeout) {
+            openEdit = false;
+        }
+
+        if (openEdit) {
+            lcdTitles = true;
+        }
+    }
+
+    void begin() {
+
+        enableInterrupt(pinEncoderA, interruptFunction, CHANGE);
+        enableInterrupt(pinEncoderB, interruptFunction, CHANGE);
+
+        pinMode(pinEncoderA, INPUT_PULLUP);
+        pinMode(pinEncoderB, INPUT_PULLUP);
+
+        lcd->createChar(0, charLinear);
+        lcd->createChar(1, charSwitch);
+    }
+
 
     void debug() {
 
