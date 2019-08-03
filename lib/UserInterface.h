@@ -183,6 +183,53 @@ private:
         timeout = currentMillis + screenRefresh * 6;
     }
 
+
+    void inputs() {
+
+        //
+        // Open menu and edit voltages
+        if (abt->getButton() == AnalogButtons::btnEncoder && !toggleSet) {
+            toggleSet = true;
+            openEdit = true;
+            editVolt = true;
+            editAmps = false;
+            updateTimeout();
+            Serial.print(F(" TOG1 "));
+        }
+
+        if (abt->getButton() == AnalogButtons::btnEncoder && toggleSet) {
+            toggleSet = false;
+            openEdit = true;
+            editVolt = false;
+            editAmps = true;
+            updateTimeout();
+            Serial.print(F(" TOG0 "));
+        }
+
+
+        if (currentMillis > timeout) {
+            openEdit = false;
+            editVolt = false;
+            editAmps = false;
+        }
+
+        if (openEdit) {
+            lcdTitles = true;
+
+        }
+        changeValues();
+    }
+
+    void changeValues() {
+        if (openEdit && editVolt) {
+            cnr->setVoltage(cnr->getTargetVolt() - enc->getPosition());
+        }
+
+        if (openEdit && editAmps) {
+            cnr->setAmperage(cnr->getTargetAmps() - enc->getPosition());
+        }
+    }
+
 public:
     /**
      *
@@ -200,33 +247,8 @@ public:
 
     void listener() {
         terminal();
+        inputs();
 
-        //
-        // Open menu and edit voltages
-        if (abt->getButton() == AnalogButtons::btnEncoder && !toggleSet) {
-            toggleSet = true;
-            openEdit = true;
-            editVolt = true;
-            editAmps = false;
-            updateTimeout();
-        }
-
-        if (abt->getButton() == AnalogButtons::btnEncoder && toggleSet) {
-            toggleSet = false;
-            openEdit = true;
-            editVolt = false;
-            editAmps = true;
-            updateTimeout();
-        }
-
-
-        if (currentMillis > timeout) {
-            openEdit = false;
-        }
-
-        if (openEdit) {
-            lcdTitles = true;
-        }
     }
 
     void begin() {
@@ -270,6 +292,14 @@ public:
         Serial.print(enc->getDirection());
         Serial.print(F(" / "));
         Serial.print(enc->getPosition());
+
+        if(editAmps){
+            Serial.print(F(" -> Edit AMP"));
+        }
+
+        if(editVolt){
+            Serial.print(F(" -> Edit VLT"));
+        }
     }
 
 };

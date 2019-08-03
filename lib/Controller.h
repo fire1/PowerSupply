@@ -62,8 +62,9 @@ class Controller {
 //        int refAmps = 550; // Max amps read as reference;
 //        testAmp = ((readVolts / refVolt) * (avrReadAmps / refAmps)) * 10;
 
-        float deflectVolt = map((int) liveVolts, 0, 30, 935, 1196/*1036*/ /*11.96428*/) * 0.1; // deflection curve by voltage
-        testAmp = readAmps * deflectVolt *0.1;
+        float deflectVolt =
+                map((int) liveVolts, 0, 30, 935, 1196/*1036*/ /*11.96428*/) * 0.1; // deflection curve by voltage
+        testAmp = readAmps * deflectVolt * 0.1;
 
     }
 
@@ -172,11 +173,13 @@ public:
     }
 
     void setVoltage(float value) {
-        targetVolt = value;
+        if (value >= 0)
+            targetVolt = value;
     }
 
     void setAmperage(float value) {
-        targetAmps = value;
+        if (value >= 0)
+            targetAmps = value;
     }
 
     float getLiveVolt() {
