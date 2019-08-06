@@ -293,11 +293,17 @@ public:
         Serial.print(F(" / "));
         Serial.print(enc->getPosition());
 
-        if(editAmps){
+        Serial.print(F(" BTN: "));
+        Serial.print(abt->getReadings());
+
+        Serial.print(F(" TMP: "));
+        Serial.print(heat);
+
+        if (editAmps) {
             Serial.print(F(" -> Edit AMP"));
         }
 
-        if(editVolt){
+        if (editVolt) {
             Serial.print(F(" -> Edit VLT"));
         }
     }

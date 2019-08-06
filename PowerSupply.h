@@ -26,11 +26,13 @@ const uint8_t pinEncoderA = 3;
 const uint8_t pinAnalogBt = A3;
 const uint16_t screenRefresh = 18000;
 const uint8_t pinLed = 13;
-
+const uint8_t pinThermistor = A6;
+const uint8_t pinFanA = 10;//back fan
+const uint8_t pinFanB = 11;// ic fan
 
 unsigned long previousMillis = 0;
 volatile unsigned long currentMillis = 0;
-
+uint8_t heat;
 
 char printValues[6];
 

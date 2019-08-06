@@ -15,7 +15,7 @@ typedef uint8_t btn;
 #endif
 
 #ifndef ButtonCheckIndexInt
-#define ButtonCheckIndexInt 4
+#define ButtonCheckIndexInt 24
 #endif
 
 #ifndef ButtonDebounceInterval
@@ -26,13 +26,13 @@ class AnalogButtons {
     btn now = 0;
     btn last = 0;
     uint8_t index = 0;
-    int read, compare = 0;
-    unsigned long lastCheck = 0;
+    int read;
+    unsigned long lastCheck = 0,compare = 0;
 
 private:
 
     void detectEncoder() {
-        if (compare > 600 && compare < 700 && last != now) {
+        if (read > 600 && read < 700 && last != now) {
             now = btnEncoder;
             Serial.print(F(" Encoder Click "));
         }
@@ -57,22 +57,30 @@ public:
 
         if (currentMillis - lastCheck >= ButtonCheckInterval && index <= ButtonCheckIndexInt) {
             lastCheck = currentMillis;
-            compare += analogRead(pinAnalogBt);
             read = 0;
+            compare += analogRead(pinAnalogBt);
             index++;
+
         }
 
         if (index >= ButtonCheckIndexInt && compare > 0) {
+            compare += analogRead(pinAnalogBt);
+            index++;
             compare = compare / index;
             index = 0;
 
-            if (compare > 0 && compare < 950) {
+            if (compare > 0 && compare < 980) {
+                read = compare;
                 lastCheck = currentMillis + ButtonCheckInterval;
                 detectEncoder();
                 compare = 0;
 
             }
         }
+    }
+
+    int getReadings(){
+        return  read;
     }
 
     btn getButton() {
