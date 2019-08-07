@@ -7,20 +7,20 @@
 #define DEBUG
 
 #include <Arduino.h>
+
 #include "lib/Controller.h"
 #include "lib/UserInterface.h"
 
 
 #include "PowerSupply.h"
-#include "lib/AnalogButtons.h"
 
 
 LiquidCrystal lcd(1, 0, 4, 7, 8, 9);
 
 RotaryEncoder ec(pinEncoderA, pinEncoderB);
-AnalogButtons bt;
+AnalogButtons ab(pinAnalogBt, INPUT);
 Controller pw;
-UserInterface ui(lcd, pw, ec, bt);
+UserInterface ui(lcd, pw, ec, ab);
 
 
 void interruptFunction() {
@@ -37,7 +37,6 @@ void setup() {
     lcd.begin(20, 4);
 #endif
     ui.begin();
-    bt.begin();
     currentMillis = millis();
 }
 
@@ -47,7 +46,6 @@ void loop() {
     pw.manage();
     //Each screenRate value we print values on the LCD screen
     currentMillis = millis();
-    bt.listener();
     if (currentMillis - previousMillis >= screenRefresh) {
         previousMillis += screenRefresh;
 

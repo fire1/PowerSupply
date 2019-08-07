@@ -23,8 +23,81 @@
 #endif
 
 #include "../PowerSupply.h"
+
+#include <AnalogButtons.h>
+
+#ifndef ANALOGBUTTONS_H_
+
+#include "../../libraries/Analog_Buttons/AnalogButtons.h"
+
+#endif
+
 #include "Controller.h"
-#include "AnalogButtons.h"
+
+
+uint8_t currentButton = 0;
+
+
+void btn1Click() {
+    currentButton = 1;
+    Serial.println(F("button 1 clicked"));
+}
+
+void btn1Hold() {
+    currentButton = 11;
+    Serial.println(F("button 1 clicked"));
+}
+
+void btn2Click() {
+    currentButton = 2;
+    Serial.println(F("button 2 clicked"));
+}
+
+void btn2Hold() {
+    currentButton = 22;
+    Serial.println(F("button 2 held"));
+}
+
+void btn3Click() {
+    currentButton = 3;
+    Serial.println(F("button 3 clicked"));
+}
+
+void btn3Hold() {
+    currentButton = 33;
+    Serial.println(F("button 3 held"));
+}
+
+void btn4Click() {
+    currentButton = 4;
+    Serial.println(F("button 4 clicked"));
+}
+
+void btn4Hold() {
+    currentButton = 44;
+    Serial.println(F("button 4 held"));
+}
+
+void btn5Click() {
+    currentButton = 5;
+    Serial.println(F("button 5 clicked"));
+}
+
+void btn5Hold() {
+    currentButton = 55;
+    Serial.println(F("button 5 held"));
+}
+
+void btn6Click() {
+    currentButton = 6;
+    Serial.println(F("button 5 clicked"));
+}
+
+void btn6Hold() {
+    currentButton = 66;
+    Serial.println(F("button 5 held"));
+}
+
 
 #ifndef LiquidCrystal_h
 
@@ -32,6 +105,13 @@
 
 #endif
 
+
+Button btnEncoder = Button(678, &btn1Click, &btn1Hold);
+Button btnBlinker = Button(33, &btn2Click, &btn2Hold);
+Button btnMemSetA = Button(383, &btn3Click, &btn3Hold);
+Button btnMemSetB = Button(288, &btn4Click, &btn4Hold);
+Button btnMemSetC = Button(450, &btn5Click, &btn5Hold);
+Button btnMemSetD = Button(544, &btn6Click, &btn6Hold);
 
 void static interruptFunction();
 
@@ -188,7 +268,7 @@ private:
 
         //
         // Open menu and edit voltages
-        if (abt->getButton() == AnalogButtons::btnEncoder && !toggleSet) {
+        if (currentButton == 1 && !toggleSet) {
             toggleSet = true;
             openEdit = true;
             editVolt = true;
@@ -197,7 +277,7 @@ private:
             Serial.print(F(" TOG1 "));
         }
 
-        if (abt->getButton() == AnalogButtons::btnEncoder && toggleSet) {
+        if (currentButton == 1 && toggleSet) {
             toggleSet = false;
             openEdit = true;
             editVolt = false;
@@ -221,11 +301,11 @@ private:
     }
 
     void changeValues() {
-        if (openEdit && editVolt) {
+        if (editVolt) {
             cnr->setVoltage(cnr->getTargetVolt() - enc->getPosition());
         }
 
-        if (openEdit && editAmps) {
+        if (editAmps) {
             cnr->setAmperage(cnr->getTargetAmps() - enc->getPosition());
         }
     }
@@ -248,7 +328,7 @@ public:
     void listener() {
         terminal();
         inputs();
-
+        abt->check();
     }
 
     void begin() {
@@ -258,6 +338,13 @@ public:
 
         pinMode(pinEncoderA, INPUT_PULLUP);
         pinMode(pinEncoderB, INPUT_PULLUP);
+
+        abt->add(btnEncoder);
+        abt->add(btnBlinker);
+        abt->add(btnMemSetA);
+        abt->add(btnMemSetB);
+        abt->add(btnMemSetC);
+        abt->add(btnMemSetD);
 
         lcd->createChar(0, charLinear);
         lcd->createChar(1, charSwitch);
@@ -293,8 +380,6 @@ public:
         Serial.print(F(" / "));
         Serial.print(enc->getPosition());
 
-        Serial.print(F(" BTN: "));
-        Serial.print(abt->getReadings());
 
         Serial.print(F(" TMP: "));
         Serial.print(heat);
