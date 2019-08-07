@@ -39,63 +39,87 @@ uint8_t currentButton = 0;
 
 
 void btn1Click() {
-    currentButton = 1;
-    Serial.println(F("button 1 clicked"));
+    if (currentButton != 1) {
+        currentButton = 1;
+        Serial.println(F("button 1 clicked"));
+    }
 }
 
 void btn1Hold() {
-    currentButton = 11;
-    Serial.println(F("button 1 clicked"));
+//    if (currentButton != 11) {
+//        currentButton = 11;
+//        Serial.println(F("button 1 hold"));
+//    }
 }
 
 void btn2Click() {
-    currentButton = 2;
-    Serial.println(F("button 2 clicked"));
+    if (currentButton != 2) {
+        currentButton = 2;
+        Serial.println(F("button 2 clicked"));
+    }
 }
 
 void btn2Hold() {
-    currentButton = 22;
-    Serial.println(F("button 2 held"));
+    if (currentButton != 22) {
+        currentButton = 22;
+        Serial.println(F("button 2 held"));
+    }
 }
 
 void btn3Click() {
-    currentButton = 3;
-    Serial.println(F("button 3 clicked"));
+    if (currentButton != 3) {
+        currentButton = 3;
+        Serial.println(F("button 3 clicked"));
+    }
 }
 
 void btn3Hold() {
-    currentButton = 33;
-    Serial.println(F("button 3 held"));
+    if (currentButton != 33) {
+        currentButton = 33;
+        Serial.println(F("button 3 held"));
+    }
 }
 
 void btn4Click() {
-    currentButton = 4;
-    Serial.println(F("button 4 clicked"));
+    if (currentButton != 4) {
+        currentButton = 4;
+        Serial.println(F("button 4 clicked"));
+    }
 }
 
 void btn4Hold() {
-    currentButton = 44;
-    Serial.println(F("button 4 held"));
+    if (currentButton != 44) {
+        currentButton = 44;
+        Serial.println(F("button 4 held"));
+    }
 }
 
 void btn5Click() {
-    currentButton = 5;
-    Serial.println(F("button 5 clicked"));
+    if (currentButton != 5) {
+        currentButton = 5;
+        Serial.println(F("button 5 clicked"));
+    }
 }
 
 void btn5Hold() {
-    currentButton = 55;
-    Serial.println(F("button 5 held"));
+    if (currentButton != 55) {
+        currentButton = 55;
+        Serial.println(F("button 5 held"));
+    }
 }
 
 void btn6Click() {
-    currentButton = 6;
-    Serial.println(F("button 5 clicked"));
+    if (currentButton != 6) {
+        currentButton = 6;
+        Serial.println(F("button 5 clicked"));
+    }
 }
 
 void btn6Hold() {
-    currentButton = 66;
-    Serial.println(F("button 5 held"));
+    if (currentButton != 66) {
+        currentButton = 66;
+        Serial.println(F("button 5 held"));
+    }
 }
 
 
@@ -106,12 +130,12 @@ void btn6Hold() {
 #endif
 
 
-Button btnEncoder = Button(678, &btn1Click, &btn1Hold);
-Button btnBlinker = Button(33, &btn2Click, &btn2Hold);
-Button btnMemSetA = Button(383, &btn3Click, &btn3Hold);
-Button btnMemSetB = Button(288, &btn4Click, &btn4Hold);
-Button btnMemSetC = Button(450, &btn5Click, &btn5Hold);
-Button btnMemSetD = Button(544, &btn6Click, &btn6Hold);
+Button btnBlinker = Button(27, &btn2Click, &btn2Hold);
+Button btnEncoder = Button(610, &btn1Click, &btn1Hold);
+Button btnMemSetA = Button(765, &btn3Click, &btn3Hold);
+Button btnMemSetB = Button(512, &btn4Click, &btn4Hold);
+Button btnMemSetC = Button(264, &btn5Click, &btn5Hold);
+Button btnMemSetD = Button(420, &btn6Click, &btn6Hold);
 
 void static interruptFunction();
 
@@ -124,7 +148,8 @@ private:
     boolean openEdit = false;
     boolean powerMode = true;
     boolean toggleSet = false;
-    unsigned long timeout;
+    uint8_t lastPress = 0;
+    unsigned long timeout, debounce;
     String valChar;
     LiquidCrystal *lcd;
     Controller *cnr;
@@ -260,53 +285,73 @@ private:
     }
 
     void updateTimeout() {
-        timeout = currentMillis + screenRefresh * 6;
+        if (timeout == 0)
+            timeout = currentMillis + 300000;
     }
 
 
     void inputs() {
 
-        //
-        // Open menu and edit voltages
-        if (currentButton == 1 && !toggleSet) {
-            toggleSet = true;
-            openEdit = true;
-            editVolt = true;
-            editAmps = false;
-            updateTimeout();
-            Serial.print(F(" TOG1 "));
-        }
-
-        if (currentButton == 1 && toggleSet) {
-            toggleSet = false;
-            openEdit = true;
-            editVolt = false;
-            editAmps = true;
-            updateTimeout();
-            Serial.print(F(" TOG0 "));
-        }
-
-
+        changeValues();
         if (currentMillis > timeout) {
             openEdit = false;
             editVolt = false;
             editAmps = false;
         }
 
+        if (currentMillis > debounce) {
+//            currentButton = 0;
+        }
+
+        lastPress = currentButton;
+
+        //
+        // Open menu and edit voltages
+        if (currentButton == 1 && toggleSet) {
+            toggleSet = false;
+            openEdit = true;
+            editVolt = true;
+            editAmps = false;
+            updateTimeout();
+            debounce = currentMillis + 2200;
+            currentButton = 0;
+        }
+
+        if (currentButton == 1 && !toggleSet) {
+            toggleSet = true;
+            openEdit = true;
+            editVolt = false;
+            editAmps = true;
+            updateTimeout();
+            debounce = currentMillis + 2200;
+            currentButton = 0;
+        }
+
+        if (currentMillis > timeout && openEdit) {
+            editAmps = false;
+            editVolt = false;
+            openEdit = false;
+            lcdTitles = false;
+            timeout = 0;
+        }
+
         if (openEdit) {
             lcdTitles = true;
 
         }
-        changeValues();
+
     }
 
     void changeValues() {
+        if (enc->getDirection() != 0) {
+            timeout = currentMillis + 400000;
+        }
         if (editVolt) {
-            cnr->setVoltage(cnr->getTargetVolt() - enc->getPosition());
+            cnr->setVoltage(cnr->getTargetVolt() - enc->getDirection());
         }
 
         if (editAmps) {
-            cnr->setAmperage(cnr->getTargetAmps() - enc->getPosition());
+            cnr->setAmperage(cnr->getTargetAmps() - enc->getDirection());
         }
     }
 
@@ -322,6 +367,7 @@ public:
             lcd(&lc), cnr(&cn), enc(&ec), abt(&bt) {}
 
     void draw() {
+
         drawMain();
     }
 
@@ -352,7 +398,6 @@ public:
 
 
     void debug() {
-
         Serial.println();
         Serial.print(F("Amp In: "));
         displayAmps(cnr->lcdAmps(), printValues);

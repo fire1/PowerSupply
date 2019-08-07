@@ -18,7 +18,7 @@
 LiquidCrystal lcd(1, 0, 4, 7, 8, 9);
 
 RotaryEncoder ec(pinEncoderA, pinEncoderB);
-AnalogButtons ab(pinAnalogBt, INPUT);
+AnalogButtons ab(pinAnalogBt, INPUT, 60);
 Controller pw;
 UserInterface ui(lcd, pw, ec, ab);
 
@@ -39,8 +39,11 @@ void setup() {
     ui.begin();
     currentMillis = millis();
 }
+//
+//void loop() {
+//    Serial.println(analogRead(pinAnalogBt));
+//}
 
-//void loop(){};
 void loop() {
     ui.listener();
     pw.manage();
