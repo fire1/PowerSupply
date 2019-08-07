@@ -286,7 +286,7 @@ private:
 
     void updateTimeout() {
         if (timeout == 0)
-            timeout = currentMillis + 300000;
+            timeout = currentMillis + 3000;
     }
 
 
@@ -313,7 +313,7 @@ private:
             editVolt = true;
             editAmps = false;
             updateTimeout();
-            debounce = currentMillis + 2200;
+            debounce = currentMillis + 220;
             currentButton = 0;
         }
 
@@ -323,7 +323,7 @@ private:
             editVolt = false;
             editAmps = true;
             updateTimeout();
-            debounce = currentMillis + 2200;
+            debounce = currentMillis + 220;
             currentButton = 0;
         }
 
@@ -343,15 +343,17 @@ private:
     }
 
     void changeValues() {
-        if (enc->getDirection() != 0) {
-            timeout = currentMillis + 400000;
+        int direction = enc->getDirection();
+        if (direction != 0) {
+            timeout = currentMillis + 2000;
         }
+
         if (editVolt) {
-            cnr->setVoltage(cnr->getTargetVolt() - enc->getDirection());
+            cnr->setVoltage(cnr->getTargetVolt() - direction);
         }
 
         if (editAmps) {
-            cnr->setAmperage(cnr->getTargetAmps() - enc->getDirection());
+            cnr->setAmperage(cnr->getTargetAmps() - direction);
         }
     }
 
