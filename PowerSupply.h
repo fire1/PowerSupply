@@ -8,9 +8,9 @@
 #include <Arduino.h>
 #include <LiquidCrystal.h>
 
-#ifndef LiquidCrystal_h
+#ifndef LiquidCrystal_4bit_h
 
-#include "../libraries/LiquidCrystal/src/LiquidCrystal.h"
+#include "../libraries/NewLiquidCrystal_lib/LiquidCrystal.h"
 
 #endif
 
@@ -29,7 +29,8 @@ const uint8_t pinLed = 13;
 const uint8_t pinThermistor = A6;
 const uint8_t pinFanA = 10;//back fan
 const uint8_t pinFanB = 11;// ic fan
-
+const uint16_t editTimeout = 10000;
+const uint16_t holdTimeout = 400;
 unsigned long previousMillis = 0;
 volatile unsigned long currentLoops = 0;
 uint8_t heat;
@@ -89,7 +90,7 @@ void fansControl() {
 
     if (heat > 25) {
         analogWrite(pinFanB, (int) map(heat, 80, 120, 0, 255));
-        if (heat > 35) {
+        if (heat > 45) {
             analogWrite(pinFanA, (int) map(heat, 0, 120, 0, 255));
         }
         if (heat < 30) {
