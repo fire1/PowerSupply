@@ -7,12 +7,11 @@
 //#define DEBUG
 
 #include <Arduino.h>
-
 #include "lib/Controller.h"
 #include "lib/UserInterface.h"
 #include "PowerSupply.h"
 
-
+// https://bitbucket.org/fmalpartida/new-liquidcrystal/wiki/Home
 LiquidCrystal lcd(1, 0, 4, 7, 8, 9);
 
 RotaryEncoder ec(pinEncoderA, pinEncoderB);

@@ -315,10 +315,13 @@ private:
         }
 
         if (currentButton == 1 && !toggleSet) {
+
             toggleSet = true;
             openEdit = true;
+
             editVolt = false;
             editAmps = true;
+
             updateTimeout();
             currentButton = 0;
         }
