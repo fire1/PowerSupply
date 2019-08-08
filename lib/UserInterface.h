@@ -36,6 +36,22 @@
 
 
 uint8_t currentButton = 0;
+uint8_t holdCounter = 0;
+
+void driveHold(uint8_t button) {
+    if (currentButton != button && is350()) {
+        holdCounter++;
+        currentButton = 0; // clear old  button
+    }
+    if (holdCounter > 3) {
+        currentButton = button;
+        Serial.println();
+        Serial.print(F(" Button "));
+        Serial.print(button);
+        Serial.print(" held.");
+        Serial.println();
+    }
+}
 
 
 void btn1Click() {
@@ -46,10 +62,7 @@ void btn1Click() {
 }
 
 void btn1Hold() {
-//    if (currentButton != 11) {
-//        currentButton = 11;
-//        Serial.println(F("button 1 hold"));
-//    }
+    driveHold(11);
 }
 
 void btn2Click() {
@@ -60,10 +73,7 @@ void btn2Click() {
 }
 
 void btn2Hold() {
-    if (currentButton != 22) {
-        currentButton = 22;
-        Serial.println(F("button 2 held"));
-    }
+    driveHold(22);
 }
 
 void btn3Click() {
@@ -74,10 +84,7 @@ void btn3Click() {
 }
 
 void btn3Hold() {
-    if (currentButton != 33) {
-        currentButton = 33;
-        Serial.println(F("button 3 held"));
-    }
+    driveHold(33);
 }
 
 void btn4Click() {
@@ -88,10 +95,7 @@ void btn4Click() {
 }
 
 void btn4Hold() {
-    if (currentButton != 44) {
-        currentButton = 44;
-        Serial.println(F("button 4 held"));
-    }
+    driveHold(44);
 }
 
 void btn5Click() {
@@ -102,10 +106,7 @@ void btn5Click() {
 }
 
 void btn5Hold() {
-    if (currentButton != 55) {
-        currentButton = 55;
-        Serial.println(F("button 5 held"));
-    }
+    driveHold(55);
 }
 
 void btn6Click() {
@@ -116,10 +117,7 @@ void btn6Click() {
 }
 
 void btn6Hold() {
-    if (currentButton != 66) {
-        currentButton = 66;
-        Serial.println(F("button 5 held"));
-    }
+    driveHold(66);
 }
 
 
@@ -286,20 +284,20 @@ private:
 
     void updateTimeout() {
         if (timeout == 0)
-            timeout = currentMillis + 3000;
+            timeout = currentLoops + 3000;
     }
 
 
     void inputs() {
 
         changeValues();
-        if (currentMillis > timeout) {
+        if (currentLoops > timeout) {
             openEdit = false;
             editVolt = false;
             editAmps = false;
         }
 
-        if (currentMillis > debounce) {
+        if (currentLoops > debounce) {
 //            currentButton = 0;
         }
 
@@ -313,7 +311,6 @@ private:
             editVolt = true;
             editAmps = false;
             updateTimeout();
-            debounce = currentMillis + 220;
             currentButton = 0;
         }
 
@@ -323,11 +320,10 @@ private:
             editVolt = false;
             editAmps = true;
             updateTimeout();
-            debounce = currentMillis + 220;
             currentButton = 0;
         }
 
-        if (currentMillis > timeout && openEdit) {
+        if (currentLoops > timeout && openEdit) {
             editAmps = false;
             editVolt = false;
             openEdit = false;
@@ -345,14 +341,14 @@ private:
     void changeValues() {
         int direction = enc->getDirection();
         if (direction != 0) {
-            timeout = currentMillis + 2000;
+            timeout = currentLoops + 2000;
         }
 
-        if (editVolt) {
+        if (editVolt && is100()) {
             cnr->setVoltage(cnr->getTargetVolt() - direction);
         }
 
-        if (editAmps) {
+        if (editAmps && is100()) {
             cnr->setAmperage(cnr->getTargetAmps() - direction);
         }
     }

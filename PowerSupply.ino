@@ -4,14 +4,12 @@
  * version $Id$
  */
 
-#define DEBUG
+//#define DEBUG
 
 #include <Arduino.h>
 
 #include "lib/Controller.h"
 #include "lib/UserInterface.h"
-
-
 #include "PowerSupply.h"
 
 
@@ -37,8 +35,15 @@ void setup() {
     lcd.begin(20, 4);
 #endif
     ui.begin();
-    currentMillis = millis();
+    currentLoops = 0;
+
+
+    pinMode(pinFanA, OUTPUT);
+    pinMode(pinFanB, OUTPUT);
+    analogWrite(pinFanA, 0);
+    analogWrite(pinFanB, 0);
 }
+
 //
 void loop_() {
     analogWrite(pinFanA, 100);
@@ -48,23 +53,12 @@ void loop() {
     ui.listener();
     pw.manage();
     //Each screenRate value we print values on the LCD screen
-//    currentMillis = millis();
-    currentMillis++;
-    if (currentMillis - previousMillis >= screenRefresh) {
+//    currentLoops = millis();
+    currentLoops++;
+    if (currentLoops - previousMillis >= screenRefresh) {
         previousMillis += screenRefresh;
+        fansControl();
 
-        int rawTemp = analogRead(pinThermistor);
-        heat = map(rawTemp, 345, 460, 120, 70);
-
-        if (heat > 25) {
-            analogWrite(pinFanB, map(heat, 80, 120, 0, 255));
-            if (heat > 35) {
-                analogWrite(pinFanA, map(heat, 0, 120, 0, 255));
-            }
-        } else if (heat < 22) {
-            analogWrite(pinFanA, map(heat, 80, 120, 0, 0));
-            analogWrite(pinFanB, map(heat, 0, 120, 0, 0));
-        }
         digitalWrite(pinLed, HIGH);
 #ifdef DEBUG
         ui.debug();
