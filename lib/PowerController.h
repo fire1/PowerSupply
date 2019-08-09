@@ -9,6 +9,9 @@
 #include "../PowerSupply.h"
 
 
+ResponsiveAnalogRead rawVolt(pinVolt, true);
+ResponsiveAnalogRead rawAmps(pinAmps, true);
+
 class PowerController {
     volatile uint8_t index;
     volatile uint8_t offset;
@@ -54,32 +57,28 @@ class PowerController {
     }
 
     void sensVolts() {
-        dumpVolts = readVolts = analogRead(pinVolt);
+//        dumpVolts = readVolts = analogRead(pinVolt);
+        rawVolt.update();
+        dumpVolts = readVolts = rawVolt.getValue();
         // liveVolts = fmap(readVolts, 11, 379, 0.86, 10.5);
         liveVolts = map(readVolts, 140, 940, 411, 2700) * 0.01;
     }
 
-// 6.25
-// https://circuits4you.com/2016/05/13/dc-current-measurement-arduino/
-// V=I x R
-    void testAmps() {
-//        int refVolt = 940; // Max volt read as reference
-//        int refAmps = 550; // Max amps read as reference;
-//        testAmp = ((readVolts / refVolt) * (avrReadAmps / refAmps)) * 10;
+
+    void sensAmps() {
+        for (index = 0; index < 4; ++index) {
+//            avrReadAmps += analogRead(pinAmps);
+            rawAmps.update();
+        }
+//        dumpAmps = readAmps = avrReadAmps = avrReadAmps / 4;
+        dumpAmps = readAmps = avrReadAmps = rawAmps.getValue();
+
+
+
 
         float deflectVolt =
                 map((int) liveVolts, 0, 30, 935, 1196/*1036*/ /*11.96428*/) * 0.1; // deflection curve by voltage
         testAmp = readAmps * deflectVolt * 0.1;
-
-    }
-
-    void sensAmps() {
-        for (index = 0; index < 4; ++index) {
-            avrReadAmps += analogRead(pinAmps);
-            delayMicroseconds(1);
-        }
-        dumpAmps = readAmps = avrReadAmps = avrReadAmps / 4;
-        testAmps();
 
 
         if (readAmps < 30) {
@@ -150,30 +149,56 @@ public:
  */
     void setPwmFrequency(int pin, int divisor) {
         byte mode;
-        if(pin == 5 || pin == 6 || pin == 9 || pin == 10) {
-            switch(divisor) {
-                case 1: mode = 0x01; break;
-                case 8: mode = 0x02; break;
-                case 64: mode = 0x03; break;
-                case 256: mode = 0x04; break;
-                case 1024: mode = 0x05; break;
-                default: return;
+        if (pin == 5 || pin == 6 || pin == 9 || pin == 10) {
+            switch (divisor) {
+                case 1:
+                    mode = 0x01;
+                    break;
+                case 8:
+                    mode = 0x02;
+                    break;
+                case 64:
+                    mode = 0x03;
+                    break;
+                case 256:
+                    mode = 0x04;
+                    break;
+                case 1024:
+                    mode = 0x05;
+                    break;
+                default:
+                    return;
             }
-            if(pin == 5 || pin == 6) {
+            if (pin == 5 || pin == 6) {
                 TCCR0B = TCCR0B & 0b11111000 | mode;
             } else {
                 TCCR1B = TCCR1B & 0b11111000 | mode;
             }
-        } else if(pin == 3 || pin == 11) {
-            switch(divisor) {
-                case 1: mode = 0x01; break;
-                case 8: mode = 0x02; break;
-                case 32: mode = 0x03; break;
-                case 64: mode = 0x04; break;
-                case 128: mode = 0x05; break;
-                case 256: mode = 0x06; break;
-                case 1024: mode = 0x7; break;
-                default: return;
+        } else if (pin == 3 || pin == 11) {
+            switch (divisor) {
+                case 1:
+                    mode = 0x01;
+                    break;
+                case 8:
+                    mode = 0x02;
+                    break;
+                case 32:
+                    mode = 0x03;
+                    break;
+                case 64:
+                    mode = 0x04;
+                    break;
+                case 128:
+                    mode = 0x05;
+                    break;
+                case 256:
+                    mode = 0x06;
+                    break;
+                case 1024:
+                    mode = 0x7;
+                    break;
+                default:
+                    return;
             }
             TCCR2B = TCCR2B & 0b11111000 | mode;
         }
@@ -209,12 +234,12 @@ public:
     }
 
     void setVoltage(float value) {
-        if (value >= 0)
+        if (value >= 0 && value <= 26)
             targetVolt = value;
     }
 
     void setAmperage(float value) {
-        if (value >= 0)
+        if (value >= 0 && value <= 10)
             targetAmps = value;
     }
 

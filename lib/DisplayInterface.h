@@ -26,7 +26,7 @@
 
 class DisplayInterface {
 private:
-    boolean lcdTitles = false;
+
     boolean lcdBlinks = false;
     boolean editVolt = false;
     boolean editAmps = false;
@@ -41,7 +41,7 @@ private:
     void drawMain() {
 
         if (editAmps || editVolt) {
-            lcdTitles = false;
+            inp->setTitles(false);
         }
         editCursor = inp->isEditPosition();
         bool lcdTitles = inp->isTitles();

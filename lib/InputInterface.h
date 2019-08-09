@@ -130,6 +130,8 @@ private:
             timeout = currentLoops + editTimeout;
         }
 
+        //
+        // Todo check here
         float mlt = 1;
         editCursor = 0;
         if (currentButton == 11 && editVolt || currentButton == 11 && editAmps) {
@@ -180,6 +182,16 @@ public:
     boolean isTitles() {
         return lcdTitles;
     }
+
+    boolean isEditVolt() {
+        return editVolt;
+    }
+
+
+    boolean isEditAmps() {
+        return editAmps;
+    }
+
 /**
  *
  * @param state

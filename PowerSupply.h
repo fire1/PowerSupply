@@ -6,6 +6,14 @@
 #define POWER_SUPPLY_H
 
 #include <Arduino.h>
+#include <ResponsiveAnalogRead.h>
+
+#ifndef RESPONSIVE_ANALOG_READ_H
+
+#include "../libraries/ResponsiveAnalogRead/src/ResponsiveAnalogRead.h"
+
+#endif
+
 #include <LiquidCrystal.h>
 
 #ifndef LiquidCrystal_4bit_h
