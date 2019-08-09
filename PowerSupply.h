@@ -22,8 +22,6 @@
 
 #endif
 
-#define maxPwmControl 254
-#define minPwmControl 1
 
 //Inputs/outputs
 const uint8_t pinVolt = A1;
@@ -32,7 +30,7 @@ const uint8_t pinPWM = 5;
 const uint8_t pinEncoderB = 2;
 const uint8_t pinEncoderA = 3;
 const uint8_t pinAnalogBt = A3;
-const uint16_t screenRefresh = 350;
+const uint16_t screenRefresh = 110;
 const uint8_t pinLed = 13;
 const uint8_t pinThermistor = A6;
 const uint8_t pinFanA = 10;//back fan

@@ -28,9 +28,7 @@ class DisplayInterface {
 private:
 
     boolean lcdBlinks = false;
-    boolean editVolt = false;
-    boolean editAmps = false;
-    boolean editCursor = 0;
+
     unsigned long timeout;
     String valChar;
     LiquidCrystal *lcd;
@@ -39,11 +37,14 @@ private:
 
 
     void drawMain() {
+        boolean editVolt = inp->isEditVolt();
+        boolean editAmps = inp->isEditAmps();
+        boolean editCursor = inp->isEditPosition();
 
         if (editAmps || editVolt) {
             inp->setTitles(false);
         }
-        editCursor = inp->isEditPosition();
+
         bool lcdTitles = inp->isTitles();
         if (!lcdTitles || lcdBlinks) {
             lcd->clear();
@@ -79,13 +80,13 @@ private:
             lcdBlinks = !lcdBlinks;
         }
 
-        valChar = F("V");
+        valChar = F("V ");
         lcd->setCursor(14, 0);
         lcd->print(cnr->lcdVolt(), 2);
         lcd->print(valChar);
 
 
-        valChar = F("A");
+        valChar = F("A ");
         lcd->setCursor(14, 2);
         lcd->print(cnr->lcdAmps(), 3);
         lcd->print(valChar);
@@ -115,6 +116,7 @@ public:
     void begin() {
         lcd->createChar(0, charLinear);
         lcd->createChar(1, charSwitch);
+        lcd->noAutoscroll();
     }
 
 
@@ -146,11 +148,11 @@ public:
         Serial.print(F(" TMP: "));
         Serial.print(heat);
 
-        if (editAmps) {
+        if (inp->isEditAmps()) {
             Serial.print(F(" -> Edit AMP"));
         }
 
-        if (editVolt) {
+        if (inp->isEditAmps()) {
             Serial.print(F(" -> Edit VLT"));
         }
     }

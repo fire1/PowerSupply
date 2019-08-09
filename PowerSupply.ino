@@ -30,6 +30,7 @@ void interruptFunction() {
 
 // do not use 10/11
 void setup() {
+
     pw.begin();
 #ifdef DEBUG
     Serial.begin(115200);
@@ -65,7 +66,6 @@ void loop() {
 #else
         ui.draw();
 #endif
-        pw.manage();
     }
 
 }//end of void loop

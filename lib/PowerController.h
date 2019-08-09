@@ -16,7 +16,9 @@ class PowerController {
     volatile uint8_t index;
     volatile uint8_t offset;
     uint8_t pwmValue = 1;
-    float targetVolt = 3.3;
+    uint8_t maxPwmControl = 255;
+    uint8_t minPwmControl = 1;
+    float targetVolt = 3;
     float liveVolts = 0;
     float readVolts = 0;
     uint16_t avrReadAmps;
@@ -24,7 +26,7 @@ class PowerController {
     int dumpVolts, dumpAmps;
     int readAmps = 0;
     double liveAmps = 0;
-    double targetAmps = 0.500;
+    double targetAmps = 0.200;
     double ampSmooth = 0;
 
     double testAmp;
@@ -33,6 +35,10 @@ class PowerController {
         pinMode(pinPWM, OUTPUT);
         //---------------------------------------------- Set PWM frequency for D5 & D6 -------------------------------
 
+        pinMode(3, OUTPUT); // Output pin for OCR2B
+        pinMode(5, OUTPUT); // Output pin for OCR0B
+
+//        TCCR0B = TCCR0B & 0b11111000 | 0x05;
         TCCR0B = TCCR0B & B11111000 | B00000001;    // set timer 0 divisor to     1 for PWM frequency of 62500.00 Hz
 //    TCCR0B = TCCR0B & B11111000 | B00000010;    // set timer 0 divisor to     8 for PWM frequency of  7812.50 Hz
 //    TCCR0B = TCCR0B & B11111000 | B00000011;    // set timer 0 divisor to    64 for PWM frequency of   976.56 Hz
@@ -41,7 +47,7 @@ class PowerController {
 
         //---------------------------------------------- Set PWM frequency for D3 & D11 ------------------------------
 
-//    TCCR2B = TCCR2B & B11111000 | B00000001;    // set timer 2 divisor to     1 for PWM frequency of 31372.55 Hz
+        TCCR2B = TCCR2B & B11111000 | B00000001;    // set timer 2 divisor to     1 for PWM frequency of 31372.55 Hz
 //TCCR2B = TCCR2B & B11111000 | B00000010;    // set timer 2 divisor to     8 for PWM frequency of  3921.16 Hz
 //TCCR2B = TCCR2B & B11111000 | B00000011;    // set timer 2 divisor to    32 for PWM frequency of   980.39 Hz
 //    TCCR2B = TCCR2B & B11111000 | B00000100;    // set timer 2 divisor to    64 for PWM frequency of   490.20 Hz (The DEFAULT)
@@ -51,33 +57,31 @@ class PowerController {
 
 
         //---------------------------------------------- Set PWM frequency for D9 & D10 ------------------------------
-//        TCCR1B = TCCR1B & B11111000 | B00000010;    // set timer 1 divisor to     8 for PWM frequency of  3921.16 Hz
+        TCCR1B = TCCR1B & B11111000 | B00000010;    // set timer 1 divisor to     8 for PWM frequency of  3921.16 Hz
 //        TCCR1B = TCCR1B & B11111000 | B00000101;    // set timer 1 divisor to  1024 for PWM frequency of    30.64 Hz
 //        TCCR1B = TCCR1B & B11111000 | B00000010;    // set timer 1 divisor to     8 for PWM frequency of  3921.16 Hz
     }
 
+
+    void readValues() {
+        for (index = 0; index < 10; ++index) {
+            rawVolt.update();
+            rawAmps.update();
+            delayMicroseconds(1);
+        }
+    }
+
     void sensVolts() {
-//        dumpVolts = readVolts = analogRead(pinVolt);
-        rawVolt.update();
+        readValues();
         dumpVolts = readVolts = rawVolt.getValue();
-        // liveVolts = fmap(readVolts, 11, 379, 0.86, 10.5);
         liveVolts = map(readVolts, 140, 940, 411, 2700) * 0.01;
     }
 
 
     void sensAmps() {
-        for (index = 0; index < 4; ++index) {
-//            avrReadAmps += analogRead(pinAmps);
-            rawAmps.update();
-        }
-//        dumpAmps = readAmps = avrReadAmps = avrReadAmps / 4;
         dumpAmps = readAmps = avrReadAmps = rawAmps.getValue();
 
-
-
-
-        float deflectVolt =
-                map((int) liveVolts, 0, 30, 935, 1196/*1036*/ /*11.96428*/) * 0.1; // deflection curve by voltage
+        float deflectVolt = map((int) liveVolts, 0, 30, 935, 1196) * 0.1; // deflection curve by voltage
         testAmp = readAmps * deflectVolt * 0.1;
 
 
@@ -96,20 +100,11 @@ class PowerController {
 
     uint8_t lastPwm = 0;
 
+/**
+ *
+ * @param pwm
+ */
     void setPwm(uint8_t pwm) {
-
-        if (lastPwm == pwm && pwm == maxPwmControl) {
-//        pwm -=1;
-        }
-
-        uint8_t compensate = 0;
-        if (targetVolt > (liveVolts - 2) && pwm == maxPwmControl && lastPwm == pwm) {
-            compensate = 0;
-        }
-
-        if (targetVolt <= (liveVolts + 1)) {
-//        pwmValue--;
-        }
         lastPwm = pwm;
         analogWrite(pinPWM, pwm);
     }
