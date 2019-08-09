@@ -124,6 +124,7 @@ class PowerController {
                 pwmValue = pwmValue + 1;
                 pwmValue = constrain(pwmValue, minPwmControl, maxPwmControl);
             }
+
             //If set voltage is lower than real value from feedback, we increase PWM width till we get same value
             if (targetVolt < liveVolts) {
                 //When we increase PWM width, the voltage gets lower at the output.
@@ -215,11 +216,12 @@ public:
         if ((liveVolts > targetVolt + 1 || liveVolts < targetVolt - 1)) {
             offset = 0;
             while (liveVolts > targetVolt + 1 && liveVolts < targetVolt - 1 && offset < 228) {
-                sensVolts();
+
                 parsePwm();
+                sensVolts();
                 setPwm(pwmValue);
                 digitalWrite(pinLed, HIGH);
-                delayMicroseconds(10);
+                delayMicroseconds(3);
                 offset++;
             }
         }
