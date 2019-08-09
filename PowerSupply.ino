@@ -9,7 +9,9 @@
 #include <Arduino.h>
 #include "lib/Controller.h"
 #include "lib/UserInterface.h"
+#include "lib/InputInterface.h"
 #include "PowerSupply.h"
+
 
 // https://bitbucket.org/fmalpartida/new-liquidcrystal/wiki/Home
 LiquidCrystal lcd(1, 0, 4, 7, 8, 9);
@@ -17,7 +19,8 @@ LiquidCrystal lcd(1, 0, 4, 7, 8, 9);
 RotaryEncoder ec(pinEncoderA, pinEncoderB);
 AnalogButtons ab(pinAnalogBt, INPUT, 10);
 Controller pw;
-UserInterface ui(lcd, pw, ec, ab);
+InputInterface in(pw, ec, ab);
+UserInterface ui(lcd, pw, in);
 
 
 void interruptFunction() {
@@ -33,6 +36,7 @@ void setup() {
 #else
     lcd.begin(20, 4);
 #endif
+    in.begin();
     ui.begin();
     currentLoops = 0;
 
@@ -49,21 +53,19 @@ void loop_() {
 }
 
 void loop() {
-    ui.listener();
-    pw.manage();
-    //Each screenRate value we print values on the LCD screen
-//    currentLoops = millis();
     currentLoops++;
+    in.listen();
+    pw.manage();
     if (currentLoops - previousMillis >= screenRefresh) {
         previousMillis += screenRefresh;
         fansControl();
-
         digitalWrite(pinLed, HIGH);
 #ifdef DEBUG
         ui.debug();
 #else
         ui.draw();
 #endif
+        pw.manage();
     }
 
 }//end of void loop

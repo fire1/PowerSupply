@@ -49,7 +49,7 @@ class Controller {
 
         //---------------------------------------------- Set PWM frequency for D9 & D10 ------------------------------
 //        TCCR1B = TCCR1B & B11111000 | B00000010;    // set timer 1 divisor to     8 for PWM frequency of  3921.16 Hz
-        TCCR1B = TCCR1B & B11111000 | B00000101;    // set timer 1 divisor to  1024 for PWM frequency of    30.64 Hz
+//        TCCR1B = TCCR1B & B11111000 | B00000101;    // set timer 1 divisor to  1024 for PWM frequency of    30.64 Hz
 //        TCCR1B = TCCR1B & B11111000 | B00000010;    // set timer 1 divisor to     8 for PWM frequency of  3921.16 Hz
     }
 
@@ -143,10 +143,41 @@ class Controller {
     }
 
 public:
-
-//    Controller(const uint8_t pwm, const uint8_t inVolt, const uint8_t inAmps,){
-//
-//    }
+/**
+ *
+ * @param pin
+ * @param divisor
+ */
+    void setPwmFrequency(int pin, int divisor) {
+        byte mode;
+        if(pin == 5 || pin == 6 || pin == 9 || pin == 10) {
+            switch(divisor) {
+                case 1: mode = 0x01; break;
+                case 8: mode = 0x02; break;
+                case 64: mode = 0x03; break;
+                case 256: mode = 0x04; break;
+                case 1024: mode = 0x05; break;
+                default: return;
+            }
+            if(pin == 5 || pin == 6) {
+                TCCR0B = TCCR0B & 0b11111000 | mode;
+            } else {
+                TCCR1B = TCCR1B & 0b11111000 | mode;
+            }
+        } else if(pin == 3 || pin == 11) {
+            switch(divisor) {
+                case 1: mode = 0x01; break;
+                case 8: mode = 0x02; break;
+                case 32: mode = 0x03; break;
+                case 64: mode = 0x04; break;
+                case 128: mode = 0x05; break;
+                case 256: mode = 0x06; break;
+                case 1024: mode = 0x7; break;
+                default: return;
+            }
+            TCCR2B = TCCR2B & 0b11111000 | mode;
+        }
+    }
 
     void begin() {
         setupPwm();
