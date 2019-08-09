@@ -7,8 +7,8 @@
 //#define DEBUG
 
 #include <Arduino.h>
-#include "lib/Controller.h"
-#include "lib/UserInterface.h"
+#include "lib/PowerController.h"
+#include "lib/DisplayInterface.h"
 #include "lib/InputInterface.h"
 #include "PowerSupply.h"
 
@@ -18,9 +18,9 @@ LiquidCrystal lcd(1, 0, 4, 7, 8, 9);
 
 RotaryEncoder ec(pinEncoderA, pinEncoderB);
 AnalogButtons ab(pinAnalogBt, INPUT, 10);
-Controller pw;
+PowerController pw;
 InputInterface in(pw, ec, ab);
-UserInterface ui(lcd, pw, in);
+DisplayInterface ui(lcd, pw, in);
 
 
 void interruptFunction() {

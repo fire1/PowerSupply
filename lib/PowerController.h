@@ -9,7 +9,7 @@
 #include "../PowerSupply.h"
 
 
-class Controller {
+class PowerController {
     volatile uint8_t index;
     volatile uint8_t offset;
     uint8_t pwmValue = 1;

@@ -11,7 +11,7 @@
 #include "../PowerSupply.h"
 
 
-#include "Controller.h"
+#include "PowerController.h"
 #include "InputInterface.h"
 
 
@@ -24,7 +24,7 @@
 #endif
 
 
-class UserInterface {
+class DisplayInterface {
 private:
     boolean lcdTitles = false;
     boolean lcdBlinks = false;
@@ -34,7 +34,7 @@ private:
     unsigned long timeout;
     String valChar;
     LiquidCrystal *lcd;
-    Controller *cnr;
+    PowerController *cnr;
     InputInterface *inp;
 
 
@@ -105,7 +105,7 @@ public:
      * @param ec
      * @param bt
      */
-    UserInterface(LiquidCrystal &lc, Controller &cn, InputInterface &in) : lcd(&lc), cnr(&cn), inp(&in) {}
+    DisplayInterface(LiquidCrystal &lc, PowerController &cn, InputInterface &in) : lcd(&lc), cnr(&cn), inp(&in) {}
 
     void draw() {
         drawMain();

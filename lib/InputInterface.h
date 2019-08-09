@@ -7,7 +7,7 @@
 
 #include <Arduino.h>
 #include "../PowerSupply.h"
-#include "Controller.h"
+#include "PowerController.h"
 #include <EnableInterrupt.h>
 
 #ifndef EnableInterrupt_h
@@ -45,7 +45,7 @@ class InputInterface {
     boolean editCursor = 0;
     uint8_t lastPress = 0;
     unsigned long timeout, debounce;
-    Controller *cnr;
+    PowerController *cnr;
     AnalogButtons *abt;
     RotaryEncoder *enc;
 
@@ -148,7 +148,7 @@ private:
 
 public:
 
-    InputInterface(Controller &cn, RotaryEncoder &ec, AnalogButtons &bt) : cnr(&cn), enc(&ec), abt(&bt) {}
+    InputInterface(PowerController &cn, RotaryEncoder &ec, AnalogButtons &bt) : cnr(&cn), enc(&ec), abt(&bt) {}
 
     void begin() {
 
