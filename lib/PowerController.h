@@ -12,7 +12,27 @@
 ResponsiveAnalogRead rawVolt(pinVolt, true);
 ResponsiveAnalogRead rawAmps(pinAmps, true);
 
+//  pwm     / volt
+//
+//  100         26
+//  62          25
+//  61          21
+//  60          18
+//  59          17.4
+//  57          16.1
+//  56          14.6
+//  54          13.1
+//  53          12.3
+//  52          11
+//  50          8.6
+//  49          7
+//  47          5.6
+//  46          4.8
+//  45          4.1
+//  44          3.2
+
 class PowerController {
+    boolean isParse = true;
     volatile uint8_t index;
     volatile uint8_t offset;
     uint8_t pwmValue = 1;
@@ -111,6 +131,7 @@ class PowerController {
 
 
     void parsePwm() {
+        if(!isParse) return;
         //If the set current value is higher than the feedback current value, we make normal control of output voltage
         if (liveAmps < targetAmps) {
             //Now, if set voltage is higher than real value from feedback, we decrease PWM width till we get same value
@@ -121,7 +142,7 @@ class PowerController {
             }
 
             //If set voltage is lower than real value from feedback, we increase PWM width till we get same value
-            if (targetVolt < liveVolts) {
+            if (targetVolt < liveVolts - 0.2) {
                 //When we increase PWM width, the voltage gets lower at the output.
                 pwmValue = pwmValue - 1;
                 pwmValue = constrain(pwmValue, minPwmControl, maxPwmControl);
@@ -240,12 +261,24 @@ public:
             targetAmps = value;
     }
 
+/**
+ *
+ * @param value
+ */
+    void setPWM(uint8_t value) {
+        pwmValue = value;
+    }
+
     float getLiveVolt() {
         return liveVolts;
     }
 
     float getLiveAmps() {
         return liveAmps;
+    }
+
+    void setParse(boolean is){
+        isParse = is;
     }
 
     int getDumpVolt() {

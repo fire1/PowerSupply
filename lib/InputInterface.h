@@ -60,6 +60,7 @@ private:
         if (Serial.available()) {
             String where = Serial.readStringUntil('=');
             if (where == F("v")) {
+                cnr->setParse(true);
                 cnr->setVoltage(Serial.readStringUntil('\n').toFloat());
                 Serial.println();
                 Serial.print(F("VOLTAGE: "));
@@ -67,7 +68,17 @@ private:
                 Serial.println();
             }
 
+            if (where == F("p")) {
+                cnr->setParse(false);
+                cnr->setPWM(Serial.readStringUntil('\n').toInt());
+                Serial.println();
+                Serial.print(F("PWM: "));
+                Serial.print(cnr->getPwmValue());
+                Serial.println();
+            }
+
             if (where == F("a")) {
+                cnr->setParse(true);
                 cnr->setAmperage(Serial.readStringUntil('\n').toFloat());
                 Serial.println();
                 Serial.print(F("CURRENT: "));
