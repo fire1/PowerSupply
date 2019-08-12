@@ -60,7 +60,7 @@ private:
         if (Serial.available()) {
             String where = Serial.readStringUntil('=');
             if (where == F("v")) {
-                cnr->setParse(true);
+                cnr->useParse(true);
                 cnr->setVoltage(Serial.readStringUntil('\n').toFloat());
                 Serial.println();
                 Serial.print(F("VOLTAGE: "));
@@ -69,7 +69,7 @@ private:
             }
 
             if (where == F("p")) {
-                cnr->setParse(false);
+                cnr->useParse(false);
                 cnr->setPWM(Serial.readStringUntil('\n').toInt());
                 Serial.println();
                 Serial.print(F("PWM: "));
@@ -78,7 +78,7 @@ private:
             }
 
             if (where == F("a")) {
-                cnr->setParse(true);
+                cnr->useParse(true);
                 cnr->setAmperage(Serial.readStringUntil('\n').toFloat());
                 Serial.println();
                 Serial.print(F("CURRENT: "));
@@ -87,6 +87,38 @@ private:
             }
         }
     }
+
+    void rotaryButton() {
+        if (currentButton == 1 && !toggleSet) {
+            toggleSet = true;
+            openEdit = true;
+            editVolt = true;
+            editAmps = false;
+            updateTimeout();
+            currentButton = 0;
+        }
+        if (currentButton == 1 && toggleSet) {
+            toggleSet = false;
+            openEdit = true;
+            editVolt = false;
+            editAmps = true;
+            updateTimeout();
+            currentButton = 0;
+        }
+        if (currentLoops > timeout && openEdit) {
+            editAmps = false;
+            editVolt = false;
+            openEdit = false;
+            lcdTitles = false;
+            timeout = 0;
+        }
+    }
+
+    void pwmMudeButton() {
+        if (currentButton == 2)
+            cnr->togglePwmMode();
+    }
+
 
     void inputs() {
 
@@ -101,36 +133,12 @@ private:
         lastPress = currentButton;
 
         //
-        // Open menu and edit voltages
-        if (currentButton == 1 && !toggleSet) {
-            toggleSet = true;
-            openEdit = true;
-            editVolt = true;
-            editAmps = false;
-            updateTimeout();
-            currentButton = 0;
-        }
+        // Open  edit voltages/amperage
+        rotaryButton();
 
-        if (currentButton == 1 && toggleSet) {
-            toggleSet = false;
-            openEdit = true;
-            editVolt = false;
-            editAmps = true;
-            updateTimeout();
-            currentButton = 0;
-        }
-
-        if (currentLoops > timeout && openEdit) {
-            editAmps = false;
-            editVolt = false;
-            openEdit = false;
-            lcdTitles = false;
-            timeout = 0;
-        }
 
         if (openEdit) {
             lcdTitles = true;
-
         }
 
     }

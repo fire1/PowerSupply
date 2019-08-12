@@ -31,17 +31,29 @@ ResponsiveAnalogRead rawAmps(pinAmps, true);
 //  45          4.1
 //  44          3.2
 
+#ifndef maxPwmValue
+#define maxPwmValue  255;
+#endif
+
+#ifndef minPwmValue
+#define minPwmValue 1
+#endif
+
 class PowerController {
-    boolean isParse = true;
+
+    const static uint8_t voltIndex = 26;
+    boolean activeParse = true;
+    boolean activeTable = true;
     volatile uint8_t index;
     volatile uint8_t offset;
+    uint8_t powerMode = 0; // liner, power switching, limited switching
     uint8_t pwmValue = 1;
-    uint8_t maxPwmControl = 255;
-    uint8_t minPwmControl = 1;
+    uint8_t maxPwmControl = maxPwmValue;
+    uint8_t minPwmControl = minPwmValue;
+    uint8_t lastTrVoltage = 0;
     float targetVolt = 3;
     float liveVolts = 0;
     float readVolts = 0;
-    uint16_t avrReadAmps;
     uint32_t ampSmoothIndex;
     int dumpVolts, dumpAmps;
     int readAmps = 0;
@@ -50,6 +62,10 @@ class PowerController {
     double ampSmooth = 0;
 
     double testAmp;
+    // Pwm table for voltage
+    uint8_t voltTable[voltIndex] = {
+            100, 62, 62, 62, 62, 61, 61, 61, 60, 59, 57, 57, 56, 54, 53, 52, 51, 51, 50, 49, 48, 47, 45, 44, 40, 30
+    };
 
     void setupPwm() {
         pinMode(pinPWM, OUTPUT);
@@ -99,8 +115,7 @@ class PowerController {
 
 
     void sensAmps() {
-        dumpAmps = readAmps = avrReadAmps = rawAmps.getValue();
-
+        dumpAmps = readAmps = rawAmps.getValue();
         float deflectVolt = map((int) liveVolts, 0, 30, 935, 1196) * 0.1; // deflection curve by voltage
         testAmp = readAmps * deflectVolt * 0.1;
 
@@ -120,6 +135,16 @@ class PowerController {
 
     uint8_t lastPwm = 0;
 
+
+    void resolveMaxPwmValue() {
+        if (lastTrVoltage != targetVolt && activeTable) {
+            maxPwmControl = voltTable[uint8_t(targetVolt)];
+        } else if (!activeTable) {
+            maxPwmControl = maxPwmValue;
+        }
+        lastTrVoltage = uint8_t(targetVolt);
+    }
+
 /**
  *
  * @param pwm
@@ -130,8 +155,9 @@ class PowerController {
     }
 
 
-    void parsePwm() {
-        if(!isParse) return;
+    void parsePwmSwitching() {
+        if (!activeParse) return;
+        resolveMaxPwmValue();
         //If the set current value is higher than the feedback current value, we make normal control of output voltage
         if (liveAmps < targetAmps) {
             //Now, if set voltage is higher than real value from feedback, we decrease PWM width till we get same value
@@ -233,7 +259,7 @@ public:
             offset = 0;
             while (liveVolts > targetVolt + 1 && liveVolts < targetVolt - 1 && offset < 228) {
 
-                parsePwm();
+                parsePwmSwitching();
                 sensVolts();
                 setPwm(pwmValue);
                 digitalWrite(pinLed, HIGH);
@@ -243,7 +269,7 @@ public:
         }
 
         digitalWrite(pinLed, LOW);
-        parsePwm();
+        parsePwmSwitching();
         pinMode(pinVolt, INPUT);
         pinMode(pinAmps, INPUT);
         pinMode(pinLed, OUTPUT);
@@ -277,9 +303,15 @@ public:
         return liveAmps;
     }
 
-    void setParse(boolean is){
-        isParse = is;
+    void useParse(boolean active) {
+        activeParse = active;
     }
+
+
+    void togglePwmMode() {
+        this->activeTable = !this->activeTable;
+    }
+
 
     int getDumpVolt() {
         return dumpVolts;
