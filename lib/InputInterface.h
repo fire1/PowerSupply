@@ -114,9 +114,11 @@ private:
         }
     }
 
-    void pwmMudeButton() {
-        if (currentButton == 2)
+    void pwmModeButton() {
+        if (currentButton == 2) {
             cnr->togglePwmMode();
+            lcdTitles = false;
+        }
     }
 
 
@@ -136,6 +138,7 @@ private:
         // Open  edit voltages/amperage
         rotaryButton();
 
+        pwmModeButton();
 
         if (openEdit) {
             lcdTitles = true;

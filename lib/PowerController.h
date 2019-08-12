@@ -42,10 +42,11 @@ ResponsiveAnalogRead rawAmps(pinAmps, true);
 
 class PowerController {
 
+
     boolean activeParse = true;
     boolean activeTable = true;
     boolean activeLinear = false;
-    const static uint8_t voltIndex = 26;
+    const static uint8_t voltIndex = 27;
     volatile uint8_t index;
     volatile uint8_t offset;
     uint8_t powerMode = 0; // liner, power switching, limited switching
@@ -66,8 +67,11 @@ class PowerController {
     double testAmp;
     // Pwm table for voltage
     uint8_t voltTable[voltIndex] = {
-            100, 62, 62, 62, 62, 61, 61, 61, 60, 59, 57, 57, 56, 54, 53, 52, 51, 51, 50, 49, 48, 47, 45, 44, 40, 30
+            //100, 62, 62, 62, 62, 61, 61, 61, 60, 59, 57, 57, 56, 54, 53, 52, 51, 51, 50, 49, 48, 47, 45, 44, 40, 30
+            30, 40, 42, 44, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 61, 61, 61, 61, 62, 62, 62
+//          0    1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  16  17  18  19  20  21  22  23  24  25  26
     };
+
 
     void setupPwm() {
         pinMode(pinPWM, OUTPUT);
@@ -139,8 +143,9 @@ class PowerController {
 
 
     void resolveMaxPwmValue() {
-        if (lastTrVoltage != targetVolt && activeTable) {
+        if (activeTable) {
             maxPwmControl = voltTable[uint8_t(targetVolt)];
+
         } else if (!activeTable) {
             maxPwmControl = maxPwmValue;
         }
@@ -149,13 +154,13 @@ class PowerController {
 
     void resolvePowerMode() {
         if (activeTable) {
-            powerMode = 0;
+            powerMode = PowerController::MODE_SWT_LM;
         }
         if (!activeTable) {
-            powerMode = 1;
+            powerMode = PowerController::MODE_SWT_PW;
         }
         if (activeLinear) {
-            powerMode = 2;
+            powerMode = PowerController::MODE_LIN_PW;
         }
     }
 
@@ -199,6 +204,12 @@ class PowerController {
     }
 
 public:
+
+    static const uint8_t MODE_SWT_PW = 0;
+    static const uint8_t MODE_SWT_LM = 1;
+    static const uint8_t MODE_LIN_PW = 2;
+    static const uint8_t MODE_LIN_LM = 3;
+
 /**
  *
  * @param pin
@@ -268,7 +279,7 @@ public:
     void manage() {
         sensVolts();
         sensAmps();
-
+        resolvePowerMode();
         if ((liveVolts > targetVolt + 1 || liveVolts < targetVolt - 1)) {
             offset = 0;
             while (liveVolts > targetVolt + 1 && liveVolts < targetVolt - 1 && offset < 228) {

@@ -36,6 +36,25 @@ private:
     InputInterface *inp;
 
 
+    void powerMode() {
+        lcd->setCursor(19, 4);
+        switch (cnr->getPowerMode()) {
+            default:
+            case PowerController::MODE_SWT_PW :
+                lcd->write((byte) 1);
+                break;
+            case PowerController::MODE_SWT_LM :
+                lcd->write((byte) 2);
+                break;
+            case PowerController::MODE_LIN_PW :
+                lcd->write((byte) 0);
+                break;
+            case PowerController::MODE_LIN_LM :
+                lcd->write((byte) 0);
+                break;
+        }
+    }
+
     void drawMain() {
         boolean editVolt = inp->isEditVolt();
         boolean editAmps = inp->isEditAmps();
@@ -60,8 +79,8 @@ private:
             lcd->setCursor(1, 2);
             lcd->print(F("CURRENT"));
 
-            lcd->setCursor(10, 0);
-//            (powerMode) ? lcd->write((byte) 1) : lcd->write((byte) 0); // or 0
+
+            powerMode();
 
             if (editAmps && lcdBlinks) {
                 lcd->setCursor(editCursor, 3);
@@ -78,12 +97,15 @@ private:
             lcd->print(cnr->getTargetVolt(), 2);
             lcd->print(valChar);
             lcdBlinks = !lcdBlinks;
+
         }
 
         valChar = F("V ");
         lcd->setCursor(14, 0);
         lcd->print(cnr->lcdVolt(), 2);
         lcd->print(valChar);
+//        lcd->setCursor(13, 3);
+//        lcd->print(cnr->getPwmValue());
 
 
         valChar = F("A ");
