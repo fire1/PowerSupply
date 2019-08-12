@@ -39,11 +39,13 @@ ResponsiveAnalogRead rawAmps(pinAmps, true);
 #define minPwmValue 1
 #endif
 
+
 class PowerController {
 
-    const static uint8_t voltIndex = 26;
     boolean activeParse = true;
     boolean activeTable = true;
+    boolean activeLinear = false;
+    const static uint8_t voltIndex = 26;
     volatile uint8_t index;
     volatile uint8_t offset;
     uint8_t powerMode = 0; // liner, power switching, limited switching
@@ -143,6 +145,18 @@ class PowerController {
             maxPwmControl = maxPwmValue;
         }
         lastTrVoltage = uint8_t(targetVolt);
+    }
+
+    void resolvePowerMode() {
+        if (activeTable) {
+            powerMode = 0;
+        }
+        if (!activeTable) {
+            powerMode = 1;
+        }
+        if (activeLinear) {
+            powerMode = 2;
+        }
     }
 
 /**
@@ -345,6 +359,9 @@ public:
         return result;
     }
 
+    uint8_t getPowerMode() {
+        return powerMode;
+    }
 
     double testAmperage() {
         return testAmp;
