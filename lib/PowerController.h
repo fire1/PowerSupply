@@ -40,6 +40,38 @@ ResponsiveAnalogRead rawAmps(pinAmps, true);
 #endif
 
 
+#define avrGap 10
+
+uint8_t capMin, capMax, capAvr, capIndex = 0;
+uint8_t capContainer[100];
+
+void setToAvr(uint8_t val) {
+    capContainer[capIndex] = val;
+    capIndex++;
+
+    if (capIndex > 100) {
+        capIndex = 0;
+    }
+}
+
+
+// Print array elements greater than average
+void parseAvg(int arr[], int n) {
+    // Find average
+    double avg = 0;
+    for (int i = 0; i < n; i++)
+        avg += arr[i];
+    avg = avg / n;
+    capAvr = int(avg);
+
+    // Print elements greater than average
+    for (int i = 0; i < n; i++)
+        if (arr[i] >= avg - avrGap && arr[i] <= avg + avrGap) {
+            capMin = capMin > arr[i] ? arr[i] : capMin;
+            capMax = capMax < arr[i] ? arr[i] : capMax;
+        }
+}
+
 class PowerController {
 
 
@@ -174,10 +206,11 @@ class PowerController {
         pwmComtainer += pwm;
         pwmIndex++;
         lastPwm = pwm;
-        analogWrite(pinPWM, pwmComtainer / pwmIndex);
+        uint8_t avr = uint8_t(pwmComtainer / pwmIndex);
+        analogWrite(pinPWM, avr);
 
-        if (pwmIndex > 200) {
-            pwmComtainer = pwmComtainer / pwmIndex * 10;
+        if (pwmIndex > 100) {
+            pwmComtainer = avr * 10;
             pwmIndex = 10;
         }
     }
