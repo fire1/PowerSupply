@@ -69,7 +69,7 @@ private:
             lcd->clear();
 
             if (editVolt && lcdBlinks) {
-                lcd->setCursor(editCursor, 1);
+                lcd->setCursor(editCursor + 3, 1);
                 lcd->write(B01111110);
             }
 
@@ -83,17 +83,17 @@ private:
             powerMode();
 
             if (editAmps && lcdBlinks) {
-                lcd->setCursor(editCursor, 3);
+                lcd->setCursor(editCursor + 3, 3);
                 lcd->write(B01111110);
             }
 
             valChar = F("A");
-            lcd->setCursor(3, 3);
+            lcd->setCursor(6, 3);
             lcd->print(cnr->getTargetAmps(), 3);
             lcd->print(valChar);
 
             valChar = F("V");
-            lcd->setCursor(3, 1);
+            lcd->setCursor(6, 1);
             lcd->print(cnr->getTargetVolt(), 2);
             lcd->print(valChar);
             lcdBlinks = !lcdBlinks;

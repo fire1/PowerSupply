@@ -81,7 +81,7 @@ class PowerController {
     const static uint8_t voltIndex = 27;
     volatile uint8_t index;
     volatile uint8_t offset;
-    uint8_t powerMode = 0; // liner, power switching, limited switching
+    uint8_t powerMode = PowerController::MODE_SWT_PW; // liner, power switching, limited switching
     uint8_t pwmValue = 1;
     uint8_t maxPwmControl = maxPwmValue;
     uint8_t minPwmControl = minPwmValue;
@@ -138,18 +138,22 @@ class PowerController {
     }
 
 
+    float getVoltage(int raw) {
+        return map(raw, 140, 940, 411, 2700) * 0.01;
+    }
+
     void readValues() {
-        for (index = 0; index < 10; ++index) {
+        for (index = 0; index < 3; ++index) {
             rawVolt.update();
             rawAmps.update();
-            delayMicroseconds(1);
         }
     }
 
     void sensVolts() {
         readValues();
-        dumpVolts = readVolts = rawVolt.getValue();
-        liveVolts = map(readVolts, 140, 940, 411, 2700) * 0.01;
+        dumpVolts = readVolts = rawVolt.getRawValue();
+        liveVolts = this->getVoltage(readVolts);
+
     }
 
 
@@ -177,10 +181,10 @@ class PowerController {
 
     void resolveMaxPwmValue() {
         if (activeTable) {
-            maxPwmControl = voltTable[uint8_t(targetVolt)];
+//            maxPwmControl = voltTable[uint8_t(targetVolt)];
 
         } else if (!activeTable) {
-            maxPwmControl = maxPwmValue;
+//            maxPwmControl = maxPwmValue;
         }
         lastTrVoltage = uint8_t(targetVolt);
     }
@@ -206,13 +210,13 @@ class PowerController {
         pwmComtainer += pwm;
         pwmIndex++;
         lastPwm = pwm;
-        uint8_t avr = uint8_t(pwmComtainer / pwmIndex);
-        analogWrite(pinPWM, avr);
-
-        if (pwmIndex > 100) {
-            pwmComtainer = avr * 10;
-            pwmIndex = 10;
-        }
+//        uint8_t avr = uint8_t(pwmComtainer / pwmIndex);
+        analogWrite(pinPWM, pwm);
+//
+//        if (pwmIndex > 10) {
+//            pwmComtainer = avr * 2;
+//            pwmIndex = 2;
+//        }
     }
 
 
@@ -222,18 +226,17 @@ class PowerController {
         //If the set current value is higher than the feedback current value, we make normal control of output voltage
         if (liveAmps < targetAmps) {
             //Now, if set voltage is higher than real value from feedback, we decrease PWM width till we get same value
-            if (targetVolt > liveVolts) {
-                //When we decrease PWM width, the voltage gets higher at the output.
-                pwmValue = pwmValue + 1;
-                pwmValue = constrain(pwmValue, minPwmControl, maxPwmControl);
-            }
-
             //If set voltage is lower than real value from feedback, we increase PWM width till we get same value
             if (targetVolt < liveVolts) {
                 //When we increase PWM width, the voltage gets lower at the output.
                 pwmValue = pwmValue - 1;
                 pwmValue = constrain(pwmValue, minPwmControl, maxPwmControl);
+            } else if (targetVolt + 0.30 > liveVolts) {
+                //When we decrease PWM width, the voltage gets higher at the output.
+                pwmValue = pwmValue + 1;
+                pwmValue = constrain(pwmValue, minPwmControl, maxPwmControl);
             }
+
         }
 
         /*if the set current value is lower than the feedback current value, that means we need to lower the voltage at the output
@@ -330,7 +333,7 @@ public:
                 sensVolts();
                 setPwm(pwmValue);
                 digitalWrite(pinLed, HIGH);
-                delayMicroseconds(3);
+                delayMicroseconds(1);
                 offset++;
             }
         }
@@ -402,7 +405,7 @@ public:
 
 
     double lcdVolt() {
-        return liveVolts;
+        return getVoltage(rawVolt.getValue());
     }
 
     double lcdAmps() {
