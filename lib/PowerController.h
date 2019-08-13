@@ -64,10 +64,11 @@ class PowerController {
     double targetAmps = 0.200;
     double ampSmooth = 0;
 
-    double testAmp;
+    double captureAmp;
     // Pwm table for voltage
+    unsigned long pwmComtainer;
+    uint16_t pwmIndex;
     uint8_t voltTable[voltIndex] = {
-            //100, 62, 62, 62, 62, 61, 61, 61, 60, 59, 57, 57, 56, 54, 53, 52, 51, 51, 50, 49, 48, 47, 45, 44, 40, 30
             30, 40, 42, 44, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 61, 61, 61, 61, 62, 62, 62
 //          0    1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  16  17  18  19  20  21  22  23  24  25  26
     };
@@ -123,7 +124,7 @@ class PowerController {
     void sensAmps() {
         dumpAmps = readAmps = rawAmps.getValue();
         float deflectVolt = map((int) liveVolts, 0, 30, 935, 1196) * 0.1; // deflection curve by voltage
-        testAmp = readAmps * deflectVolt * 0.1;
+        captureAmp = readAmps * deflectVolt * 0.1;
 
 
         if (readAmps < 30) {
@@ -134,7 +135,7 @@ class PowerController {
             liveAmps = map(readAmps, 56, 550, 670, 5700);
         }
 //        liveAmps = liveAmps < 0 ? 0 : liveAmps * 0.001;
-        liveAmps = testAmp * 0.001;
+        liveAmps = captureAmp * 0.001;
         ampSmooth += liveAmps;
         ampSmoothIndex++;
     }
@@ -169,8 +170,16 @@ class PowerController {
  * @param pwm
  */
     void setPwm(uint8_t pwm) {
+
+        pwmComtainer += pwm;
+        pwmIndex++;
         lastPwm = pwm;
-        analogWrite(pinPWM, pwm);
+        analogWrite(pinPWM, pwmComtainer / pwmIndex);
+
+        if (pwmIndex > 200) {
+            pwmComtainer = pwmComtainer / pwmIndex * 10;
+            pwmIndex = 10;
+        }
     }
 
 
@@ -187,7 +196,7 @@ class PowerController {
             }
 
             //If set voltage is lower than real value from feedback, we increase PWM width till we get same value
-            if (targetVolt < liveVolts - 0.2) {
+            if (targetVolt < liveVolts) {
                 //When we increase PWM width, the voltage gets lower at the output.
                 pwmValue = pwmValue - 1;
                 pwmValue = constrain(pwmValue, minPwmControl, maxPwmControl);
@@ -375,7 +384,7 @@ public:
     }
 
     double testAmperage() {
-        return testAmp;
+        return captureAmp;
     }
 };
 
