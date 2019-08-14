@@ -39,46 +39,16 @@ ResponsiveAnalogRead rawAmps(pinAmps, true);
 #define minPwmValue 1
 #endif
 
+#ifndef pwmSwtCorrection
+#define pwmSwtCorrection 0.30
+#endif
 
-#define avrGap 10
-
-uint8_t capMin, capMax, capAvr, capIndex = 0;
-uint8_t capContainer[100];
-
-void setToAvr(uint8_t val) {
-    capContainer[capIndex] = val;
-    capIndex++;
-
-    if (capIndex > 100) {
-        capIndex = 0;
-    }
-}
-
-
-// Print array elements greater than average
-void parseAvg(int arr[], int n) {
-    // Find average
-    double avg = 0;
-    for (int i = 0; i < n; i++)
-        avg += arr[i];
-    avg = avg / n;
-    capAvr = int(avg);
-
-    // Print elements greater than average
-    for (int i = 0; i < n; i++)
-        if (arr[i] >= avg - avrGap && arr[i] <= avg + avrGap) {
-            capMin = capMin > arr[i] ? arr[i] : capMin;
-            capMax = capMax < arr[i] ? arr[i] : capMax;
-        }
-}
 
 class PowerController {
 
-
     boolean activeParse = true;
-    boolean activeTable = true;
-    boolean activeLinear = false;
-    const static uint8_t voltIndex = 27;
+    boolean isModeChange = true;
+    boolean isActiveLinear = false;
     volatile uint8_t index;
     volatile uint8_t offset;
     uint8_t powerMode = PowerController::MODE_SWT_PW; // liner, power switching, limited switching
@@ -89,21 +59,14 @@ class PowerController {
     float targetVolt = 3;
     float liveVolts = 0;
     float readVolts = 0;
+    float correctionValue = 0;
     uint32_t ampSmoothIndex;
     int dumpVolts, dumpAmps;
     int readAmps = 0;
     double liveAmps = 0;
     double targetAmps = 0.200;
     double ampSmooth = 0;
-
     double captureAmp;
-    // Pwm table for voltage
-    unsigned long pwmComtainer;
-    uint16_t pwmIndex;
-    uint8_t voltTable[voltIndex] = {
-            30, 40, 42, 44, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 61, 61, 61, 61, 62, 62, 62
-//          0    1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  16  17  18  19  20  21  22  23  24  25  26
-    };
 
 
     void setupPwm() {
@@ -138,7 +101,7 @@ class PowerController {
     }
 
 
-    float getVoltage(int raw) {
+    float toVoltage(int raw) {
         return map(raw, 140, 940, 411, 2700) * 0.01;
     }
 
@@ -152,7 +115,7 @@ class PowerController {
     void sensVolts() {
         readValues();
         dumpVolts = readVolts = rawVolt.getRawValue();
-        liveVolts = this->getVoltage(readVolts);
+        liveVolts = this->toVoltage(readVolts);
 
     }
 
@@ -180,23 +143,23 @@ class PowerController {
 
 
     void resolveMaxPwmValue() {
-        if (activeTable) {
+        if (isModeChange) {
 //            maxPwmControl = voltTable[uint8_t(targetVolt)];
 
-        } else if (!activeTable) {
+        } else if (!isModeChange) {
 //            maxPwmControl = maxPwmValue;
         }
         lastTrVoltage = uint8_t(targetVolt);
     }
 
     void resolvePowerMode() {
-        if (activeTable) {
+        if (isModeChange) {
             powerMode = PowerController::MODE_SWT_LM;
         }
-        if (!activeTable) {
+        if (!isModeChange) {
             powerMode = PowerController::MODE_SWT_PW;
         }
-        if (activeLinear) {
+        if (isActiveLinear) {
             powerMode = PowerController::MODE_LIN_PW;
         }
     }
@@ -206,43 +169,31 @@ class PowerController {
  * @param pwm
  */
     void setPwm(uint8_t pwm) {
-
-        pwmComtainer += pwm;
-        pwmIndex++;
         lastPwm = pwm;
-//        uint8_t avr = uint8_t(pwmComtainer / pwmIndex);
         analogWrite(pinPWM, pwm);
-//
-//        if (pwmIndex > 10) {
-//            pwmComtainer = avr * 2;
-//            pwmIndex = 2;
-//        }
     }
 
 
     void parsePwmSwitching() {
         if (!activeParse) return;
-        resolveMaxPwmValue();
-        //If the set current value is higher than the feedback current value, we make normal control of output voltage
+
         if (liveAmps < targetAmps) {
-            //Now, if set voltage is higher than real value from feedback, we decrease PWM width till we get same value
-            //If set voltage is lower than real value from feedback, we increase PWM width till we get same value
             if (targetVolt < liveVolts) {
-                //When we increase PWM width, the voltage gets lower at the output.
+                //
+                // Pump up voltage
                 pwmValue = pwmValue - 1;
                 pwmValue = constrain(pwmValue, minPwmControl, maxPwmControl);
-            } else if (targetVolt + 0.30 > liveVolts) {
-                //When we decrease PWM width, the voltage gets higher at the output.
+            } else if (targetVolt + correctionValue > liveVolts) {
+                //
+                // Lower the voltage
                 pwmValue = pwmValue + 1;
                 pwmValue = constrain(pwmValue, minPwmControl, maxPwmControl);
             }
-
         }
 
-        /*if the set current value is lower than the feedback current value, that means we need to lower the voltage at the output
-        in order to amintain the same current value*/
+        //
+        // Lower voltage at high amps limit
         if (liveAmps > targetAmps) {
-            //When we increase PWM width, the voltage gets lower at the output.
             pwmValue = pwmValue - 1;
             pwmValue = constrain(pwmValue, minPwmControl, maxPwmControl);
         }
@@ -379,7 +330,8 @@ public:
 
 
     void togglePwmMode() {
-        this->activeTable = !this->activeTable;
+        this->isModeChange = !this->isModeChange;
+        correctionValue = (isModeChange != 0) ? pwmSwtCorrection : correctionValue;
     }
 
 
@@ -405,7 +357,7 @@ public:
 
 
     double lcdVolt() {
-        return getVoltage(rawVolt.getValue());
+        return toVoltage(rawVolt.getValue());
     }
 
     double lcdAmps() {
@@ -423,7 +375,38 @@ public:
         return captureAmp;
     }
 };
+/*
+#define avrGap 10
 
+uint8_t capMin, capMax, capAvr, capIndex = 0;
+uint8_t capContainer[100];
+
+void setToAvr(uint8_t val) {
+    capContainer[capIndex] = val;
+    capIndex++;
+
+    if (capIndex > 100) {
+        capIndex = 0;
+    }
+}
+
+
+// Print array elements greater than average
+void parseAvg(int arr[], int n) {
+    // Find average
+    double avg = 0;
+    for (int i = 0; i < n; i++)
+        avg += arr[i];
+    avg = avg / n;
+    capAvr = int(avg);
+
+    // Print elements greater than average
+    for (int i = 0; i < n; i++)
+        if (arr[i] >= avg - avrGap && arr[i] <= avg + avrGap) {
+            capMin = capMin > arr[i] ? arr[i] : capMin;
+            capMax = capMax < arr[i] ? arr[i] : capMax;
+        }
+}*/
 
 #endif //POWERSUPPLY_FUNCTIONS_H
 
