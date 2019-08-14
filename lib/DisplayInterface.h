@@ -68,10 +68,6 @@ private:
         if (!lcdTitles || lcdBlinks) {
             lcd->clear();
 
-            if (editVolt && lcdBlinks) {
-                lcd->setCursor(editCursor + 3, 1);
-                lcd->write(B01111110);
-            }
 
             lcd->setCursor(1, 0);
             lcd->print(F("VOLTAGE"));
@@ -82,9 +78,19 @@ private:
 
             powerMode();
 
+            if (editVolt && lcdBlinks) {
+                lcd->setCursor(editCursor + 6, 1);
+//                lcd->write(B01111110);
+                lcd->cursor();
+            }
             if (editAmps && lcdBlinks) {
-                lcd->setCursor(editCursor + 3, 3);
-                lcd->write(B01111110);
+                lcd->setCursor(editCursor + 6, 3);
+//                lcd->write(B01111110);
+                lcd->cursor();
+            }
+
+            if (!lcdBlinks) {
+                lcd->noCursor();
             }
 
             valChar = F("A");
@@ -104,9 +110,6 @@ private:
         lcd->setCursor(14, 0);
         lcd->print(cnr->lcdVolt(), 2);
         lcd->print(valChar);
-//        lcd->setCursor(13, 3);
-//        lcd->print(cnr->getPwmValue());
-
 
         valChar = F("A ");
         lcd->setCursor(14, 2);
@@ -115,6 +118,7 @@ private:
 
         if (!lcdTitles) {
             inp->setTitles(true);
+            lcd->noCursor();
         }
 
 
