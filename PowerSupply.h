@@ -16,11 +16,7 @@
 
 #include <LiquidCrystal.h>
 
-#ifndef LiquidCrystal_4bit_h
 
-#include "../libraries/NewLiquidCrystal_lib/LiquidCrystal.h"
-
-#endif
 
 
 //Inputs/outputs

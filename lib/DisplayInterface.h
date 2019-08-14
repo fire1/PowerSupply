@@ -23,17 +23,16 @@
 
 #endif
 
+const char charV[2] = "V";
+const char charA[2] = "A";
 
 class DisplayInterface {
 private:
 
-    const char charV[3] = "V ";
-    const char charA[3] = "A ";
 
     boolean lcdBlinks = false;
 
     unsigned long timeout;
-    String valChar;
     LiquidCrystal *lcd;
     PowerController *cnr;
     InputInterface *inp;
@@ -54,7 +53,7 @@ private:
 
         dig2 /= 10;
 
-        sprintf(output, "%02d.%01d", dig1, dig2);
+        sprintf(output, "%02d.%02d", dig1, dig2);
     }
 
     void ampsFloat(float value, char *output) {
@@ -71,7 +70,7 @@ private:
         }
 
 
-        sprintf(output, "%01d.%02d", dig1, dig2);
+        sprintf(output, "%01d.%03d", dig1, dig2);
     }
 
 
@@ -117,35 +116,28 @@ private:
 
             powerMode();
 
-            if (editVolt && lcdBlinks) {
-                lcd->setCursor(editCursor + 6, 1);
-//                lcd->write(B01111110);
-                lcd->cursor();
-            }
-            if (editAmps && lcdBlinks) {
-                lcd->setCursor(editCursor + 6, 3);
-//                lcd->write(B01111110);
-                lcd->cursor();
-            }
 
-            if (!lcdBlinks) {
-                lcd->noCursor();
-            }
-
-
-            lcd->setCursor(6, 1);
+            lcd->setCursor(5, 1);
             voltFloat(cnr->getTargetVolt(), printValues);
             lcd->print(printValues);
+            if (editVolt)
+                lcd->cursor();
             lcd->print(charV);
 
-            lcd->setCursor(6, 3);
+            lcd->setCursor(5, 3);
             ampsFloat(cnr->getTargetAmps(), printValues);
+            if (editAmps)
+                lcd->cursor();
             lcd->print(printValues);
             lcd->print(charA);
 
             lcdBlinks = !lcdBlinks;
 
+        } else {
+            lcd->noCursor();
+            lcd->noBlink();
         }
+
 
         lcd->setCursor(14, 0);
         voltFloat(cnr->lcdVolt(), printValues);

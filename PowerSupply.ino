@@ -4,6 +4,7 @@
  * version $Id$
  */
 
+// TODO eep rom
 //#define DEBUG
 
 #include <Arduino.h>

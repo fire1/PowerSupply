@@ -127,7 +127,7 @@ class PowerController {
 
 
         if (readAmps < 30) {
-            liveAmps = map(readAmps, 19, 40, 120, 250);
+            liveAmps = map(readAmps, 19, 40, 140, 250);
         } else if (readAmps < 61) {
             liveAmps = map(readAmps, 20, 45, 205, 630);
         } else if (readAmps > 60) {
