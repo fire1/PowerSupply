@@ -4,8 +4,6 @@
  * version $Id$
  */
 
-// TODO
-// EEP ROM, Shutdown mode (when edit), Battery charge mode
 //#define DEBUG
 
 #include <Arduino.h>
