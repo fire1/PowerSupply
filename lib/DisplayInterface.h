@@ -27,6 +27,9 @@
 class DisplayInterface {
 private:
 
+    const char charV[3] = "V ";
+    const char charA[3] = "A ";
+
     boolean lcdBlinks = false;
 
     unsigned long timeout;
@@ -34,6 +37,42 @@ private:
     LiquidCrystal *lcd;
     PowerController *cnr;
     InputInterface *inp;
+
+
+    void voltFloat(float value, char *output) {
+
+        if (value < -99) {
+            value = -99;
+        }
+
+        int dig1 = int(value); // 210
+        int dig2 = int(int(value * 1000) - dig1 * 1000);
+
+        if (dig2 < 0) {
+            dig2 = dig2 * -1;
+        }
+
+        dig2 /= 10;
+
+        sprintf(output, "%02d.%01d", dig1, dig2);
+    }
+
+    void ampsFloat(float value, char *output) {
+
+        if (value < -99) {
+            value = -99;
+        }
+
+        int dig1 = int(value); // 210
+        int dig2 = int(int(value * 1000) - dig1 * 1000);
+
+        if (dig2 < 0) {
+            dig2 = dig2 * -1;
+        }
+
+
+        sprintf(output, "%01d.%02d", dig1, dig2);
+    }
 
 
     void powerMode() {
@@ -93,28 +132,31 @@ private:
                 lcd->noCursor();
             }
 
-            valChar = F("A");
-            lcd->setCursor(6, 3);
-            lcd->print(cnr->getTargetAmps(), 3);
-            lcd->print(valChar);
 
-            valChar = F("V");
             lcd->setCursor(6, 1);
-            lcd->print(cnr->getTargetVolt(), 2);
-            lcd->print(valChar);
+            voltFloat(cnr->getTargetVolt(), printValues);
+            lcd->print(printValues);
+            lcd->print(charV);
+
+            lcd->setCursor(6, 3);
+            ampsFloat(cnr->getTargetAmps(), printValues);
+            lcd->print(printValues);
+            lcd->print(charA);
+
             lcdBlinks = !lcdBlinks;
 
         }
 
-        valChar = F("V ");
         lcd->setCursor(14, 0);
-        lcd->print(cnr->lcdVolt(), 2);
-        lcd->print(valChar);
+        voltFloat(cnr->lcdVolt(), printValues);
+        lcd->print(printValues);
+        lcd->print(charV);
 
-        valChar = F("A ");
+
         lcd->setCursor(14, 2);
-        lcd->print(cnr->lcdAmps(), 3);
-        lcd->print(valChar);
+        ampsFloat(cnr->lcdAmps(), printValues);
+        lcd->print(printValues);
+        lcd->print(charA);
 
         if (!lcdTitles) {
             inp->setTitles(true);
