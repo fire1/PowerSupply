@@ -37,8 +37,14 @@ private:
     PowerController *cnr;
     InputInterface *inp;
 
-
-    void voltFloat(float value, char *output) {
+/**
+ *
+ * @param value
+ * @param output
+ * @param edit
+ * @param half
+ */
+    void voltFloat(float value, char *output, boolean edit = false, boolean half = false) {
 
         if (value < -99) {
             value = -99;
@@ -53,10 +59,24 @@ private:
 
         dig2 /= 10;
 
-        sprintf(output, "%02d.%02d", dig1, dig2);
-    }
 
-    void ampsFloat(float value, char *output) {
+
+        if (edit && half && lcdBlinks) {
+            sprintf(output, "%02d.  ", dig1);
+        } else if (edit && lcdBlinks) {
+            sprintf(output, "  .%02d", dig2);
+        } else {
+            sprintf(output, "%02d.%02d", dig1, dig2);
+        }
+    }
+/**
+ *
+ * @param value
+ * @param output
+ * @param edit
+ * @param half
+ */
+    void ampsFloat(float value, char *output, boolean edit = false, boolean half = false) {
 
         if (value < -99) {
             value = -99;
@@ -69,8 +89,14 @@ private:
             dig2 = dig2 * -1;
         }
 
+        if (edit && half && lcdBlinks) {
+            sprintf(output, "%01d.   ", dig1);
+        } else if (edit && lcdBlinks) {
+            sprintf(output, " .%03d", dig2);
+        } else {
+            sprintf(output, "%01d.%03d", dig1, dig2);
+        }
 
-        sprintf(output, "%01d.%03d", dig1, dig2);
     }
 
 
@@ -118,16 +144,12 @@ private:
 
 
             lcd->setCursor(5, 1);
-            voltFloat(cnr->getTargetVolt(), printValues);
+            voltFloat(cnr->getTargetVolt(), printValues, editVolt, editCursor);
             lcd->print(printValues);
-            if (editVolt)
-                lcd->cursor();
             lcd->print(charV);
 
             lcd->setCursor(5, 3);
-            ampsFloat(cnr->getTargetAmps(), printValues);
-            if (editAmps)
-                lcd->cursor();
+            ampsFloat(cnr->getTargetAmps(), printValues, editAmps, editCursor);
             lcd->print(printValues);
             lcd->print(charA);
 
