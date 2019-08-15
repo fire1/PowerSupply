@@ -143,7 +143,7 @@ class PowerController {
  */
     void setPwm(uint8_t pwm) {
         if (!isPowered) {
-            analogWrite(pinPWM, 255);
+            analogWrite(pinPWM, 0);
             return;
         }
         lastPwm = pwm;
@@ -293,7 +293,7 @@ public:
 
     void power(boolean state) {
         if (state) {
-            pwmValue = 255;
+            pwmValue = 15;
             isPowered = true;
         } else {
             isPowered = false;

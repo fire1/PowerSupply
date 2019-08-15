@@ -126,6 +126,12 @@ private:
         if (currentButton == 66) savePreset(3);
     }
 
+    void stopEditing() {
+        openEdit = false;
+        editVolt = false;
+        editAmps = false;
+    }
+
 /**
  * Rotary Encoder changes
  */
@@ -159,7 +165,7 @@ private:
     void pwmModeButton() {
         if (currentButton == 2) {
             if (lcdTitles) {
-                lcdTitles = false;
+                stopEditing();
                 cnr->power(1);
                 return;
             }
@@ -175,9 +181,7 @@ private:
 
         changeValues();
         if (currentLoops > timeout) {
-            openEdit = false;
-            editVolt = false;
-            editAmps = false;
+            stopEditing();
         }
 
 
@@ -191,6 +195,9 @@ private:
 
         if (openEdit) {
             lcdTitles = true;
+            fastScreen = true;
+        } else {
+            fastScreen = false;
         }
 
     }

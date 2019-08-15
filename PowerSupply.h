@@ -17,16 +17,16 @@
 #include <LiquidCrystal.h>
 
 
-
-
 //Inputs/outputs
+boolean fastScreen = false;
 const uint8_t pinVolt = A1;
 const uint8_t pinAmps = A0;
 const uint8_t pinPWM = 5;
 const uint8_t pinEncoderB = 2;
 const uint8_t pinEncoderA = 3;
 const uint8_t pinAnalogBt = A3;
-const uint16_t screenRefresh = 310;
+const uint16_t screenNormalRefresh = 310;
+const uint16_t screenEditorRefresh = 120;
 const uint8_t pinLed = 13;
 const uint8_t pinThermistor = A6;
 const uint8_t pinFanA = 10;//back fan

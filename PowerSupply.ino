@@ -59,8 +59,9 @@ void loop() {
     currentLoops++;
     in.listen();
     pw.manage();
-    if (currentLoops - previousMillis >= screenRefresh) {
-        previousMillis += screenRefresh;
+    if (currentLoops > previousMillis) {
+        previousMillis = currentLoops;
+        previousMillis += (fastScreen) ? screenEditorRefresh : screenNormalRefresh;
         fansControl();
         digitalWrite(pinLed, HIGH);
 #ifdef DEBUG
