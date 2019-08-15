@@ -129,9 +129,8 @@ private:
         }
 
         bool lcdTitles = inp->isTitles();
-        if (!lcdTitles || lcdBlinks) {
+        if (!lcdTitles || !lcdBlinks) {
             lcd->clear();
-
 
             lcd->setCursor(1, 0);
             lcd->print(F("VOLTAGE"));
@@ -141,7 +140,6 @@ private:
 
 
             powerMode();
-
 
             lcd->setCursor(5, 1);
             voltFloat(cnr->getTargetVolt(), printValues, editVolt, editCursor);
@@ -155,11 +153,7 @@ private:
 
             lcdBlinks = !lcdBlinks;
 
-        } else {
-            lcd->noCursor();
-            lcd->noBlink();
         }
-
 
         lcd->setCursor(14, 0);
         voltFloat(cnr->lcdVolt(), printValues);

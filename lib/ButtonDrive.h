@@ -19,12 +19,13 @@ uint8_t currentButton = 0;
 uint16_t holdCounter = 0;
 
 void driveHold(uint8_t button) {
-    if (currentButton != button && is350()) {
+    if (currentButton != button && is250()) {
         holdCounter++;
         currentButton = 0; // clear old  button
     }
     if (holdCounter > holdTimeout) {
         currentButton = button;
+        Serial.println();
         Serial.println();
         Serial.print(F(" Button "));
         Serial.print(button);

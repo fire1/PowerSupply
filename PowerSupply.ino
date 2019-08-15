@@ -7,6 +7,7 @@
 //#define DEBUG
 
 #include <Arduino.h>
+#include "lib/PresetMemory.h"
 #include "lib/PowerController.h"
 #include "lib/DisplayInterface.h"
 #include "lib/InputInterface.h"
@@ -18,8 +19,9 @@ LiquidCrystal lcd(1, 0, 4, 7, 8, 9);
 
 RotaryEncoder ec(pinEncoderA, pinEncoderB);
 AnalogButtons ab(pinAnalogBt, INPUT, 10);
+PresetMemory pm;
 PowerController pw;
-InputInterface in(pw, ec, ab);
+InputInterface in(pw, ec, ab, pm);
 DisplayInterface ui(lcd, pw, in);
 
 

@@ -49,13 +49,14 @@ class PowerController {
     boolean activeParse = true;
     boolean isModeChange = true;
     boolean isActiveLinear = false;
+    boolean isPowered = true;
     volatile uint8_t index;
     volatile uint8_t offset;
+    uint8_t lastPwm = 0;
     uint8_t powerMode = PowerController::MODE_SWT_PW; // liner, power switching, limited switching
     uint8_t pwmValue = 1;
     uint8_t maxPwmControl = maxPwmValue;
     uint8_t minPwmControl = minPwmValue;
-    uint8_t lastTrVoltage = 0;
     float targetVolt = 3;
     float liveVolts = 0;
     float readVolts = 0;
@@ -76,28 +77,12 @@ class PowerController {
         pinMode(3, OUTPUT); // Output pin for OCR2B
         pinMode(5, OUTPUT); // Output pin for OCR0B
 
-//        TCCR0B = TCCR0B & 0b11111000 | 0x05;
+        //---------------------------------------------- Set PWM frequency for D5 & D6 ------------------------------
         TCCR0B = TCCR0B & B11111000 | B00000001;    // set timer 0 divisor to     1 for PWM frequency of 62500.00 Hz
-//    TCCR0B = TCCR0B & B11111000 | B00000010;    // set timer 0 divisor to     8 for PWM frequency of  7812.50 Hz
-//    TCCR0B = TCCR0B & B11111000 | B00000011;    // set timer 0 divisor to    64 for PWM frequency of   976.56 Hz
-//TCCR0B = TCCR0B & B11111000 | B00000100;    // set timer 0 divisor to   256 for PWM frequency of   244.14 Hz
-//TCCR0B = TCCR0B & B11111000 | B00000101;    // set timer 0 divisor to  1024 for PWM frequency of    61.04 Hz
-
         //---------------------------------------------- Set PWM frequency for D3 & D11 ------------------------------
-
         TCCR2B = TCCR2B & B11111000 | B00000001;    // set timer 2 divisor to     1 for PWM frequency of 31372.55 Hz
-//TCCR2B = TCCR2B & B11111000 | B00000010;    // set timer 2 divisor to     8 for PWM frequency of  3921.16 Hz
-//TCCR2B = TCCR2B & B11111000 | B00000011;    // set timer 2 divisor to    32 for PWM frequency of   980.39 Hz
-//    TCCR2B = TCCR2B & B11111000 | B00000100;    // set timer 2 divisor to    64 for PWM frequency of   490.20 Hz (The DEFAULT)
-//TCCR2B = TCCR2B & B11111000 | B00000101;    // set timer 2 divisor to   128 for PWM frequency of   245.10 Hz
-//TCCR2B = TCCR2B & B11111000 | B00000110;    // set timer 2 divisor to   256 for PWM frequency of   122.55 Hz
-//TCCR2B = TCCR2B & B11111000 | B00000111;    // set timer 2 divisor to  1024 for PWM frequency of    30.64 Hz
-
-
         //---------------------------------------------- Set PWM frequency for D9 & D10 ------------------------------
         TCCR1B = TCCR1B & B11111000 | B00000010;    // set timer 1 divisor to     8 for PWM frequency of  3921.16 Hz
-//        TCCR1B = TCCR1B & B11111000 | B00000101;    // set timer 1 divisor to  1024 for PWM frequency of    30.64 Hz
-//        TCCR1B = TCCR1B & B11111000 | B00000010;    // set timer 1 divisor to     8 for PWM frequency of  3921.16 Hz
     }
 
 
@@ -139,18 +124,6 @@ class PowerController {
         ampSmoothIndex++;
     }
 
-    uint8_t lastPwm = 0;
-
-
-    void resolveMaxPwmValue() {
-        if (isModeChange) {
-//            maxPwmControl = voltTable[uint8_t(targetVolt)];
-
-        } else if (!isModeChange) {
-//            maxPwmControl = maxPwmValue;
-        }
-        lastTrVoltage = uint8_t(targetVolt);
-    }
 
     void resolvePowerMode() {
         if (isModeChange) {
@@ -169,6 +142,10 @@ class PowerController {
  * @param pwm
  */
     void setPwm(uint8_t pwm) {
+        if (!isPowered) {
+            analogWrite(pinPWM, 255);
+            return;
+        }
         lastPwm = pwm;
         analogWrite(pinPWM, pwm);
     }
@@ -206,67 +183,6 @@ public:
     static const uint8_t MODE_LIN_PW = 2;
     static const uint8_t MODE_LIN_LM = 3;
 
-/**
- *
- * @param pin
- * @param divisor
- */
-    void setPwmFrequency(int pin, int divisor) {
-        byte mode;
-        if (pin == 5 || pin == 6 || pin == 9 || pin == 10) {
-            switch (divisor) {
-                case 1:
-                    mode = 0x01;
-                    break;
-                case 8:
-                    mode = 0x02;
-                    break;
-                case 64:
-                    mode = 0x03;
-                    break;
-                case 256:
-                    mode = 0x04;
-                    break;
-                case 1024:
-                    mode = 0x05;
-                    break;
-                default:
-                    return;
-            }
-            if (pin == 5 || pin == 6) {
-                TCCR0B = TCCR0B & 0b11111000 | mode;
-            } else {
-                TCCR1B = TCCR1B & 0b11111000 | mode;
-            }
-        } else if (pin == 3 || pin == 11) {
-            switch (divisor) {
-                case 1:
-                    mode = 0x01;
-                    break;
-                case 8:
-                    mode = 0x02;
-                    break;
-                case 32:
-                    mode = 0x03;
-                    break;
-                case 64:
-                    mode = 0x04;
-                    break;
-                case 128:
-                    mode = 0x05;
-                    break;
-                case 256:
-                    mode = 0x06;
-                    break;
-                case 1024:
-                    mode = 0x7;
-                    break;
-                default:
-                    return;
-            }
-            TCCR2B = TCCR2B & 0b11111000 | mode;
-        }
-    }
 
     void begin() {
         setupPwm();
@@ -276,7 +192,7 @@ public:
         sensVolts();
         sensAmps();
         resolvePowerMode();
-        if ((liveVolts > targetVolt + 1 || liveVolts < targetVolt - 1)) {
+        if ((liveVolts > targetVolt + 1 || liveVolts < targetVolt - 1) && isPowered) {
             offset = 0;
             while (liveVolts > targetVolt + 1 && liveVolts < targetVolt - 1 && offset < 228) {
 
@@ -374,6 +290,16 @@ public:
     double testAmperage() {
         return captureAmp;
     }
+
+    void power(boolean state) {
+        if (state) {
+            pwmValue = 255;
+            isPowered = true;
+        } else {
+            isPowered = false;
+        }
+    }
+
 };
 /*
 #define avrGap 10

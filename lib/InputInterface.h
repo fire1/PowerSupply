@@ -33,6 +33,7 @@
 #endif
 
 #include "ButtonDrive.h"
+#include "PresetMemory.h"
 
 void static interruptFunction();
 
@@ -48,12 +49,16 @@ class InputInterface {
     PowerController *cnr;
     AnalogButtons *abt;
     RotaryEncoder *enc;
+    PresetMemory *prm;
 
+    Preset preset;
 private:
 
     void updateTimeout() {
-        if (timeout == 0)
+        if (timeout == 0) {
             timeout = currentLoops + editTimeout;
+            cnr->power(0);
+        }
     }
 
     void terminal() {
@@ -88,6 +93,42 @@ private:
         }
     }
 
+/**
+ *
+ * @param index
+ */
+    void setPreset(uint8_t index) {
+        prm->get(index, preset);
+        cnr->setAmperage(preset.amp);
+        cnr->setVoltage(preset.volt);
+    }
+
+/**
+ *
+ * @param index
+ */
+    void savePreset(uint8_t index) {
+        preset.amp = cnr->getTargetAmps();
+        preset.volt = cnr->getTargetVolt();
+
+        prm->set(index, preset);
+    }
+
+    void presetButtons() {
+        if (currentButton == 3) setPreset(0);
+        if (currentButton == 4) setPreset(1);
+        if (currentButton == 5) setPreset(2);
+        if (currentButton == 6) setPreset(3);
+
+        if (currentButton == 33) savePreset(0);
+        if (currentButton == 44) savePreset(1);
+        if (currentButton == 55) savePreset(2);
+        if (currentButton == 66) savePreset(3);
+    }
+
+/**
+ * Rotary Encoder changes
+ */
     void rotaryButton() {
         if (currentButton == 1 && !toggleSet) {
             toggleSet = true;
@@ -106,6 +147,7 @@ private:
             currentButton = 0;
         }
         if (currentLoops > timeout && openEdit) {
+            cnr->power(1);
             editAmps = false;
             editVolt = false;
             openEdit = false;
@@ -116,6 +158,13 @@ private:
 
     void pwmModeButton() {
         if (currentButton == 2) {
+            if (lcdTitles) {
+                lcdTitles = false;
+                cnr->power(1);
+                return;
+            }
+
+
             cnr->togglePwmMode();
             lcdTitles = false;
         }
@@ -137,7 +186,7 @@ private:
         //
         // Open  edit voltages/amperage
         rotaryButton();
-
+        presetButtons();
         pwmModeButton();
 
         if (openEdit) {
@@ -161,18 +210,19 @@ private:
             editCursor = 1;
         }
 
-        if (editVolt && is100()) {
+        if (editVolt && is80()) {
             cnr->setVoltage(cnr->getTargetVolt() - (direction * mlt));
         }
 
-        if (editAmps && is100()) {
+        if (editAmps && is80()) {
             cnr->setAmperage(cnr->getTargetAmps() - (direction * mlt));
         }
     }
 
 public:
 
-    InputInterface(PowerController &cn, RotaryEncoder &ec, AnalogButtons &bt) : cnr(&cn), enc(&ec), abt(&bt) {}
+    InputInterface(PowerController &cn, RotaryEncoder &ec, AnalogButtons &bt, PresetMemory &pm)
+            : cnr(&cn), enc(&ec), abt(&bt), prm(&pm) {}
 
     void begin() {
 

@@ -30,7 +30,7 @@ const uint16_t screenRefresh = 310;
 const uint8_t pinLed = 13;
 const uint8_t pinThermistor = A6;
 const uint8_t pinFanA = 10;//back fan
-const uint8_t pinFanB = 11;// ic fan
+const uint8_t pinFanB = 11;// ic fan TODO change to tone
 const uint16_t editTimeout = 10000;
 const uint16_t holdTimeout = 400;
 unsigned long previousMillis = 0;
@@ -80,16 +80,16 @@ boolean is10() {
     }
 }
 
-boolean is100() {
+boolean is80() {
     if (amplitude100 < currentLoops) {
-        amplitude100 = currentLoops + 100;
+        amplitude100 = currentLoops + 80;
         return true;
     }
 }
 
-boolean is350() {
+boolean is250() {
     if (amplitude100 < currentLoops) {
-        amplitude350 = currentLoops + 350;
+        amplitude350 = currentLoops + 250;
         return true;
     }
 }
