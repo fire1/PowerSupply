@@ -11,4 +11,4 @@
  * EEP ROM / Save states
  * Power off mode (when edit)
  * Battery charge mode
- * Menus
+ * Hardware Schematics
