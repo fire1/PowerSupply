@@ -60,7 +60,6 @@ private:
         dig2 /= 10;
 
 
-
         if (edit && half && lcdBlinks) {
             sprintf(output, "%02d.  ", dig1);
         } else if (edit && lcdBlinks) {
@@ -69,6 +68,7 @@ private:
             sprintf(output, "%02d.%02d", dig1, dig2);
         }
     }
+
 /**
  *
  * @param value
@@ -123,8 +123,11 @@ private:
         boolean editVolt = inp->isEditVolt();
         boolean editAmps = inp->isEditAmps();
         boolean editCursor = inp->isEditPosition();
+        uint8_t presetSet = inp->getSavedPreset();
+        uint8_t usedSet = inp->getPresetUsed();
 
-        if (editAmps || editVolt) {
+
+        if (editAmps || editVolt || presetSet != 0 || usedSet != 0) {
             inp->setTitles(false);
         }
 
@@ -152,6 +155,18 @@ private:
             lcd->print(charA);
 
             lcdBlinks = !lcdBlinks;
+
+            if (presetSet > 0) {
+                lcd->setCursor(0, 3);
+                lcd->print((">"));
+                lcd->print(presetSet);
+            }
+            if (usedSet > 0) {
+                lcd->setCursor(0, 3);
+                lcd->print(usedSet);
+                lcd->print((">"));
+                lcd->print((">"));
+            }
 
         }
 

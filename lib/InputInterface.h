@@ -44,8 +44,11 @@ class InputInterface {
     boolean toggleSet = false;
     boolean lcdTitles = false;
     boolean editCursor = 0;
+    boolean isSetSaved = false;
     uint8_t lastPress = 0;
-    unsigned long timeout, debounce;
+    uint8_t savedPreset = 0;
+    uint8_t usedPreset = 0;
+    unsigned long timeout, debounce = 0;
     PowerController *cnr;
     AnalogButtons *abt;
     RotaryEncoder *enc;
@@ -98,9 +101,22 @@ private:
  * @param index
  */
     void setPreset(uint8_t index) {
-        prm->get(index, preset);
-        cnr->setAmperage(preset.amp);
-        cnr->setVoltage(preset.volt);
+        if (usedPreset == 0 && index > 0) {
+            debounce = currentLoops + 620;
+            usedPreset = index;
+        }
+        // todo play sound here!
+    }
+
+    void usePreset() {
+        if (usedPreset > 0) {
+            prm->get(usedPreset, preset);
+            if (preset.amp > 0 && preset.volt > 0) {
+                cnr->setAmperage(preset.amp);
+                cnr->setVoltage(preset.volt);
+            }
+            usedPreset = 0;
+        }
     }
 
 /**
@@ -108,22 +124,26 @@ private:
  * @param index
  */
     void savePreset(uint8_t index) {
+        if (index == 0)return;
         preset.amp = cnr->getTargetAmps();
         preset.volt = cnr->getTargetVolt();
-
-        prm->set(index, preset);
+        if (preset.amp > 0 && preset.volt > 0) {
+            prm->set(index, preset);
+            savedPreset = index;
+            isSetSaved = true;
+        }
     }
 
     void presetButtons() {
-        if (currentButton == 3) setPreset(0);
-        if (currentButton == 4) setPreset(1);
-        if (currentButton == 5) setPreset(2);
-        if (currentButton == 6) setPreset(3);
+        if (currentButton == 3) setPreset(1);
+        if (currentButton == 4) setPreset(2);
+        if (currentButton == 5) setPreset(3);
+        if (currentButton == 6) setPreset(4);
 
-        if (currentButton == 33) savePreset(0);
-        if (currentButton == 44) savePreset(1);
-        if (currentButton == 55) savePreset(2);
-        if (currentButton == 66) savePreset(3);
+        if (currentButton == 33) savePreset(1);
+        if (currentButton == 44) savePreset(2);
+        if (currentButton == 55) savePreset(3);
+        if (currentButton == 66) savePreset(4);
     }
 
     void stopEditing() {
@@ -252,6 +272,11 @@ public:
         terminal();
         abt->check();
         inputs();
+
+        if (usedPreset > 0 && currentLoops > debounce) {
+            debounce = 0;
+            usePreset();
+        }
     }
 
     boolean isEditPosition() {
@@ -277,6 +302,16 @@ public:
  */
     void setTitles(boolean state) {
         lcdTitles = state;
+    }
+
+    uint8_t getSavedPreset() {
+        uint8_t t = savedPreset;
+        savedPreset = 0;
+        return t;
+    }
+
+    uint8_t getPresetUsed() {
+        return usedPreset;
     }
 
 };

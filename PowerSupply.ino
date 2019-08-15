@@ -52,7 +52,8 @@ void setup() {
 
 //
 void loop_() {
-    analogWrite(pinFanA, 100);
+//    analogWrite(pinFanA, 100);
+    Serial.println(analogRead(pinAnalogBt));
 }
 
 void loop() {

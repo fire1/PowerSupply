@@ -94,7 +94,7 @@ void btn5Hold() {
 void btn6Click() {
     if (currentButton != 6) {
         currentButton = 6;
-        Serial.println(F("button 5 clicked"));
+        Serial.println(F("button 6 clicked"));
     }
 }
 
@@ -102,10 +102,10 @@ void btn6Hold() {
     driveHold(66);
 }
 
-Button btnBlinker = Button(27, &btn2Click, &btn2Hold);
-Button btnEncoder = Button(610, &btn1Click, &btn1Hold);
-Button btnMemSetA = Button(765, &btn3Click, &btn3Hold);
-Button btnMemSetB = Button(512, &btn4Click, &btn4Hold);
-Button btnMemSetC = Button(264, &btn5Click, &btn5Hold);
-Button btnMemSetD = Button(420, &btn6Click, &btn6Hold);
+Button btnBlinker = Button(27, &btn2Click, &btn2Hold, 250);
+Button btnEncoder = Button(610, &btn1Click, &btn1Hold, 250);
+Button btnMemSetA = Button(765, &btn3Click, &btn3Hold, 250);
+Button btnMemSetB = Button(512, &btn4Click, &btn4Hold, 250);
+Button btnMemSetD = Button(420, &btn6Click, &btn6Hold, 250);
+Button btnMemSetC = Button(264, &btn5Click, &btn5Hold, 250);
 #endif //POWERSUPPLY_BUTTONDRIVE_H
