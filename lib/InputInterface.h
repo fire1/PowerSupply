@@ -111,6 +111,15 @@ private:
     void usePreset() {
         if (usedPreset > 0) {
             prm->get(usedPreset, preset);
+#ifdef DEBUG
+            Serial.println();
+            Serial.print(F(" Load:  "));
+            Serial.print(preset.amp);
+            Serial.print(F("A "));
+            Serial.print(preset.volt);
+            Serial.print(F("V"));
+            Serial.println();
+#endif
             if (preset.amp > 0 && preset.volt > 0) {
                 cnr->setAmperage(preset.amp);
                 cnr->setVoltage(preset.volt);
@@ -128,6 +137,15 @@ private:
         preset.amp = cnr->getTargetAmps();
         preset.volt = cnr->getTargetVolt();
         if (preset.amp > 0 && preset.volt > 0) {
+#ifdef DEBUG
+            Serial.println();
+            Serial.print(F(" Save:  "));
+            Serial.print(preset.amp);
+            Serial.print(F("A "));
+            Serial.print(preset.volt);
+            Serial.print(F("V"));
+            Serial.println();
+#endif
             prm->set(index, preset);
             savedPreset = index;
             isSetSaved = true;
