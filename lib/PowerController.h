@@ -71,7 +71,7 @@ class PowerController {
 
 
     void setupPwm() {
-        pinMode(pinPWM, OUTPUT);
+        pinMode(pinSwhPwm, OUTPUT);
         //---------------------------------------------- Set PWM frequency for D5 & D6 -------------------------------
 
         pinMode(3, OUTPUT); // Output pin for OCR2B
@@ -79,10 +79,10 @@ class PowerController {
 
         //---------------------------------------------- Set PWM frequency for D5 & D6 ------------------------------
         TCCR0B = TCCR0B & B11111000 | B00000001;    // set timer 0 divisor to     1 for PWM frequency of 62500.00 Hz
-        //---------------------------------------------- Set PWM frequency for D3 & D11 ------------------------------
-        TCCR2B = TCCR2B & B11111000 | B00000001;    // set timer 2 divisor to     1 for PWM frequency of 31372.55 Hz
         //---------------------------------------------- Set PWM frequency for D9 & D10 ------------------------------
         TCCR1B = TCCR1B & B11111000 | B00000010;    // set timer 1 divisor to     8 for PWM frequency of  3921.16 Hz
+        //---------------------------------------------- Set PWM frequency for D3 & D11 ------------------------------
+        TCCR2B = TCCR2B & B11111000 | B00000001;    // set timer 2 divisor to     1 for PWM frequency of 31372.55 Hz
     }
 
 
@@ -143,11 +143,11 @@ class PowerController {
  */
     void setPwm(uint8_t pwm) {
         if (!isPowered) {
-            analogWrite(pinPWM, 0);
+            analogWrite(pinSwhPwm, 0);
             return;
         }
         lastPwm = pwm;
-        analogWrite(pinPWM, pwm);
+        analogWrite(pinSwhPwm, pwm);
     }
 
 
@@ -210,7 +210,7 @@ public:
         pinMode(pinVolt, INPUT);
         pinMode(pinAmps, INPUT);
         pinMode(pinLed, OUTPUT);
-        analogWrite(pinPWM, 0);
+        analogWrite(pinSwhPwm, 0);
         setPwm(pwmValue);
     }
 

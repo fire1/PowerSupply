@@ -44,16 +44,21 @@ void setup() {
     currentLoops = 0;
 
 
-    pinMode(pinFanA, OUTPUT);
-    pinMode(pinFanB, OUTPUT);
-    analogWrite(pinFanA, 0);
-    analogWrite(pinFanB, 0);
+    pinMode(pinFans, OUTPUT);
+    pinMode(pinTone, OUTPUT);
+
+    analogWrite(pinFans, 200);
+    delay(24500);
+    tone(pinTone, 2200);
+    delay(16500);
+    analogWrite(pinFans, 0);
+    noTone(pinTone);
 }
 
 //
 void loop_() {
-//    analogWrite(pinFanA, 100);
-    Serial.println(analogRead(pinAnalogBt));
+    analogWrite(pinFans, 254);
+//    Serial.println(analogRead(pinAnalogBt));
 }
 
 void loop() {

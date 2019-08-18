@@ -67,7 +67,9 @@ private:
     void terminal() {
         if (Serial.available()) {
             String where = Serial.readStringUntil('=');
-            if (where == F("v")) {
+            //
+            // Switch mode
+            if (where == F("swt")) {
                 cnr->useParse(true);
                 cnr->setVoltage(Serial.readStringUntil('\n').toFloat());
                 Serial.println();
@@ -75,8 +77,30 @@ private:
                 Serial.print(cnr->getTargetVolt());
                 Serial.println();
             }
+            //
+            // Linear mode
+            if (where == F("lin")) {
+                cnr->useParse(true);
+                cnr->setVoltage(Serial.readStringUntil('\n').toFloat());
+                Serial.println();
+                Serial.print(F("Linear: "));
+                Serial.print(cnr->getTargetVolt());
+                Serial.println();
+            }
 
-            if (where == F("p")) {
+            //
+            // Analog pwm
+            if (where == F("anl")) {
+                analogWrite(pinLinPwm, Serial.readStringUntil('\n').toInt());
+                Serial.println();
+                Serial.print(F("PWM Analog: "));
+                Serial.print(cnr->getPwmValue());
+                Serial.println();
+            }
+
+            //
+            // Digital pwm
+            if (where == F("dig")) {
                 cnr->useParse(false);
                 cnr->setPWM(Serial.readStringUntil('\n').toInt());
                 Serial.println();
@@ -85,12 +109,23 @@ private:
                 Serial.println();
             }
 
-            if (where == F("a")) {
+            if (where == F("amp")) {
                 cnr->useParse(true);
                 cnr->setAmperage(Serial.readStringUntil('\n').toFloat());
                 Serial.println();
                 Serial.print(F("CURRENT: "));
                 Serial.print(cnr->getTargetAmps());
+                Serial.println();
+            }
+
+
+            if (where == F("fan")) {
+                cnr->useParse(true);
+                int pwm = Serial.readStringUntil('\n').toInt();
+                analogWrite(pinFans, pwm);
+                Serial.println();
+                Serial.print(F("FAn: "));
+                Serial.print(pwm);
                 Serial.println();
             }
         }
@@ -104,6 +139,7 @@ private:
         if (usedPreset == 0 && index > 0) {
             debounce = currentLoops + 620;
             usedPreset = index;
+            tone(pinTone,1500);
         }
         // todo play sound here!
     }
@@ -120,6 +156,7 @@ private:
             Serial.print(F("V"));
             Serial.println();
 #endif
+            noTone(pinTone);
             if (preset.amp > 0 && preset.volt > 0) {
                 cnr->setAmperage(preset.amp);
                 cnr->setVoltage(preset.volt);

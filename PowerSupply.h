@@ -21,21 +21,24 @@
 boolean fastScreen = false;
 const uint8_t pinVolt = A1;
 const uint8_t pinAmps = A0;
-const uint8_t pinPWM = 5;
+const uint8_t pinSwhPwm = 5;
+const uint8_t pinLinPwm = 6;
 const uint8_t pinEncoderB = 2;
 const uint8_t pinEncoderA = 3;
 const uint8_t pinAnalogBt = A3;
 const uint16_t screenNormalRefresh = 310;
 const uint16_t screenEditorRefresh = 120;
 const uint8_t pinLed = 13;
-const uint8_t pinThermistor = A6;
-const uint8_t pinFanA = 10;//back fan
-const uint8_t pinFanB = 11;// ic fan TODO change to tone
+const uint8_t pinThermistorSwt = A6;
+const uint8_t pinThermistorLin = A2;
+const uint8_t pinFans = 10;
+const uint8_t pinTone = 11;
 const uint16_t editTimeout = 10000;
 const uint16_t holdTimeout = 400;
 unsigned long previousMillis = 0;
 volatile unsigned long currentLoops = 0;
-uint8_t heat;
+uint8_t heatSwt, heatLin;
+
 
 char printValues[6];
 
@@ -96,20 +99,16 @@ boolean is250() {
 
 
 void fansControl() {
-    int rawTemp = analogRead(pinThermistor);
-    heat = (uint8_t) map(rawTemp, 345, 460, 120, 70);
+    int rawTempSwt = analogRead(pinThermistorSwt);
+    int rawTempLin = analogRead(pinThermistorLin);
+    heatSwt = (uint8_t) map(rawTempSwt, 345, 460, 120, 70);
+    heatLin = (uint8_t) map(rawTempLin, 345, 460, 120, 70);
 
-    if (heat > 25) {
-        analogWrite(pinFanB, (int) map(heat, 80, 120, 0, 255));
-        if (heat > 45) {
-            analogWrite(pinFanA, (int) map(heat, 0, 120, 0, 255));
-        }
-        if (heat < 30) {
-            analogWrite(pinFanA, 0);
-        }
-    } else if (heat < 22) {
-        analogWrite(pinFanA, 0);
-        analogWrite(pinFanB, 0);
+    uint8_t heat = (heatLin > heatSwt) ? heatLin : heatSwt;
+    if (heat > 30) {
+        analogWrite(pinFans, (int) map(heat, 30, 120, 0, 254));
+    } else if (heatSwt < 25 && heatLin < 25) {
+        analogWrite(pinFans, 0);
     }
 }
 

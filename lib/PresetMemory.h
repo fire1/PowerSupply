@@ -27,6 +27,7 @@ public:
 
     void set(uint8_t setIndex, Preset save) {
         EEPROM.put(setIndex + sizeof(Preset), save);
+        delay(5);
     }
 
 

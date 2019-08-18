@@ -233,12 +233,10 @@ public:
         Serial.print(F(" PWM: "));
         Serial.print(cnr->getPwmValue());
 
-        Serial.print(F(" ENC: "));
+        Serial.print(F(" TMP S/L: "));
+        Serial.print(heatSwt);
         Serial.print(F(" / "));
-
-
-        Serial.print(F(" TMP: "));
-        Serial.print(heat);
+        Serial.print(heatLin);
 
         if (inp->isEditAmps()) {
             Serial.print(F(" -> Edit AMP"));
