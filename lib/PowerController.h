@@ -142,25 +142,36 @@ class PowerController {
  * @param pwm
  */
     void setPwm(uint8_t pwm) {
-        if (!isPowered) {
-            analogWrite(pinSwhPwm, 0);
-            return;
-        }
+
         lastPwm = pwm;
         analogWrite(pinSwhPwm, pwm);
+        analogWrite(pinLinPwm, pwm);
     }
 
 
     void parsePwmSwitching() {
         if (!activeParse) return;
+        //
+        // High amps limit
+        if (liveAmps > targetAmps) {
+            pwmValue = pwmValue - 1;
+            pwmValue = constrain(pwmValue, minPwmControl, maxPwmControl);
+        }
 
+        //
+        // Low amps
         if (liveAmps < targetAmps) {
+            //
+            // Voltage is in range
+            if (int(targetVolt * 10) == int(liveVolts * 10)) return;
+
+
             if (targetVolt < liveVolts) {
                 //
                 // Pump up voltage
                 pwmValue = pwmValue - 1;
                 pwmValue = constrain(pwmValue, minPwmControl, maxPwmControl);
-            } else if (targetVolt + correctionValue > liveVolts) {
+            } else if (targetVolt > liveVolts) {
                 //
                 // Lower the voltage
                 pwmValue = pwmValue + 1;
@@ -168,12 +179,7 @@ class PowerController {
             }
         }
 
-        //
-        // Lower voltage at high amps limit
-        if (liveAmps > targetAmps) {
-            pwmValue = pwmValue - 1;
-            pwmValue = constrain(pwmValue, minPwmControl, maxPwmControl);
-        }
+
     }
 
 public:
@@ -189,6 +195,10 @@ public:
     }
 
     void manage() {
+        if (!isPowered) {
+            analogWrite(pinSwhPwm, 0);
+            return;
+        }
         sensVolts();
         sensAmps();
         resolvePowerMode();
@@ -200,7 +210,6 @@ public:
                 sensVolts();
                 setPwm(pwmValue);
                 digitalWrite(pinLed, HIGH);
-                delayMicroseconds(1);
                 offset++;
             }
         }
