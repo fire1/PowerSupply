@@ -35,6 +35,7 @@ const uint8_t pinFans = 10;
 const uint8_t pinTone = 11;
 const uint16_t editTimeout = 10000;
 const uint16_t holdTimeout = 400;
+const float thresholdBoost = 0.3;
 unsigned long previousMillis = 0;
 volatile unsigned long currentLoops = 0;
 uint8_t heatSwt, heatLin;

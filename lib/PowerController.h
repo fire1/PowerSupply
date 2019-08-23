@@ -202,9 +202,9 @@ public:
         sensVolts();
         sensAmps();
         resolvePowerMode();
-        if ((liveVolts > targetVolt + 1 || liveVolts < targetVolt - 1) && isPowered) {
+        if ((liveVolts > targetVolt + thresholdBoost || liveVolts < targetVolt - thresholdBoost) && isPowered) {
             offset = 0;
-            while (liveVolts > targetVolt + 1 && liveVolts < targetVolt - 1 && offset < 228) {
+            while (liveVolts > targetVolt + 1 && liveVolts < targetVolt - 1 && offset < 240) {
 
                 parsePwmSwitching();
                 sensVolts();
