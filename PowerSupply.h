@@ -131,6 +131,66 @@ void fansControl() {
 #endif
 
 
+void timer2at150khz() {
+    //Timer2 register setup
+//Bits 7:6 mean toggle pin 11 on a compare match
+//Bits 1:0 and bit 3 in TCCR2B select Fast PWM mode, with OCRA for the TOP value
+    TCCR2A = 0b01000011;
+//If you want to output on pin 3 instead, set TCCR2A = 0b00010011 instead.
+//Bits 2:0 are the prescaler setting, this is a 1 prescaler
+    TCCR2B = 0b00001001;
+// This is the value that, when the timer reaches it,
+// will toggle the output pin and restart. A value of 51 in this case gives a 153.85kHz output
+    OCR2A = 51;
+}
+
+void timer1FastPWM()
+{
+    // This will activate a PWM frequency of 62500 Hz on the
+    // PWM pins associated with Timer1
+    // Arduino UNO ==> pin-9 and pin-10
+    // Arduino MEGA ==>  pin-11 and pin-12
+#if defined(__AVR_ATmega328P__)
+    analogWrite(9,127); // let Arduino do PWM timer and pin initialization
+#elif defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
+    analogWrite(11,100); // // let Arduino do PWM timer and pin initialization
+#else
+  *** wrong board ***
+#endif
+    // finally set fast-PWM at highest possible frequency
+    TCCR1A = _BV(COM1A1) | _BV(WGM10);
+    TCCR1B = _BV(CS10) | _BV(WGM12);
+}
+
+
+void timer1Setup(){
+
+        // Set PB1 to be an output (Pin9 Arduino UNO)
+        DDRB |= (1 << PB1);
+
+        // Clear Timer/Counter Control Registers
+        TCCR1A = 0;
+        TCCR1B = 0;
+
+        // Set inverting mode
+        TCCR1A |= (1 << COM1A1);
+        TCCR1A |= (1 << COM1A0);
+
+        // Set PWM Phase Correct, Mode 10
+        TCCR1A |= (1 << WGM11);
+        TCCR1B |= (1 << WGM13);
+
+        // Set prescaler to 1 and starts PWM
+        TCCR1B |= (1 << CS10);
+        TCCR1B |= (0 << CS11);
+
+        // Set PWM frequency = 100kHz, duty-cycle = 20%
+        ICR1 = (F_CPU / (1*200000)) - 1;
+        OCR1A = ICR1 / (100 / 20);
+    }
+}
+
+
 void fastADC() {
 // set prescale to 16
     sbi(ADCSRA, ADPS2);
