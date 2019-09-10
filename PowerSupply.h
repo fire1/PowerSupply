@@ -115,13 +115,27 @@ void fansControl() {
 
 //Other Variables
 
+//
+// ADC lower the resolution increase speed
+//
+// ADC clock of 1 MHz and a sample rate of ~77KHz
+// without much loss of resolution.
 
 
+// defines for setting and clearing register bits
+#ifndef cbi
+#define cbi(sfr, bit) (_SFR_BYTE(sfr) &= ~_BV(bit))
+#endif
+#ifndef sbi
+#define sbi(sfr, bit) (_SFR_BYTE(sfr) |= _BV(bit))
+#endif
 
 
-
-
-
-
+void fastADC() {
+// set prescale to 16
+    sbi(ADCSRA, ADPS2);
+    cbi(ADCSRA, ADPS1);
+    cbi(ADCSRA, ADPS0);
+}
 
 #endif //POWERSUPPLY_POWERSUPPLY_H
