@@ -20,13 +20,19 @@ struct Preset {
 
 class PresetMemory {
 
-
+    Preset lastSave;
+    uint8_t lastIndexSave = 0;
 
 public:
 
 
     void set(uint8_t setIndex, Preset save) {
-        EEPROM.put(setIndex + sizeof(Preset), save);
+
+        if (lastSave.volt != save.volt || lastSave.amp != save.amp || lastIndexSave != setIndex) {
+            EEPROM.put(setIndex * sizeof(Preset), save);
+            lastSave = save;
+            lastIndexSave = setIndex;
+        }
         delay(5);
     }
 
@@ -35,7 +41,12 @@ public:
         Preset save = {
                 voltage, amperage, mode
         };
-        EEPROM.put(setIndex * sizeof(Preset), save);
+
+        if (lastSave.volt != save.volt || lastSave.amp != save.amp || lastIndexSave != setIndex) {
+            EEPROM.put(setIndex * sizeof(Preset), save);
+            lastSave = save;
+            lastIndexSave = setIndex;
+        }
     }
 
     void get(uint8_t setIndex, Preset &output) {
