@@ -144,14 +144,13 @@ void timer2at150khz() {
     OCR2A = 51;
 }
 
-void timer1FastPWM()
-{
+void timer1FastPWM() {
     // This will activate a PWM frequency of 62500 Hz on the
     // PWM pins associated with Timer1
     // Arduino UNO ==> pin-9 and pin-10
     // Arduino MEGA ==>  pin-11 and pin-12
 #if defined(__AVR_ATmega328P__)
-    analogWrite(9,127); // let Arduino do PWM timer and pin initialization
+    analogWrite(9, 127); // let Arduino do PWM timer and pin initialization
 #elif defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
     analogWrite(11,100); // // let Arduino do PWM timer and pin initialization
 #else
@@ -163,31 +162,30 @@ void timer1FastPWM()
 }
 
 
-void timer1Setup(){
+void timer1Setup() {
 
-        // Set PB1 to be an output (Pin9 Arduino UNO)
-        DDRB |= (1 << PB1);
+    // Set PB1 to be an output (Pin9 Arduino UNO)
+    DDRB |= (1 << PB1);
 
-        // Clear Timer/Counter Control Registers
-        TCCR1A = 0;
-        TCCR1B = 0;
+    // Clear Timer/Counter Control Registers
+    TCCR1A = 0;
+    TCCR1B = 0;
 
-        // Set inverting mode
-        TCCR1A |= (1 << COM1A1);
-        TCCR1A |= (1 << COM1A0);
+    // Set inverting mode
+    TCCR1A |= (1 << COM1A1);
+    TCCR1A |= (1 << COM1A0);
 
-        // Set PWM Phase Correct, Mode 10
-        TCCR1A |= (1 << WGM11);
-        TCCR1B |= (1 << WGM13);
+    // Set PWM Phase Correct, Mode 10
+    TCCR1A |= (1 << WGM11);
+    TCCR1B |= (1 << WGM13);
 
-        // Set prescaler to 1 and starts PWM
-        TCCR1B |= (1 << CS10);
-        TCCR1B |= (0 << CS11);
+    // Set prescaler to 1 and starts PWM
+    TCCR1B |= (1 << CS10);
+    TCCR1B |= (0 << CS11);
 
-        // Set PWM frequency = 100kHz, duty-cycle = 20%
-        ICR1 = (F_CPU / (1*200000)) - 1;
-        OCR1A = ICR1 / (100 / 20);
-    }
+    // Set PWM frequency = 100kHz, duty-cycle = 20%
+    ICR1 = (F_CPU / (1 * 200000)) - 1;
+    OCR1A = ICR1 / (100 / 20);
 }
 
 
