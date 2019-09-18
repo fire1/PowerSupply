@@ -133,8 +133,9 @@ void fansControl() {
 
 void timer2at250khz() {
     // Pins 11 and 3
-    pinMode(11, OUTPUT); // output pin for OCR2B, this is Arduino pin number
-
+    pinMode(3, OUTPUT); // output pin for OCR2B, this is Arduino pin number
+    // It seems to work with pin 3
+    //
     // In the next line of code, we:
     // 1. Set the compare output mode to clear OC2A and OC2B on compare match.
     //    To achieve this, we set bits COM2A1 and COM2B1 to high.
