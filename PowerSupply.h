@@ -216,7 +216,6 @@ void timer1Setup() {
     // Set PWM frequency = 100kHz, duty-cycle = 20%
     ICR1 = (F_CPU / (1 * 200000)) - 1;
     OCR1A = ICR1 / (100 / 20);
-}
 
 }
 

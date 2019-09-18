@@ -14,6 +14,7 @@
 #include "PowerController.h"
 #include "InputInterface.h"
 
+#ifndef DEBUG
 
 #include <LiquidCrystal.h>
 
@@ -21,6 +22,7 @@
 
 #include "../libraries/NewLiquidCrystal_lib/LiquidCrystal.h"
 
+#endif
 #endif
 
 const char charV[2] = "V";
