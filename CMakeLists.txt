@@ -11,5 +11,5 @@ set(${CMAKE_PROJECT_NAME}_SKETCH PowerSupply.ino)
 # set(mega.build.mcu atmega2560)
 # set(mega.upload.protocol wiring)
 # set(mega.upload.speed 115200)
-
+set(INCLUDE_DIRECTORIES "../libraries/")
 generate_arduino_firmware(${CMAKE_PROJECT_NAME})
