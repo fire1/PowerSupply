@@ -131,6 +131,36 @@ void fansControl() {
 #endif
 
 
+void timer2at250khz() {
+    // Pins 11 and 3
+    pinMode(11, OUTPUT); // output pin for OCR2B, this is Arduino pin number
+
+    // In the next line of code, we:
+    // 1. Set the compare output mode to clear OC2A and OC2B on compare match.
+    //    To achieve this, we set bits COM2A1 and COM2B1 to high.
+    // 2. Set the waveform generation mode to fast PWM (mode 3 in datasheet).
+    //    To achieve this, we set bits WGM21 and WGM20 to high.
+    TCCR2A = _BV(COM2A1) | _BV(COM2B1) | _BV(WGM21) | _BV(WGM20);
+
+    // In the next line of code, we:
+    // 1. Set the waveform generation mode to fast PWM mode 7 —reset counter on
+    //    OCR2A value instead of the default 255. To achieve this, we set bit
+    //    WGM22 to high.
+    // 2. Set the prescaler divisor to 1, so that our counter will be fed with
+    //    the clock's full frequency (16MHz). To achieve this, we set CS20 to
+    //    high (and keep CS21 and CS22 to low by not setting them).
+    TCCR2B = _BV(WGM22) | _BV(CS20);
+
+    // OCR2A holds the top value of our counter, so it acts as a divisor to the
+    // clock. When our counter reaches this, it resets. Counting starts from 0.
+    // Thus 63 equals to 64 divs.
+    OCR2A = 63;
+    // This is the duty cycle. Think of it as the last value of the counter our
+    // output will remain high for. Can't be greater than OCR2A of course. A
+    // value of 0 means a duty cycle of 1/64 in this case.
+    OCR2B = 0;
+}
+
 void timer2at150khz() {
     //Timer2 register setup
 //Bits 7:6 mean toggle pin 11 on a compare match
@@ -144,14 +174,13 @@ void timer2at150khz() {
     OCR2A = 51;
 }
 
-void timer1FastPWM()
-{
+void timer1FastPWM() {
     // This will activate a PWM frequency of 62500 Hz on the
     // PWM pins associated with Timer1
     // Arduino UNO ==> pin-9 and pin-10
     // Arduino MEGA ==>  pin-11 and pin-12
 #if defined(__AVR_ATmega328P__)
-    analogWrite(9,127); // let Arduino do PWM timer and pin initialization
+    analogWrite(9, 127); // let Arduino do PWM timer and pin initialization
 #elif defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
     analogWrite(11,100); // // let Arduino do PWM timer and pin initialization
 #else
@@ -162,32 +191,33 @@ void timer1FastPWM()
     TCCR1B = _BV(CS10) | _BV(WGM12);
 }
 
+void timer1Setup() {
+// Pins 9 and 10: controlled by timer 1
 
-void timer1Setup(){
+    // Set PB1 to be an output (Pin9 Arduino UNO)
+    DDRB |= (1 << PB1);
 
-        // Set PB1 to be an output (Pin9 Arduino UNO)
-        DDRB |= (1 << PB1);
+    // Clear Timer/Counter Control Registers
+    TCCR1A = 0;
+    TCCR1B = 0;
 
-        // Clear Timer/Counter Control Registers
-        TCCR1A = 0;
-        TCCR1B = 0;
+    // Set inverting mode
+    TCCR1A |= (1 << COM1A1);
+    TCCR1A |= (1 << COM1A0);
 
-        // Set inverting mode
-        TCCR1A |= (1 << COM1A1);
-        TCCR1A |= (1 << COM1A0);
+    // Set PWM Phase Correct, Mode 10
+    TCCR1A |= (1 << WGM11);
+    TCCR1B |= (1 << WGM13);
 
-        // Set PWM Phase Correct, Mode 10
-        TCCR1A |= (1 << WGM11);
-        TCCR1B |= (1 << WGM13);
+    // Set prescaler to 1 and starts PWM
+    TCCR1B |= (1 << CS10);
+    TCCR1B |= (0 << CS11);
 
-        // Set prescaler to 1 and starts PWM
-        TCCR1B |= (1 << CS10);
-        TCCR1B |= (0 << CS11);
+    // Set PWM frequency = 100kHz, duty-cycle = 20%
+    ICR1 = (F_CPU / (1 * 200000)) - 1;
+    OCR1A = ICR1 / (100 / 20);
+}
 
-        // Set PWM frequency = 100kHz, duty-cycle = 20%
-        ICR1 = (F_CPU / (1*200000)) - 1;
-        OCR1A = ICR1 / (100 / 20);
-    }
 }
 
 
