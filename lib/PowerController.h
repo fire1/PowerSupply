@@ -32,7 +32,7 @@ ResponsiveAnalogRead rawAmps(pinAmps, true);
 //  44          3.2
 
 #ifndef maxPwmValue
-#define maxPwmValue  255;
+#define maxPwmValue  63
 #endif
 
 #ifndef minPwmValue
@@ -54,7 +54,7 @@ class PowerController {
     volatile uint8_t offset;
     uint8_t lastPwm = 0;
     uint8_t powerMode = PowerController::MODE_SWT_PW; // liner, power switching, limited switching
-    uint8_t pwmValue = 1;
+    uint8_t pwmValue = 0;
     uint8_t maxPwmControl = maxPwmValue;
     uint8_t minPwmControl = minPwmValue;
     float targetVolt = 3;
@@ -71,14 +71,15 @@ class PowerController {
 
 
     void setupPwm() {
-        pinMode(pinSwhPwm, OUTPUT);
         //---------------------------------------------- Set PWM frequency for D5 & D6 -------------------------------
-
-        pinMode(3, OUTPUT); // Output pin for OCR2B
-        pinMode(5, OUTPUT); // Output pin for OCR0B
+        pinMode(pinSwhPwm, OUTPUT); // Output pin for OCR0B
+        TCCR2A = _BV(COM2A1) | _BV(COM2B1) | _BV(WGM21) | _BV(WGM20);
+        TCCR2B = _BV(WGM22) | _BV(CS20);
+        OCR2A = maxPwmValue;
+        OCR2B = 0;
 
         //---------------------------------------------- Set PWM frequency for D5 & D6 ------------------------------
-        TCCR0B = TCCR0B & B11111000 | B00000001;    // set timer 0 divisor to     1 for PWM frequency of 62500.00 Hz
+//        TCCR0B = TCCR0B & B11111000 | B00000001;    // set timer 0 divisor to     1 for PWM frequency of 62500.00 Hz
         //---------------------------------------------- Set PWM frequency for D9 & D10 ------------------------------
         TCCR1B = TCCR1B & B11111000 | B00000010;    // set timer 1 divisor to     8 for PWM frequency of  3921.16 Hz
         //---------------------------------------------- Set PWM frequency for D3 & D11 ------------------------------
@@ -143,8 +144,9 @@ class PowerController {
  */
     void setPwm(uint8_t pwm) {
 
+        OCR2B = pwm;
         lastPwm = pwm;
-        analogWrite(pinSwhPwm, pwm);
+//        analogWrite(pinSwhPwm, pwm);
         analogWrite(pinLinPwm, pwm);
     }
 
@@ -196,7 +198,7 @@ public:
 
     void manage() {
         if (!isPowered) {
-            analogWrite(pinSwhPwm, 0);
+            setPWM(0);
             return;
         }
         sensVolts();
@@ -219,7 +221,7 @@ public:
         pinMode(pinVolt, INPUT);
         pinMode(pinAmps, INPUT);
         pinMode(pinLed, OUTPUT);
-        analogWrite(pinSwhPwm, 0);
+
         setPwm(pwmValue);
     }
 

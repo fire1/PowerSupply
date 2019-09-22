@@ -32,7 +32,7 @@ void interruptFunction() {
 
 // do not use 10/11
 void setup() {
-
+    fastADC();
     pw.begin();
 #ifdef DEBUG
     Serial.begin(115200);
@@ -45,20 +45,24 @@ void setup() {
 
 
     pinMode(pinFans, OUTPUT);
-    pinMode(pinTone, OUTPUT);
+//    pinMode(pinTone, OUTPUT);
 
     analogWrite(pinFans, 200);
-    delay(24500);
-    tone(pinTone, 2200);
-    delay(16500);
-    analogWrite(pinFans, 0);
-    noTone(pinTone);
+//    delay(245);
+//    tone(pinTone, 2200);
+//    delay(165);
+//    analogWrite(pinFans, 0);
+//    noTone(pinTone);
 }
 
 //
 void loop_() {
-    analogWrite(pinFans, 254);
+//    analogWrite(pinFans, 254);
 //    Serial.println(analogRead(pinAnalogBt));
+    OCR2B += 1;
+    if (OCR2B > maxPwmValue) {
+        OCR2B = 0;
+    }
 }
 
 void loop() {
