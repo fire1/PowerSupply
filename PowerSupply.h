@@ -26,7 +26,7 @@ const uint8_t pinLinPwm = 6;
 const uint8_t pinEncoderB = 2;
 const uint8_t pinEncoderA = 11; // only input!
 const uint8_t pinAnalogBt = A3;
-const uint16_t screenNormalRefresh = 310;
+const uint16_t screenNormalRefresh = 650;
 const uint16_t screenEditorRefresh = 120;
 const uint8_t pinLed = 13;
 const uint8_t pinThermistorSwt = A6;
@@ -36,7 +36,7 @@ const uint8_t pinTone = 5; // timer pwm
 const uint16_t editTimeout = 10000;
 const uint16_t holdTimeout = 400;
 const float thresholdBoost = 0.15;
-unsigned long previousMillis = 0;
+unsigned long futureMillis = 0;
 volatile unsigned long currentLoops = 0;
 uint8_t heatSwt, heatLin;
 
@@ -108,8 +108,13 @@ void fansControl() {
     heatLin = (uint8_t) map(rawTempLin, 345, 656, 120, 18);
 
     uint8_t heat = (heatLin > heatSwt) ? heatLin : heatSwt;
-    if (heat > 30) {
-        analogWrite(pinFans, (int) map(heat, 30, 120, 0, 254));
+    if (heat > 65) {
+        uint8_t fpw = map(heat, 35, 100, 0, 254);
+        fpw = (fpw > 254) ? 254 : fpw;
+        fpw = (fpw < 2) ? 1 : fpw;
+        analogWrite(pinFans, fpw);
+    } else if (heat > 35 && heat < 65) {
+        analogWrite(pinFans, map(heat, 35, 65, 1, 3));
     } else if (heatSwt < 25 && heatLin < 25) {
         analogWrite(pinFans, 0);
     }

@@ -45,10 +45,11 @@ void setup() {
 
 
     pinMode(pinFans, OUTPUT);
-//    pinMode(pinTone, OUTPUT);
-
+    pinMode(pinTone, OUTPUT);
+    analogWrite(pinFans, 50);
+    delay(400);
     analogWrite(pinFans, 200);
-    delay(845);
+    delay(400);
     analogWrite(pinTone, 220);
     delay(165);
     analogWrite(pinFans, 0);
@@ -57,7 +58,8 @@ void setup() {
 
 //
 void loop_() {
-//    analogWrite(pinFans, 254);
+    analogWrite(pinFans, 4);
+    return;
 //    Serial.println(analogRead(pinAnalogBt));
     Serial.println(analogRead(pinThermistorLin));
     OCR2B += 1;
@@ -66,14 +68,22 @@ void loop_() {
     }
 }
 
+uint8_t fanToggle = 0;
+
 void loop() {
-    currentLoops++;
+    currentLoops = millis();
+
     in.listen();
     pw.manage();
-    if (currentLoops > previousMillis) {
-        previousMillis = currentLoops;
-        previousMillis += (fastScreen) ? screenEditorRefresh : screenNormalRefresh;
-        fansControl();
+    if (currentLoops > futureMillis) {
+        futureMillis = currentLoops;
+        futureMillis += (fastScreen) ? screenEditorRefresh : screenNormalRefresh;
+        fanToggle++;
+
+        if (fanToggle > 20) {
+            fansControl();
+            fanToggle = 0;
+        }
         digitalWrite(pinLed, HIGH);
 #ifdef DEBUG
         ui.debug();

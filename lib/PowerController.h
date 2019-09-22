@@ -32,11 +32,11 @@ ResponsiveAnalogRead rawAmps(pinAmps, true);
 //  44          3.2
 
 #ifndef maxPwmValue
-#define maxPwmValue  63
+#define maxPwmValue  60
 #endif
 
 #ifndef minPwmValue
-#define minPwmValue 1
+#define minPwmValue 3
 #endif
 
 #ifndef pwmSwtCorrection
@@ -101,7 +101,7 @@ class PowerController {
     void sensVolts() {
         readValues();
         dumpVolts = readVolts = rawVolt.getRawValue();
-        liveVolts = this->toVoltage(readVolts);
+        liveVolts = this->toVoltage(readVolts) - 0.22;
 
     }
 
@@ -142,12 +142,15 @@ class PowerController {
  *
  * @param pwm
  */
-    void setPwm(uint8_t pwm) {
+    void setPwm(uint8_t &pwm) {
 
+        if (pwm > maxPwmValue) {
+            pwm = maxPwmValue;
+        }
         OCR2B = pwm;
         lastPwm = pwm;
 //        analogWrite(pinSwhPwm, pwm);
-        analogWrite(pinLinPwm, pwm);
+//        analogWrite(pinLinPwm, pwm);
     }
 
 
@@ -156,7 +159,7 @@ class PowerController {
         //
         // High amps limit
         if (liveAmps > targetAmps) {
-            pwmValue = pwmValue - 1;
+            pwmValue = pwmValue - 2;
             pwmValue = constrain(pwmValue, minPwmControl, maxPwmControl);
         }
 
@@ -167,8 +170,10 @@ class PowerController {
             // Voltage is in range
             if (int(targetVolt * 10) == int(liveVolts * 10)) return;
 
-
-            if (targetVolt < liveVolts) {
+            if (targetVolt + 1 < liveVolts) {
+                pwmValue = pwmValue - 3;
+                pwmValue = constrain(pwmValue, minPwmControl, maxPwmControl);
+            } else if (targetVolt < liveVolts) {
                 //
                 // Pump up voltage
                 pwmValue = pwmValue - 1;
@@ -177,7 +182,7 @@ class PowerController {
                 //
                 // Lower the voltage
                 pwmValue = pwmValue + 1;
-                pwmValue = constrain(pwmValue, minPwmControl, maxPwmControl);
+//                pwmValue = constrain(pwmValue, minPwmControl, maxPwmControl - 5);
             }
         }
 
@@ -213,6 +218,7 @@ public:
                 setPwm(pwmValue);
                 digitalWrite(pinLed, HIGH);
                 offset++;
+                delay(2);
             }
         }
 
