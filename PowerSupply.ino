@@ -59,6 +59,7 @@ void setup() {
 void loop_() {
 //    analogWrite(pinFans, 254);
 //    Serial.println(analogRead(pinAnalogBt));
+    Serial.println(analogRead(pinThermistorLin));
     OCR2B += 1;
     if (OCR2B > maxPwmValue) {
         OCR2B = 0;

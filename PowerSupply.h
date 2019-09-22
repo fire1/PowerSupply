@@ -102,8 +102,10 @@ boolean is250() {
 void fansControl() {
     int rawTempSwt = analogRead(pinThermistorSwt);
     int rawTempLin = analogRead(pinThermistorLin);
-    heatSwt = (uint8_t) map(rawTempSwt, 345, 460, 120, 70);
-    heatLin = (uint8_t) map(rawTempLin, 345, 460, 120, 70);
+//    heatSwt = (uint8_t) map(rawTempSwt, 345, 460, 120, 70);
+//    heatLin = (uint8_t) map(rawTempLin, 345, 460, 120, 70);
+    heatSwt = (uint8_t) map(rawTempSwt, 345, 656, 120, 18);
+    heatLin = (uint8_t) map(rawTempLin, 345, 656, 120, 18);
 
     uint8_t heat = (heatLin > heatSwt) ? heatLin : heatSwt;
     if (heat > 30) {
