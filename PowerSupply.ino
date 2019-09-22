@@ -48,11 +48,11 @@ void setup() {
 //    pinMode(pinTone, OUTPUT);
 
     analogWrite(pinFans, 200);
-//    delay(245);
-//    tone(pinTone, 2200);
-//    delay(165);
-//    analogWrite(pinFans, 0);
-//    noTone(pinTone);
+    delay(845);
+    analogWrite(pinTone, 220);
+    delay(165);
+    analogWrite(pinFans, 0);
+    analogWrite(pinTone, 0);
 }
 
 //

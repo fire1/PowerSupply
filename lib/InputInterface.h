@@ -139,7 +139,7 @@ private:
         if (usedPreset == 0 && index > 0) {
             debounce = currentLoops + 620;
             usedPreset = index;
-            tone(pinTone,1500);
+            analogWrite(pinTone, 245);
         }
         // todo play sound here!
     }
@@ -156,7 +156,7 @@ private:
             Serial.print(F("V"));
             Serial.println();
 #endif
-            noTone(pinTone);
+            analogWrite(pinTone, 0);
             if (preset.amp > 0 && preset.volt > 0) {
                 cnr->setAmperage(preset.amp);
                 cnr->setVoltage(preset.volt);
