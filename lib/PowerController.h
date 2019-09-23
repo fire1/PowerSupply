@@ -101,8 +101,10 @@ class PowerController {
     void sensVolts() {
         readValues();
         dumpVolts = readVolts = rawVolt.getRawValue();
-        liveVolts = this->toVoltage(readVolts) - 0.22;
 
+        liveVolts = this->toVoltage(readVolts);
+        float crV = map(liveVolts, 1, 25, -1, 1) * 0.1;
+        liveVolts -= crV;
     }
 
 
