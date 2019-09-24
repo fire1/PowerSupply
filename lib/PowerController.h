@@ -167,12 +167,12 @@ class PowerController {
 
         //
         // Low amps
-        if (liveAmps < targetAmps) {
+        if (liveAmps <= targetAmps) {
             //
             // Voltage is in range
             if (int(targetVolt * 10) == int(liveVolts * 10)) return;
 
-            if (targetVolt + 1 < liveVolts) {
+            if (targetVolt + 0.3 < liveVolts) {
                 pwmValue = pwmValue - 3;
                 pwmValue = constrain(pwmValue, minPwmControl, maxPwmControl);
             } else if (targetVolt < liveVolts) {
@@ -201,6 +201,9 @@ public:
 
     void begin() {
         setupPwm();
+        pinMode(pinVolt, INPUT);
+        pinMode(pinAmps, INPUT);
+        pinMode(pinLed, OUTPUT);
     }
 
     void manage() {
@@ -211,7 +214,7 @@ public:
         sensVolts();
         sensAmps();
         resolvePowerMode();
-        if ((liveVolts > targetVolt + thresholdBoost || liveVolts < targetVolt - thresholdBoost) && isPowered) {
+/*        if ((liveVolts > targetVolt + thresholdBoost || liveVolts < targetVolt - thresholdBoost) && isPowered) {
             offset = 0;
             while (liveVolts > targetVolt + 1 && liveVolts < targetVolt - 1 && offset < 240) {
 
@@ -219,18 +222,13 @@ public:
                 sensVolts();
                 setPwm(pwmValue);
                 digitalWrite(pinLed, HIGH);
+                delayMicroseconds(15);
                 offset++;
-                delay(2);
             }
-        }
-
-        digitalWrite(pinLed, LOW);
+        }*/
         parsePwmSwitching();
-        pinMode(pinVolt, INPUT);
-        pinMode(pinAmps, INPUT);
-        pinMode(pinLed, OUTPUT);
-
         setPwm(pwmValue);
+        digitalWrite(pinLed, LOW);
     }
 
     void setVoltage(float value) {
