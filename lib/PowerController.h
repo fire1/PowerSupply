@@ -184,7 +184,7 @@ class PowerController {
                 //
                 // Lower the voltage
                 pwmValue = pwmValue + 1;
-//                pwmValue = constrain(pwmValue, minPwmControl, maxPwmControl - 5);
+                pwmValue = constrain(pwmValue, minPwmControl, maxPwmControl);
             }
         }
 
