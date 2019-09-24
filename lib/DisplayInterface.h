@@ -6,24 +6,11 @@
 #define POWERSUPPLY_INTERFACE_H
 
 #include <Arduino.h>
-
-
 #include "../PowerSupply.h"
-
-
 #include "PowerController.h"
 #include "InputInterface.h"
 
-#ifndef DEBUG
 
-#include <LiquidCrystal.h>
-
-#ifndef LiquidCrystal_4bit_h
-
-#include "../libraries/NewLiquidCrystal_lib/LiquidCrystal.h"
-
-#endif
-#endif
 
 const char charV[2] = "V";
 const char charA[2] = "A";

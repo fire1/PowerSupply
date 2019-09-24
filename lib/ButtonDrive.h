@@ -25,12 +25,14 @@ void driveHold(uint8_t button) {
     }
     if (holdCounter > holdTimeout) {
         currentButton = button;
+#ifdef DEBUG
         Serial.println();
         Serial.println();
         Serial.print(F(" Button "));
         Serial.print(button);
         Serial.print(" held.");
         Serial.println();
+#endif
         holdCounter = 0;
     }
 }
@@ -39,7 +41,9 @@ void driveHold(uint8_t button) {
 void btn1Click() {
     if (currentButton != 1) {
         currentButton = 1;
+#ifdef DEBUG
         Serial.println(F("button 1 clicked"));
+#endif
     }
 }
 
@@ -50,7 +54,9 @@ void btn1Hold() {
 void btn2Click() {
     if (currentButton != 2) {
         currentButton = 2;
+#ifdef DEBUG
         Serial.println(F("button 2 clicked"));
+#endif
     }
 }
 
@@ -61,7 +67,9 @@ void btn2Hold() {
 void btn3Click() {
     if (currentButton != 3) {
         currentButton = 3;
+#ifdef DEBUG
         Serial.println(F("button 3 clicked"));
+#endif
     }
 }
 

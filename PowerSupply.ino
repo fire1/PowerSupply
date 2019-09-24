@@ -4,14 +4,14 @@
  * version $Id$
  */
 
-#define DEBUG
+//#define DEBUG
 
 #include <Arduino.h>
+#include "PowerSupply.h"
 #include "lib/PresetMemory.h"
 #include "lib/PowerController.h"
 #include "lib/DisplayInterface.h"
 #include "lib/InputInterface.h"
-#include "PowerSupply.h"
 
 
 // https://bitbucket.org/fmalpartida/new-liquidcrystal/wiki/Home

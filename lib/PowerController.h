@@ -151,8 +151,7 @@ class PowerController {
         }
         OCR2B = pwm;
         lastPwm = pwm;
-//        analogWrite(pinSwhPwm, pwm);
-//        analogWrite(pinLinPwm, pwm);
+        analogWrite(pinLinPwm, pwm);
     }
 
 

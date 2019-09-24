@@ -8,13 +8,25 @@
 #include <Arduino.h>
 #include <ResponsiveAnalogRead.h>
 
+#include <LiquidCrystal.h>
+
+#ifndef DEBUG
+
+#include <LiquidCrystal.h>
+
+#ifndef LiquidCrystal_4bit_h
+
+//#include "../libraries/NewLiquidCrystal_lib/LiquidCrystal.h"
+
+#endif
+#endif
+
 #ifndef RESPONSIVE_ANALOG_READ_H
 
-#include "../libraries/ResponsiveAnalogRead/src/ResponsiveAnalogRead.h"
+//#include "../libraries/ResponsiveAnalogRead/src/ResponsiveAnalogRead.h"
 
 #endif
 
-#include <LiquidCrystal.h>
 
 
 //Inputs/outputs
@@ -27,7 +39,7 @@ const uint8_t pinEncoderB = 2;
 const uint8_t pinEncoderA = 11; // only input!
 const uint8_t pinAnalogBt = A3;
 const uint16_t screenNormalRefresh = 650;
-const uint16_t screenEditorRefresh = 120;
+const uint16_t screenEditorRefresh = 220;
 const uint8_t pinLed = 13;
 const uint8_t pinThermistorSwt = A6;
 const uint8_t pinThermistorLin = A2;
