@@ -32,7 +32,7 @@ ResponsiveAnalogRead rawAmps(pinAmps, true);
 //  44          3.2
 
 #ifndef maxPwmValue
-#define maxPwmValue  60
+#define maxPwmValue  126 //63
 #endif
 
 #ifndef minPwmValue
@@ -76,7 +76,7 @@ class PowerController {
         pinMode(pinSwhPwm, OUTPUT); // Output pin for OCR0B
         TCCR2A = _BV(COM2A1) | _BV(COM2B1) | _BV(WGM21) | _BV(WGM20);
         TCCR2B = _BV(WGM22) | _BV(CS20);
-        OCR2A = maxPwmValue;
+        OCR2A = maxPwmValue;// 63
         OCR2B = 0;
 
         //---------------------------------------------- Set PWM frequency for D5 & D6 ------------------------------
