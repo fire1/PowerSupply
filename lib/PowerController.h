@@ -32,7 +32,7 @@ ResponsiveAnalogRead rawAmps(pinAmps, true);
 //  44          3.2
 
 #ifndef maxPwmValue
-#define maxPwmValue  60
+#define maxPwmValue  126 //63
 #endif
 
 #ifndef minPwmValue
@@ -57,6 +57,7 @@ class PowerController {
     uint8_t pwmValue = 0;
     uint8_t maxPwmControl = maxPwmValue;
     uint8_t minPwmControl = minPwmValue;
+    uint8_t badPwmControl = 255;
     float targetVolt = 3;
     float liveVolts = 0;
     float readVolts = 0;
@@ -75,7 +76,7 @@ class PowerController {
         pinMode(pinSwhPwm, OUTPUT); // Output pin for OCR0B
         TCCR2A = _BV(COM2A1) | _BV(COM2B1) | _BV(WGM21) | _BV(WGM20);
         TCCR2B = _BV(WGM22) | _BV(CS20);
-        OCR2A = maxPwmValue;
+        OCR2A = maxPwmValue;// 63
         OCR2B = 0;
 
         //---------------------------------------------- Set PWM frequency for D5 & D6 ------------------------------
@@ -87,8 +88,8 @@ class PowerController {
     }
 
 
-    float toVoltage(int raw) {
-        return map(raw, 140, 940, 411, 2700) * 0.01;
+    static float toVoltage(int raw) {
+        return float(map(raw, 140, 940, 411, 2700) * 0.01);
     }
 
     void readValues() {
@@ -160,6 +161,7 @@ class PowerController {
         //
         // High amps limit
         if (liveAmps > targetAmps) {
+            maxPwmControl = lastPwm;
             pwmValue = pwmValue - 2;
             pwmValue = constrain(pwmValue, minPwmControl, maxPwmControl);
         }
@@ -182,6 +184,7 @@ class PowerController {
             } else if (targetVolt > liveVolts) {
                 //
                 // Lower the voltage
+                maxPwmControl = lastPwm;
                 pwmValue = pwmValue + 1;
                 pwmValue = constrain(pwmValue, minPwmControl, maxPwmControl);
             }
@@ -231,11 +234,13 @@ public:
     }
 
     void setVoltage(float value) {
+        maxPwmControl = maxPwmValue;
         if (value >= 0 && value <= 26)
             targetVolt = value;
     }
 
     void setAmperage(float value) {
+        maxPwmControl = maxPwmValue;
         if (value >= 0 && value <= 5)
             targetAmps = value;
     }
