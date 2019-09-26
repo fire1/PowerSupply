@@ -243,7 +243,7 @@ public:
 
     void setVoltage(float value) {
         maxPwmControl = maxPwmValue;
-        if (value >= 0 && value <= 26)
+        if (value >= 0 && value < 26)
             targetVolt = value;
     }
 
