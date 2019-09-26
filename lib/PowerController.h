@@ -176,10 +176,10 @@ class PowerController {
         // Low amps
         if (liveAmps <= targetAmps) {
             overloading = 0;
-
+            int gap = targetVolt * 10 - liveVolts * 10;
             //
             // Voltage is in range
-            if (int(targetVolt * 10) == int(liveVolts * 10)) return;
+            if (abs(gap) < 3) return;
 
             if (targetVolt - thresholdVoltage < liveVolts) {
                 if (powerMode == PowerController::MODE_SWT_LM) maxPwmControl = lastPwm;
