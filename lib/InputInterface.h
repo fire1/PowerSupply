@@ -325,7 +325,7 @@ public:
 
     void listen() {
         terminal();
-        if (is10())abt->check();
+        abt->check();
         inputs();
 
         if (usedPreset > 0 && currentLoops > debounce) {

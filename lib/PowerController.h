@@ -32,7 +32,7 @@ ResponsiveAnalogRead rawAmps(pinAmps, true);
 //  44          3.2
 
 #ifndef maxPwmValue
-#define maxPwmValue  126 //63
+#define maxPwmValue  168 //63
 #endif
 
 #ifndef minPwmValue
@@ -181,8 +181,8 @@ class PowerController {
             // Voltage is in range
             if (abs(gap) < 3) return;
 
-            if (targetVolt  < liveVolts && gap > 30) {
-                if (powerMode == PowerController::MODE_SWT_LM) maxPwmControl = lastPwm;
+            if (targetVolt  < liveVolts && gap > 10) {
+                maxPwmControl = lastPwm;
                 pwmValue = pwmValue - 3;
                 pwmValue = constrain(pwmValue, minPwmControl, maxPwmControl);
             } else if (targetVolt < liveVolts) {
