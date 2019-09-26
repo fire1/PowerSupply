@@ -47,7 +47,7 @@ const uint8_t pinFans = 10;
 const uint8_t pinTone = 5; // timer pwm
 const uint16_t editTimeout = 10000;
 const uint16_t holdTimeout = 400;
-const float thresholdBoost = 0.15;
+const float thresholdVoltage = 0.05;
 unsigned long futureMillis = 0;
 volatile unsigned long currentLoops = 0;
 uint8_t heatSwt, heatLin;

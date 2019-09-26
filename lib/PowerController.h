@@ -173,7 +173,8 @@ class PowerController {
             // Voltage is in range
             if (int(targetVolt * 10) == int(liveVolts * 10)) return;
 
-            if (targetVolt + 0.3 < liveVolts) {
+            if (targetVolt - thresholdVoltage < liveVolts) {
+                maxPwmControl = lastPwm;
                 pwmValue = pwmValue - 3;
                 pwmValue = constrain(pwmValue, minPwmControl, maxPwmControl);
             } else if (targetVolt < liveVolts) {
@@ -181,10 +182,9 @@ class PowerController {
                 // Pump up voltage
                 pwmValue = pwmValue - 1;
                 pwmValue = constrain(pwmValue, minPwmControl, maxPwmControl);
-            } else if (targetVolt > liveVolts) {
+            } else if (targetVolt  > liveVolts) {
                 //
                 // Lower the voltage
-                maxPwmControl = lastPwm;
                 pwmValue = pwmValue + 1;
                 pwmValue = constrain(pwmValue, minPwmControl, maxPwmControl);
             }
@@ -216,7 +216,7 @@ public:
         sensVolts();
         sensAmps();
         resolvePowerMode();
-/*        if ((liveVolts > targetVolt + thresholdBoost || liveVolts < targetVolt - thresholdBoost) && isPowered) {
+/*        if ((liveVolts > targetVolt + thresholdVoltage || liveVolts < targetVolt - thresholdVoltage) && isPowered) {
             offset = 0;
             while (liveVolts > targetVolt + 1 && liveVolts < targetVolt - 1 && offset < 240) {
 

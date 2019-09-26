@@ -58,14 +58,14 @@ void setup() {
 
 //
 void loop_() {
-    analogWrite(pinFans, 4);
-    return;
+//    analogWrite(pinFans, 4);
+//    return;
 //    Serial.println(analogRead(pinAnalogBt));
-    Serial.println(analogRead(pinThermistorLin));
-    OCR2B += 1;
-    if (OCR2B > maxPwmValue) {
-        OCR2B = 0;
-    }
+//    Serial.println(analogRead(pinThermistorLin));
+//    OCR2B += 1;
+//    if (OCR2B > maxPwmValue) {
+//        OCR2B = 0;
+//    }
 }
 
 uint8_t fanToggle = 0;
