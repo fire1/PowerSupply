@@ -331,6 +331,9 @@ public:
 
 };
 /*
+ * For testing by averaging value of pwm
+ *
+ *
 #define avrGap 10
 
 uint8_t capMin, capMax, capAvr, capIndex = 0;
