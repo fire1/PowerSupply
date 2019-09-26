@@ -181,7 +181,7 @@ class PowerController {
             // Voltage is in range
             if (abs(gap) < 3) return;
 
-            if (gap > 30) {
+            if (targetVolt  < liveVolts && gap > 30) {
                 if (powerMode == PowerController::MODE_SWT_LM) maxPwmControl = lastPwm;
                 pwmValue = pwmValue - 3;
                 pwmValue = constrain(pwmValue, minPwmControl, maxPwmControl);
