@@ -57,7 +57,7 @@ class PowerController {
     uint8_t pwmValue = 0;
     uint8_t maxPwmControl = maxPwmValue;
     uint8_t minPwmControl = minPwmValue;
-    uint8_t badPwmControl = 255;
+    uint8_t overloading = 0;
     float targetVolt = 3;
     float liveVolts = 0;
     float readVolts = 0;
@@ -161,20 +161,28 @@ class PowerController {
         //
         // High amps limit
         if (liveAmps > targetAmps) {
-            maxPwmControl = lastPwm;
+            if (powerMode == PowerController::MODE_SWT_LM) maxPwmControl = lastPwm;
             pwmValue = pwmValue - 2;
             pwmValue = constrain(pwmValue, minPwmControl, maxPwmControl);
+            overloading++;
+        }
+
+        if (overloading > 60) {
+            activeParse = false;
+            alarm();
         }
 
         //
         // Low amps
         if (liveAmps <= targetAmps) {
+            overloading = 0;
+
             //
             // Voltage is in range
             if (int(targetVolt * 10) == int(liveVolts * 10)) return;
 
             if (targetVolt - thresholdVoltage < liveVolts) {
-                maxPwmControl = lastPwm;
+                if (powerMode == PowerController::MODE_SWT_LM) maxPwmControl = lastPwm;
                 pwmValue = pwmValue - 3;
                 pwmValue = constrain(pwmValue, minPwmControl, maxPwmControl);
             } else if (targetVolt < liveVolts) {
@@ -182,7 +190,7 @@ class PowerController {
                 // Pump up voltage
                 pwmValue = pwmValue - 1;
                 pwmValue = constrain(pwmValue, minPwmControl, maxPwmControl);
-            } else if (targetVolt  > liveVolts) {
+            } else if (targetVolt > liveVolts) {
                 //
                 // Lower the voltage
                 pwmValue = pwmValue + 1;

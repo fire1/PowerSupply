@@ -271,10 +271,10 @@ private:
         if (openEdit) {
             lcdTitles = true;
             fastScreen = true;
+            noAlarm();
         } else {
             fastScreen = false;
         }
-
     }
 
     void changeValues() {

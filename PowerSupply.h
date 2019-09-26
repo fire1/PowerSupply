@@ -28,7 +28,6 @@
 #endif
 
 
-
 //Inputs/outputs
 boolean fastScreen = false;
 const uint8_t pinVolt = A1;
@@ -154,6 +153,22 @@ void fastADC() {
     sbi(ADCSRA, ADPS2);
     cbi(ADCSRA, ADPS1);
     cbi(ADCSRA, ADPS0);
+}
+
+boolean isAlarmed = false;
+
+void alarm() {
+    if (!isAlarmed) {
+        analogWrite(pinTone, 244);
+        isAlarmed = true;
+    }
+}
+
+void noAlarm() {
+    if (isAlarmed) {
+        analogWrite(pinTone, 0);
+        isAlarmed = false;
+    }
 }
 
 #endif //POWERSUPPLY_POWERSUPPLY_H
