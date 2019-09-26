@@ -150,7 +150,7 @@ class PowerController {
         if (pwm > maxPwmValue) {
             pwm = maxPwmValue;
         }
-        OCR2B = pwm;
+        OCR2B = pwm; // move it here constrain(pwm, minPwmControl, maxPwmControl)
         lastPwm = pwm;
         analogWrite(pinLinPwm, pwm);
     }
