@@ -176,6 +176,7 @@ class PowerController {
         }
 
         if (overloading > 60) {
+            pwmValue = 0;
             activeParse = false;
             alarm();
         }

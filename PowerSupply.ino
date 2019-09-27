@@ -85,6 +85,7 @@ void loop() {
             fanToggle = 0;
         }
         blink();
+        noAlarm();
 #ifdef DEBUG
         ui.debug();
 #else
