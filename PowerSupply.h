@@ -159,12 +159,17 @@ boolean isAlarmed = false;
 
 void alarm() {
     if (!isAlarmed) {
-        analogWrite(pinTone, 244);
+        analogWrite(pinTone, 200);
         isAlarmed = true;
     }
 }
 void alert(){
     alarm();
+}
+boolean blinker = 0;
+void blink(){
+    blinker= !blinker;
+    digitalWrite(pinLed, blinker);
 }
 
 void noAlarm() {

@@ -84,7 +84,7 @@ void loop() {
             fansControl();
             fanToggle = 0;
         }
-        digitalWrite(pinLed, HIGH);
+        blink();
 #ifdef DEBUG
         ui.debug();
 #else

@@ -62,6 +62,9 @@ class PowerController {
     uint8_t maxPwmControl = maxPwmValue;
     uint8_t minPwmControl = minPwmValue;
     uint8_t overloading = 0;
+    uint8_t capMin = 255, capMax, capAvr, capIndex = 0;
+    uint8_t capContainer[100];
+    boolean avrCalibration = false;
     float targetVolt = 3;
     float liveVolts = 0;
     float readVolts = 0;
@@ -149,11 +152,12 @@ class PowerController {
  *
  * @param pwm
  */
-    void setPwm(uint8_t &pwm) {
+    void setPwm(uint8_t pwm) {
 
         if (pwm > maxPwmValue) {
             pwm = maxPwmValue;
         }
+        setToAvr(pwm);
         OCR2B = pwm; // move it here constrain(pwm, minPwmControl, maxPwmControl)
         lastPwm = pwm;
         analogWrite(pinLinPwm, pwm);
@@ -174,6 +178,12 @@ class PowerController {
         if (overloading > 60) {
             activeParse = false;
             alarm();
+        }
+
+        if (this->isAvrCalibrated()) {
+            parseAvg(capContainer, avrSimples);
+            pwmValue = capAvr;
+            blink();
         }
 
         //
@@ -204,8 +214,15 @@ class PowerController {
 
 
     }
-    uint8_t capMin = 255, capMax, capAvr, capIndex = 0;
-    uint8_t capContainer[100];
+
+
+    boolean isAvrCalibrated() {
+        if (avrCalibration) {
+            avrCalibration = false;
+            return true;
+        }
+        return false;
+    }
 
     void setToAvr(uint8_t val) {
         capContainer[capIndex] = val;
@@ -213,6 +230,7 @@ class PowerController {
 
         if (capIndex > avrSimples) {
             capIndex = 0;
+            avrCalibration = true;
         }
     }
 
@@ -231,8 +249,8 @@ class PowerController {
                 capMax = capMax < arr[index] ? arr[index] : capMax;
             }
 
-        minPwmControl = capMin;
-        maxPwmControl = capMax;
+        minPwmControl = capMin - 5;
+        maxPwmControl = capMax + 5;
         alert();
     }
 
@@ -260,36 +278,23 @@ public:
         sensVolts();
         sensAmps();
         resolvePowerMode();
-/*        if ((liveVolts > targetVolt + thresholdVoltage || liveVolts < targetVolt - thresholdVoltage) && isPowered) {
-            offset = 0;
-            while (liveVolts > targetVolt + 1 && liveVolts < targetVolt - 1 && offset < 240) {
-
-                parsePwmSwitching();
-                sensVolts();
-                setPwm(pwmValue);
-                digitalWrite(pinLed, HIGH);
-                delayMicroseconds(15);
-                offset++;
-            }
-        }*/
         parsePwmSwitching();
         setPwm(pwmValue);
-        digitalWrite(pinLed, LOW);
     }
 
-    void resetControl(){
+    void resetControl() {
         maxPwmControl = maxPwmValue;
         minPwmControl = minPwmValue;
     }
 
     void setVoltage(float value) {
-
+        resetControl();
         if (value >= 0 && value < 26)
             targetVolt = value;
     }
 
     void setAmperage(float value) {
-        maxPwmControl = maxPwmValue;
+        resetControl();
         if (value >= 0 && value <= 5)
             targetAmps = value;
     }
