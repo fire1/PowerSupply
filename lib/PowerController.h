@@ -31,6 +31,10 @@ ResponsiveAnalogRead rawAmps(pinAmps, true);
 //  45          4.1
 //  44          3.2
 
+
+#define avrSimples 100
+#define avrGap 50
+
 #ifndef maxPwmValue
 #define maxPwmValue  168 //63
 #endif
@@ -181,7 +185,7 @@ class PowerController {
             // Voltage is in range
             if (abs(gap) < 3) return;
 
-            if (targetVolt  < liveVolts && gap > 10) {
+            if (targetVolt < liveVolts && gap > 10) {
                 maxPwmControl = lastPwm;
                 pwmValue = pwmValue - 3;
                 pwmValue = constrain(pwmValue, minPwmControl, maxPwmControl);
@@ -200,6 +204,38 @@ class PowerController {
 
 
     }
+    uint8_t capMin = 255, capMax, capAvr, capIndex = 0;
+    uint8_t capContainer[100];
+
+    void setToAvr(uint8_t val) {
+        capContainer[capIndex] = val;
+        capIndex++;
+
+        if (capIndex > avrSimples) {
+            capIndex = 0;
+        }
+    }
+
+    void parseAvg(uint8_t *arr, int n) {
+        // Find average
+        double avg = 0;
+        for (index = 0; index < n; index++)
+            avg += arr[index];
+        avg = avg / n;
+        capAvr = int(avg);
+
+        // Print elements greater than average
+        for (index = 0; index < n; index++)
+            if (arr[index] >= avg - avrGap && arr[index] <= avg + avrGap) {
+                capMin = capMin > arr[index] ? arr[index] : capMin;
+                capMax = capMax < arr[index] ? arr[index] : capMax;
+            }
+
+        minPwmControl = capMin;
+        maxPwmControl = capMax;
+        alert();
+    }
+
 
 public:
 
@@ -241,8 +277,13 @@ public:
         digitalWrite(pinLed, LOW);
     }
 
-    void setVoltage(float value) {
+    void resetControl(){
         maxPwmControl = maxPwmValue;
+        minPwmControl = minPwmValue;
+    }
+
+    void setVoltage(float value) {
+
         if (value >= 0 && value < 26)
             targetVolt = value;
     }

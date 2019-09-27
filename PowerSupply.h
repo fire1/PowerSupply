@@ -163,6 +163,9 @@ void alarm() {
         isAlarmed = true;
     }
 }
+void alert(){
+    alarm();
+}
 
 void noAlarm() {
     if (isAlarmed) {
