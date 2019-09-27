@@ -184,6 +184,7 @@ class PowerController {
             parseAvg(capContainer, avrSimples);
             pwmValue = capAvr;
             blink();
+            return;
         }
 
         //
