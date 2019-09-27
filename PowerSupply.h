@@ -155,27 +155,30 @@ void fastADC() {
     cbi(ADCSRA, ADPS0);
 }
 
-boolean isAlarmed = false;
-
-void alarm() {
-    if (!isAlarmed) {
-        analogWrite(pinTone, 200);
-        isAlarmed = true;
-    }
-}
-void alert(){
-    alarm();
-}
 boolean blinker = 0;
-void blink(){
-    blinker= !blinker;
+
+void blink() {
+    blinker = !blinker;
     digitalWrite(pinLed, blinker);
 }
 
+unsigned long startAlarmed = 0;
+
+void alarm() {
+    if (startAlarmed == 0) {
+        analogWrite(pinTone, 200);
+        startAlarmed = currentLoops;
+    }
+}
+
+void alert() {
+    alarm();
+}
+
 void noAlarm() {
-    if (isAlarmed) {
+    if (startAlarmed + 240 > currentLoops) {
         analogWrite(pinTone, 0);
-        isAlarmed = false;
+        startAlarmed = 0;
     }
 }
 

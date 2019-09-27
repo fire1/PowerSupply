@@ -72,7 +72,7 @@ uint8_t fanToggle = 0;
 
 void loop() {
     currentLoops = millis();
-
+    noAlarm();
     in.listen();
     pw.manage();
     if (currentLoops > futureMillis) {
@@ -85,7 +85,6 @@ void loop() {
             fanToggle = 0;
         }
         blink();
-        noAlarm();
 #ifdef DEBUG
         ui.debug();
 #else
