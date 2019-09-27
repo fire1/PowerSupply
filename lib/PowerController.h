@@ -251,8 +251,11 @@ class PowerController {
                 capMax = capMax < arr[index] ? arr[index] : capMax;
             }
 
-        minPwmControl = capMin - 5;
-        maxPwmControl = capMax + 5;
+        if (capMin - 5 > minPwmValue)
+            minPwmControl = capMin - 5;
+        if (capMax + 5 < maxPwmValue)
+            maxPwmControl = capMax + 5;
+
         alert();
     }
 
