@@ -19,7 +19,7 @@ uint8_t currentButton = 0;
 uint16_t holdCounter = 0;
 
 void driveHold(uint8_t button) {
-    if (currentButton != button && is250()) {
+    if (currentButton != button /*&& is250()*/) {
         holdCounter++;
         currentButton = 0; // clear old  button
     }
@@ -110,10 +110,10 @@ void btn6Hold() {
     driveHold(66);
 }
 
-Button btnBlinker = Button(27, &btn2Click, &btn2Hold, 250);
-Button btnEncoder = Button(610, &btn1Click, &btn1Hold, 250);
-Button btnMemSetA = Button(765, &btn3Click, &btn3Hold, 250);
-Button btnMemSetB = Button(512, &btn4Click, &btn4Hold, 250);
-Button btnMemSetD = Button(420, &btn6Click, &btn6Hold, 250);
-Button btnMemSetC = Button(264, &btn5Click, &btn5Hold, 250);
+Button btnBlinker = Button(27, &btn2Click, &btn2Hold);
+Button btnEncoder = Button(610, &btn1Click, &btn1Hold);
+Button btnMemSetA = Button(765, &btn3Click, &btn3Hold);
+Button btnMemSetB = Button(512, &btn4Click, &btn4Hold);
+Button btnMemSetD = Button(420, &btn6Click, &btn6Hold);
+Button btnMemSetC = Button(264, &btn5Click, &btn5Hold);
 #endif //POWERSUPPLY_BUTTONDRIVE_H
