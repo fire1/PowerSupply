@@ -36,7 +36,7 @@ ResponsiveAnalogRead rawAmps(pinAmps, true);
 #define avrGap 50
 
 #ifndef maxPwmValue
-#define maxPwmValue  168 //63
+#define maxPwmValue  200 //200
 #endif
 
 #ifndef minPwmValue
@@ -169,17 +169,18 @@ class PowerController {
         //
         // High amps limit
         if (liveAmps > targetAmps) {
-            if (powerMode == PowerController::MODE_SWT_LM) maxPwmControl = lastPwm;
             pwmValue = pwmValue - 2;
             pwmValue = constrain(pwmValue, minPwmControl, maxPwmControl);
             overloading++;
         }
+
 
         if (overloading > 60) {
             pwmValue = 0;
             activeParse = false;
             alarm();
         }
+
 
         if (this->isAvrCalibrated()) {
             parseAvg(capContainer, avrSimples);
@@ -192,12 +193,12 @@ class PowerController {
         // Low amps
         if (liveAmps <= targetAmps) {
             overloading = 0;
-            int gap = targetVolt * 10 - liveVolts * 10;
+            int gap = targetVolt * 100 - liveVolts * 100;
             //
             // Voltage is in range
-            if (abs(gap) < 3) return;
+            if (abs(gap) < 10) return;
 
-            if (targetVolt < liveVolts && gap > 10) {
+            if (targetVolt < liveVolts && gap > 100) {
                 maxPwmControl = lastPwm;
                 pwmValue = pwmValue - 3;
                 pwmValue = constrain(pwmValue, minPwmControl, maxPwmControl);
@@ -251,12 +252,11 @@ class PowerController {
                 capMax = capMax < arr[index] ? arr[index] : capMax;
             }
 
-        if (capMin - 5 > minPwmValue)
-            minPwmControl = capMin - 5;
+        if (capMin - 5 > minPwmValue + 1)
+            minPwmControl = capMin - 1;
         if (capMax + 5 < maxPwmValue)
-            maxPwmControl = capMax + 5;
+            maxPwmControl = capMax;
 
-        alert();
     }
 
 

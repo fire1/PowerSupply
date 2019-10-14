@@ -176,7 +176,7 @@ void alert() {
 }
 
 void noAlarm() {
-    if (startAlarmed + 240 > currentLoops) {
+    if (currentLoops > startAlarmed + 250 ) {
         analogWrite(pinTone, 0);
         startAlarmed = 0;
     }

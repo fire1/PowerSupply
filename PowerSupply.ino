@@ -74,7 +74,9 @@ void loop() {
     currentLoops = millis();
     noAlarm();
     in.listen();
-    pw.manage();
+    if (is10)
+        pw.manage();
+
     if (currentLoops > futureMillis) {
         futureMillis = currentLoops;
         futureMillis += (fastScreen) ? screenEditorRefresh : screenNormalRefresh;
