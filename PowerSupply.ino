@@ -15,7 +15,7 @@
 
 
 // https://bitbucket.org/fmalpartida/new-liquidcrystal/wiki/Home
-LiquidCrystal lcd(1, 0, 4, 7, 8, 9);
+
 
 RotaryEncoder ec(pinEncoderA, pinEncoderB);
 AnalogButtons ab(pinAnalogBt, INPUT, 10);

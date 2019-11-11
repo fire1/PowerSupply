@@ -27,7 +27,17 @@
 
 #endif
 
-
+/*
+ * PWM 9,10
+ * tone: 11 (or 3)
+ * LCD: 2,4,5,6,7,8
+ * LED: 13
+ * Buttons: A0
+ * Encoder: A1,A2
+ * Thermistor: A3
+ * Fan: 3 (or 11)
+ */
+LiquidCrystal lcd(1, 0, 4, 7, 8, 9);
 //Inputs/outputs
 boolean fastScreen = false;
 const uint8_t pinVolt = A1;
@@ -37,13 +47,14 @@ const uint8_t pinLinPwm = 6;
 const uint8_t pinEncoderB = 2;
 const uint8_t pinEncoderA = 11; // only input!
 const uint8_t pinAnalogBt = A3;
-const uint16_t screenNormalRefresh = 650;
-const uint16_t screenEditorRefresh = 160;
 const uint8_t pinLed = 13;
 const uint8_t pinThermistorSwt = A6;
 const uint8_t pinThermistorLin = A2;
 const uint8_t pinFans = 10;
 const uint8_t pinTone = 5; // timer pwm
+
+const uint16_t screenNormalRefresh = 650;
+const uint16_t screenEditorRefresh = 160;
 const uint16_t editTimeout = 10000;
 const uint16_t holdTimeout = 400;
 const float thresholdVoltage = 0.05;
