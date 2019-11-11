@@ -34,11 +34,11 @@ void interruptFunction() {
 void setup() {
     fastADC();
     pw.begin();
-#ifdef DEBUG
+
     Serial.begin(115200);
-#else
+
     lcd.begin(20, 4);
-#endif
+
     in.begin();
     ui.begin();
     currentLoops = 0;
@@ -76,11 +76,11 @@ void loop() {
             fanToggle = 0;
         }
         blink();
-#ifdef DEBUG
+
         ui.debug();
-#else
+
         ui.draw();
-#endif
+
     }
 
 }//end of void loop

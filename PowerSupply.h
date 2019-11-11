@@ -37,7 +37,7 @@
  * Thermistor: A3
  * Fan: 3 (or 11)
  */
-LiquidCrystal lcd(1, 0, 4, 7, 8, 9);
+LiquidCrystal lcd(2, 4, 5, 6, 7, 8);
 //Inputs/outputs
 boolean fastScreen = false;
 const uint8_t pinVolt = A1;
