@@ -9,8 +9,8 @@
 #include "../PowerSupply.h"
 
 
-ResponsiveAnalogRead rawVolt(pinVolt, true);
-ResponsiveAnalogRead rawAmps(pinAmps, true);
+ResponsiveAnalogRead rawVolt(pinVolInp, true);
+ResponsiveAnalogRead rawAmps(pinAmpInp, true);
 
 //  pwm     / volt
 //
@@ -80,18 +80,18 @@ class PowerController {
 
     void setupPwm() {
         //---------------------------------------------- Set PWM frequency for D5 & D6 -------------------------------
-        pinMode(pinSwhPwm, OUTPUT); // Output pin for OCR0B
-        TCCR2A = _BV(COM2A1) | _BV(COM2B1) | _BV(WGM21) | _BV(WGM20);
-        TCCR2B = _BV(WGM22) | _BV(CS20);
-        OCR2A = maxPwmValue;// 63
-        OCR2B = 0;
+        pinMode(pinVolPwm, OUTPUT); // Output pin for OCR0B
 
-        //---------------------------------------------- Set PWM frequency for D5 & D6 ------------------------------
-//        TCCR0B = TCCR0B & B11111000 | B00000001;    // set timer 0 divisor to     1 for PWM frequency of 62500.00 Hz
+//        Timer 2 fast PWM
+//        TCCR2A = _BV(COM2A1) | _BV(COM2B1) | _BV(WGM21) | _BV(WGM20);
+//        TCCR2B = _BV(WGM22) | _BV(CS20);
+//        OCR2A = maxPwmValue;// 63
+//        OCR2B = 0;
+
+
         //---------------------------------------------- Set PWM frequency for D9 & D10 ------------------------------
         TCCR1B = TCCR1B & B11111000 | B00000010;    // set timer 1 divisor to     8 for PWM frequency of  3921.16 Hz
-        //---------------------------------------------- Set PWM frequency for D3 & D11 ------------------------------
-        TCCR2B = TCCR2B & B11111000 | B00000001;    // set timer 2 divisor to     1 for PWM frequency of 31372.55 Hz
+
     }
 
 
@@ -160,7 +160,7 @@ class PowerController {
         setToAvr(pwm);
         OCR2B = pwm; // move it here constrain(pwm, minPwmControl, maxPwmControl)
         lastPwm = pwm;
-        analogWrite(pinLinPwm, pwm);
+        analogWrite(pinVolPwm, pwm);
     }
 
 
@@ -270,8 +270,8 @@ public:
 
     void begin() {
         setupPwm();
-        pinMode(pinVolt, INPUT);
-        pinMode(pinAmps, INPUT);
+        pinMode(pinVolInp, INPUT);
+        pinMode(pinAmpInp, INPUT);
         pinMode(pinLed, OUTPUT);
     }
 

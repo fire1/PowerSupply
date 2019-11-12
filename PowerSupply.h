@@ -10,15 +10,14 @@
 
 #include <LiquidCrystal.h>
 
-#ifndef DEBUG
+
 
 #include <LiquidCrystal.h>
 
 #ifndef LiquidCrystal_4bit_h
 
-//#include "../libraries/NewLiquidCrystal_lib/LiquidCrystal.h"
+#include "../libraries/NewLiquidCrystal_lib/LiquidCrystal.h"
 
-#endif
 #endif
 
 #ifndef RESPONSIVE_ANALOG_READ_H
@@ -40,10 +39,10 @@
 LiquidCrystal lcd(2, 4, 5, 6, 7, 8);
 //Inputs/outputs
 boolean fastScreen = false;
-const uint8_t pinVolt = A1;
-const uint8_t pinAmps = A0;
-const uint8_t pinSwhPwm = 3;
-const uint8_t pinLinPwm = 6;
+const uint8_t pinVolInp = A1;
+const uint8_t pinAmpInp = A0;
+const uint8_t pinVolPwm = 9;
+const uint8_t pinAmpPwm = 10;
 const uint8_t pinAnalogBt = A0;
 const uint8_t pinEncoderB = A1;
 const uint8_t pinEncoderA = A2; // only input!
@@ -95,7 +94,16 @@ byte charSwitch[] = {
         B11011,
         B00000
 };
-
+byte charPlugin[] = {
+        B01010,
+        B01010,
+        B11111,
+        B10001,
+        B01110,
+        B00100,
+        B00100,
+        B00000
+};
 
 unsigned long amplitude10, amplitude100, amplitude350;
 

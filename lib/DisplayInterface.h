@@ -197,6 +197,7 @@ public:
         lcd->createChar(0, charLinear);
         lcd->createChar(1, charSwitch);
         lcd->createChar(2, charLimits);
+        lcd->createChar(3, charPlugin);
         lcd->noAutoscroll();
     }
 

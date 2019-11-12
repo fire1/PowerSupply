@@ -91,7 +91,7 @@ private:
             //
             // Analog pwm
             if (where == F("anl")) {
-                analogWrite(pinLinPwm, Serial.readStringUntil('\n').toInt());
+                analogWrite(pinAmpPwm, Serial.readStringUntil('\n').toInt());
                 Serial.println();
                 Serial.print(F("PWM Analog: "));
                 Serial.print(cnr->getPwmValue());

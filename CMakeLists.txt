@@ -13,4 +13,6 @@ set(${CMAKE_PROJECT_NAME}_SKETCH PowerSupply.ino)
 # set(mega.upload.speed 115200)
 set(INCLUDE_DIRECTORIES "../libraries/")
 generate_arduino_firmware(${CMAKE_PROJECT_NAME})
-add_compile_definitions(__AVR_ATmega328P__)
+#add_compile_definitions(__AVR_ATmega328P__)
+
+
