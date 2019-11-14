@@ -49,8 +49,8 @@ const uint8_t pinEncoderA = A2; // only input!
 const uint8_t pinLed = 13;
 const uint8_t pinThermistorSwt = A6;
 const uint8_t pinThermistorLin = A2;
-const uint8_t pinFans = 3; //alert pin INA
-const uint8_t pinTone = 11; // timer pwm
+const uint8_t pinTone = 3; //alert pin INA
+const uint8_t pinFans = 11; // timer pwm
 
 const uint16_t screenNormalRefresh = 650;
 const uint16_t screenEditorRefresh = 160;
