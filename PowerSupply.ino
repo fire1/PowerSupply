@@ -24,7 +24,7 @@ PresetMemory pm;
 PowerController pw;
 InputInterface in(pw, ec, ab, pm);
 DisplayInterface ui(lcd, pw, in);
-
+//
 
 void interruptFunction() {
     ec.tick();
@@ -43,7 +43,6 @@ void setup() {
     in.begin();
     ui.begin();
     currentLoops = 0;
-
 
     pinMode(pinFans, OUTPUT);
     pinMode(pinTone, OUTPUT);

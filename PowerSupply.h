@@ -26,6 +26,7 @@
 
 #endif
 
+
 /*
  * PWM 9,10
  * tone: 11 (or 3)
@@ -39,16 +40,16 @@
 LiquidCrystal lcd(2, 4, 5, 6, 7, 8);
 //Inputs/outputs
 boolean fastScreen = false;
-const uint8_t pinVolInp = A1;
-const uint8_t pinAmpInp = A0;
-const uint8_t pinVolPwm = 9;
-const uint8_t pinAmpPwm = 10;
-const uint8_t pinAnalogBt = A0;
-const uint8_t pinEncoderB = A1;
-const uint8_t pinEncoderA = A2; // only input!
+const uint8_t pinVolInp = 0;
+const uint8_t pinAmpInp = 0;
+const uint8_t pinVolPwm = 10;
+const uint8_t pinAmpPwm = 9;
+const uint8_t pinAnalogBt = A1;
+const uint8_t pinEncoderB = A2;
+const uint8_t pinEncoderA = A3; // only input!
 const uint8_t pinLed = 13;
 const uint8_t pinThermistorSwt = A6;
-const uint8_t pinThermistorLin = A2;
+const uint8_t pinThermistorLin = A7;
 const uint8_t pinTone = 3; //alert pin INA
 const uint8_t pinFans = 11; // timer pwm
 

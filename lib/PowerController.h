@@ -47,218 +47,40 @@ ResponsiveAnalogRead rawAmps(pinAmpInp, true);
 #define pwmSwtCorrection 0.30
 #endif
 
+// voltage table
+// V    Value
+// 1    15
+// 2    23
+// 3    31
+// 4    39
+// 5    43
+// 6    55
+// 7    62
+// 8    70
+// 9    78
+// 10   86
+// 11   94
+// 12   101
+// 13   109
+// 14   117
+// 15   125
+// 16   132
+// 17   140
+// 18   148
+// 19   156
+// 20   164
+// step 8
 
 class PowerController {
 
-    boolean activeParse = true;
-    boolean isModeChange = true;
-    boolean isActiveLinear = false;
     boolean isPowered = true;
-    volatile uint8_t index;
-    volatile uint8_t offset;
-    uint8_t lastPwm = 0;
-    uint8_t powerMode = PowerController::MODE_SWT_PW; // liner, power switching, limited switching
-    uint8_t pwmValue = 0;
-    uint8_t maxPwmControl = maxPwmValue;
-    uint8_t minPwmControl = minPwmValue;
-    uint8_t overloading = 0;
-    uint8_t capMin = 255, capMax, capAvr, capIndex = 0;
-    uint8_t capContainer[100];
-    boolean avrCalibration = false;
-    float targetVolt = 3;
-    float liveVolts = 0;
-    float readVolts = 0;
-    float correctionValue = 0;
-    uint32_t ampSmoothIndex;
-    int dumpVolts, dumpAmps;
-    int readAmps = 0;
-    double liveAmps = 0;
-    double targetAmps = 0.200;
-    double ampSmooth = 0;
-    double captureAmp;
-
+    uint8_t setVolt, setAmps, lastVolt, lastAmps;
+    float outVolt = 3.0;
+    float outAmps = 0.100;
 
     void setupPwm() {
-        //---------------------------------------------- Set PWM frequency for D5 & D6 -------------------------------
-        pinMode(pinVolPwm, OUTPUT); // Output pin for OCR0B
-
-//        Timer 2 fast PWM
-//        TCCR2A = _BV(COM2A1) | _BV(COM2B1) | _BV(WGM21) | _BV(WGM20);
-//        TCCR2B = _BV(WGM22) | _BV(CS20);
-//        OCR2A = maxPwmValue;// 63
-//        OCR2B = 0;
-
-
-        //---------------------------------------------- Set PWM frequency for D9 & D10 ------------------------------
-        TCCR1B = TCCR1B & B11111000 | B00000010;    // set timer 1 divisor to     8 for PWM frequency of  3921.16 Hz
 
     }
-
-
-    static float toVoltage(int raw) {
-        return float(map(raw, 140, 940, 411, 2700) * 0.01);
-    }
-
-    void readValues() {
-        for (index = 0; index < 3; ++index) {
-            rawVolt.update();
-            rawAmps.update();
-        }
-    }
-
-    void sensVolts() {
-        readValues();
-        dumpVolts = readVolts = rawVolt.getRawValue();
-
-        liveVolts = this->toVoltage(readVolts);
-        float crV = map(liveVolts, 1, 25, -1, 1) * 0.1;
-        liveVolts -= crV;
-    }
-
-
-    void sensAmps() {
-        dumpAmps = readAmps = rawAmps.getValue();
-        float deflectVolt = map((int) liveVolts, 0, 30, 935, 1196) * 0.1; // deflection curve by voltage
-        captureAmp = readAmps * deflectVolt * 0.1;
-
-
-        if (readAmps < 30) {
-            liveAmps = map(readAmps, 19, 40, 140, 250);
-        } else if (readAmps < 61) {
-            liveAmps = map(readAmps, 20, 45, 205, 630);
-        } else if (readAmps > 60) {
-            liveAmps = map(readAmps, 56, 550, 670, 5700);
-        }
-//        liveAmps = liveAmps < 0 ? 0 : liveAmps * 0.001;
-        liveAmps = captureAmp * 0.001;
-        ampSmooth += liveAmps;
-        ampSmoothIndex++;
-    }
-
-
-    void resolvePowerMode() {
-        if (isModeChange) {
-            powerMode = PowerController::MODE_SWT_LM;
-        }
-        if (!isModeChange) {
-            powerMode = PowerController::MODE_SWT_PW;
-        }
-        if (isActiveLinear) {
-            powerMode = PowerController::MODE_LIN_PW;
-        }
-    }
-
-/**
- *
- * @param pwm
- */
-    void setPwm(uint8_t pwm) {
-
-        if (pwm > maxPwmValue) {
-            pwm = maxPwmValue;
-        }
-        setToAvr(pwm);
-        OCR2B = pwm; // move it here constrain(pwm, minPwmControl, maxPwmControl)
-        lastPwm = pwm;
-        analogWrite(pinVolPwm, pwm);
-    }
-
-
-    void parsePwmSwitching() {
-        if (!activeParse) return;
-        //
-        // High amps limit
-        if (liveAmps > targetAmps) {
-            pwmValue = pwmValue - 2;
-            pwmValue = constrain(pwmValue, minPwmControl, maxPwmControl);
-            overloading++;
-        }
-
-
-        if (overloading > 60) {
-            pwmValue = 0;
-            activeParse = false;
-            alarm();
-        }
-
-
-        if (this->isAvrCalibrated()) {
-            parseAvg(capContainer, avrSimples);
-            pwmValue = capAvr;
-            blink();
-            return;
-        }
-
-        //
-        // Low amps
-        if (liveAmps <= targetAmps) {
-            overloading = 0;
-            int gap = targetVolt * 100 - liveVolts * 100;
-            //
-            // Voltage is in range
-            if (abs(gap) < 10) return;
-
-            if (targetVolt < liveVolts && gap > 100) {
-                maxPwmControl = lastPwm;
-                pwmValue = pwmValue - 3;
-                pwmValue = constrain(pwmValue, minPwmControl, maxPwmControl);
-            } else if (targetVolt < liveVolts) {
-                //
-                // Pump up voltage
-                pwmValue = pwmValue - 1;
-                pwmValue = constrain(pwmValue, minPwmControl, maxPwmControl);
-            } else if (targetVolt > liveVolts) {
-                //
-                // Lower the voltage
-                pwmValue = pwmValue + 1;
-                pwmValue = constrain(pwmValue, minPwmControl, maxPwmControl);
-            }
-        }
-
-
-    }
-
-
-    boolean isAvrCalibrated() {
-        if (avrCalibration) {
-            avrCalibration = false;
-            return true;
-        }
-        return false;
-    }
-
-    void setToAvr(uint8_t val) {
-        capContainer[capIndex] = val;
-        capIndex++;
-
-        if (capIndex > avrSimples) {
-            capIndex = 0;
-            avrCalibration = true;
-        }
-    }
-
-    void parseAvg(uint8_t *arr, int n) {
-        // Find average
-        double avg = 0;
-        for (index = 0; index < n; index++)
-            avg += arr[index];
-        avg = avg / n;
-        capAvr = int(avg);
-
-        // Print elements greater than average
-        for (index = 0; index < n; index++)
-            if (arr[index] >= avg - avrGap && arr[index] <= avg + avrGap) {
-                capMin = capMin > arr[index] ? arr[index] : capMin;
-                capMax = capMax < arr[index] ? arr[index] : capMax;
-            }
-
-        if (capMin - 5 > minPwmValue + 1)
-            minPwmControl = capMin - 1;
-        if (capMax + 5 < maxPwmValue)
-            maxPwmControl = capMax;
-
-    }
-
 
 public:
 
@@ -273,111 +95,67 @@ public:
         pinMode(pinVolInp, INPUT);
         pinMode(pinAmpInp, INPUT);
         pinMode(pinLed, OUTPUT);
+
+        pinMode(pinVolPwm, OUTPUT);
+        pinMode(pinAmpPwm, OUTPUT);
+        TCCR1B = TCCR1B & B11111000 | B00000010;    // set timer 1 divisor to     8 for PWM frequency of  3921.16 Hz
     }
 
     void manage() {
         if (!isPowered) {
-            setPWM(0);
             return;
         }
-        sensVolts();
-        sensAmps();
-        resolvePowerMode();
-        parsePwmSwitching();
-        setPwm(pwmValue);
+        if (lastAmps != setAmps) {
+            analogWrite(pinAmpPwm, setAmps);
+            lastAmps = setAmps;
+        }
+        if (lastVolt != setVolt) {
+            analogWrite(pinVolPwm, setVolt);
+            lastVolt = setVolt;
+        }
     }
 
-    void resetControl() {
-        maxPwmControl = maxPwmValue;
-        minPwmControl = minPwmValue;
-    }
 
     void setVoltage(float value) {
-        resetControl();
+        outVolt = value;
         if (value >= 0 && value < 26)
-            targetVolt = value;
+            setVolt = map(value, 1, 20, 1, 163);
     }
 
     void setAmperage(float value) {
-        resetControl();
-        if (value >= 0 && value <= 5)
-            targetAmps = value;
+        outAmps = value;
+        if (value >= 0 && value <= 3)
+            setAmps = map(value*100, 15, 150, 9, 94);
     }
 
-/**
- *
- * @param value
- */
-    void setPWM(uint8_t value) {
-        pwmValue = value;
+    void setPwmVolt(uint8_t value) {
+        setVolt = value;
     }
 
-    float getLiveVolt() {
-        return liveVolts;
+    void setPwmAmps(uint8_t value) {
+        setAmps = value;
     }
 
-    float getLiveAmps() {
-        return liveAmps;
+    float getOutVolt() {
+        return outVolt;
     }
 
-    void useParse(boolean active) {
-        activeParse = active;
+    float getOutAmps() {
+        return outAmps;
     }
 
 
-    void togglePwmMode() {
-        this->isModeChange = !this->isModeChange;
-        correctionValue = (isModeChange != 0) ? pwmSwtCorrection : correctionValue;
+    float getSetVolt() {
+        return setVolt;
     }
 
-
-    int getDumpVolt() {
-        return dumpVolts;
+    float getSetAmps() {
+        return setAmps;
     }
 
-    int getDumpAmps() {
-        return dumpAmps;
-    }
-
-    float getTargetVolt() {
-        return targetVolt;
-    }
-
-    float getTargetAmps() {
-        return targetAmps;
-    }
-
-    uint8_t getPwmValue() {
-        return pwmValue;
-    }
-
-
-    double lcdVolt() {
-        return toVoltage(rawVolt.getValue());
-    }
-
-    double lcdAmps() {
-        double result = ampSmooth / ampSmoothIndex;
-        ampSmooth = result;
-        ampSmoothIndex = 1;
-        return result;
-    }
-
-    uint8_t getPowerMode() {
-        return powerMode;
-    }
-
-    double testAmperage() {
-        return captureAmp;
-    }
 
     void power(boolean state) {
-        if (state) {
-            pwmValue = 15;
-            isPowered = true;
-        } else {
-            isPowered = false;
-        }
+        isPowered = state;
     }
 
 };

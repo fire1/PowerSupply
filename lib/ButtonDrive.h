@@ -111,7 +111,8 @@ void btn6Hold() {
 }
 
 Button btnBlinker = Button(27, &btn2Click, &btn2Hold);
-Button btnEncoder = Button(610, &btn1Click, &btn1Hold);
+Button btnEncoder = Button(227, &btn1Click, &btn1Hold);
+//Button btnEncoder = Button(610, &btn1Click, &btn1Hold);
 Button btnMemSetA = Button(765, &btn3Click, &btn3Hold);
 Button btnMemSetB = Button(512, &btn4Click, &btn4Hold);
 Button btnMemSetD = Button(420, &btn6Click, &btn6Hold);
