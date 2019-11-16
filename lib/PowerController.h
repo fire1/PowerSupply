@@ -12,40 +12,12 @@
 ResponsiveAnalogRead rawVolt(pinVolInp, true);
 ResponsiveAnalogRead rawAmps(pinAmpInp, true);
 
-//  pwm     / volt
-//
-//  100         26
-//  62          25
-//  61          21
-//  60          18
-//  59          17.4
-//  57          16.1
-//  56          14.6
-//  54          13.1
-//  53          12.3
-//  52          11
-//  50          8.6
-//  49          7
-//  47          5.6
-//  46          4.8
-//  45          4.1
-//  44          3.2
+struct EditMenu{
+    boolean editVolt = false;
+    boolean editAmps = false;
+    boolean editHalf = false;
+};
 
-
-#define avrSimples 100
-#define avrGap 50
-
-#ifndef maxPwmValue
-#define maxPwmValue  200 //200
-#endif
-
-#ifndef minPwmValue
-#define minPwmValue 3
-#endif
-
-#ifndef pwmSwtCorrection
-#define pwmSwtCorrection 0.30
-#endif
 
 // voltage table
 // V    Value
@@ -69,14 +41,18 @@ ResponsiveAnalogRead rawAmps(pinAmpInp, true);
 // 18   148
 // 19   156
 // 20   164
-// step 8
+// step 8.2
 
 class PowerController {
 
     boolean isPowered = true;
-    uint8_t setVolt, setAmps, lastVolt, lastAmps;
-    float outVolt = 3.0;
-    float outAmps = 0.100;
+    uint8_t pwmVolt, lastVolt;
+    uint8_t pwmAmps, lastAmps;
+    float setVolt = 3.0;
+    float setAmps = 0.100;
+    float outVolt = 0;
+    float outAmps = 0;
+
 
     void setupPwm() {
 
@@ -84,11 +60,7 @@ class PowerController {
 
 public:
 
-    static const uint8_t MODE_SWT_PW = 0;
-    static const uint8_t MODE_SWT_LM = 1;
-    static const uint8_t MODE_LIN_PW = 2;
-    static const uint8_t MODE_LIN_LM = 3;
-
+    EditMenu menu;
 
     void begin() {
         setupPwm();
@@ -105,13 +77,13 @@ public:
         if (!isPowered) {
             return;
         }
-        if (lastAmps != setAmps) {
-            analogWrite(pinAmpPwm, setAmps);
-            lastAmps = setAmps;
+        if (lastAmps != pwmAmps) {
+            analogWrite(pinAmpPwm, pwmAmps);
+            lastAmps = pwmAmps;
         }
-        if (lastVolt != setVolt) {
-            analogWrite(pinVolPwm, setVolt);
-            lastVolt = setVolt;
+        if (lastVolt != pwmVolt) {
+            analogWrite(pinVolPwm, pwmVolt);
+            lastVolt = pwmVolt;
         }
     }
 
@@ -119,21 +91,21 @@ public:
     void setVoltage(float value) {
         outVolt = value;
         if (value >= 0 && value < 26)
-            setVolt = map(value, 1, 20, 1, 163);
+            pwmVolt = value * 8.2;
     }
 
     void setAmperage(float value) {
         outAmps = value;
         if (value >= 0 && value <= 3)
-            setAmps = map(value*100, 15, 150, 9, 94);
+            pwmAmps = map(value * 100, 15, 150, 9, 94);
     }
 
     void setPwmVolt(uint8_t value) {
-        setVolt = value;
+        pwmVolt = value;
     }
 
     void setPwmAmps(uint8_t value) {
-        setAmps = value;
+        pwmAmps = value;
     }
 
     float getOutVolt() {
@@ -159,42 +131,6 @@ public:
     }
 
 };
-/*
- * For testing by averaging value of pwm
- *
- *
-#define avrGap 10
-
-uint8_t capMin, capMax, capAvr, capIndex = 0;
-uint8_t capContainer[100];
-
-void setToAvr(uint8_t val) {
-    capContainer[capIndex] = val;
-    capIndex++;
-
-    if (capIndex > 100) {
-        capIndex = 0;
-    }
-}
-
-
-// Print array elements greater than average
-void parseAvg(int arr[], int n) {
-    // Find average
-    double avg = 0;
-    for (int i = 0; i < n; i++)
-        avg += arr[i];
-    avg = avg / n;
-    capAvr = int(avg);
-
-    // Print elements greater than average
-    for (int i = 0; i < n; i++)
-        if (arr[i] >= avg - avrGap && arr[i] <= avg + avrGap) {
-            capMin = capMin > arr[i] ? arr[i] : capMin;
-            capMax = capMax < arr[i] ? arr[i] : capMax;
-        }
-}*/
-
 #endif //POWERSUPPLY_FUNCTIONS_H
 
 

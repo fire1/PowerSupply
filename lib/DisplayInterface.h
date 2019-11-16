@@ -22,7 +22,7 @@ private:
     boolean lcdEditing = false;
     unsigned long timeout;
     LiquidCrystal *lcd;
-    PowerController *cnr;
+    PowerController *cr;
     InputInterface *inp;
 
 /**
@@ -89,9 +89,34 @@ private:
 
 
     void drawMain() {
-        boolean editVolt = false;
-        boolean editAmps = false;
-        boolean editHalf = false;
+
+        cr->menu.editAmps = false;
+        cr->menu.editVolt = false;
+        cr->menu.editHalf = false;
+
+        uint8_t cur = inp->getCursor();
+        switch (cur) {
+            case 1:
+                fastScreen = true;
+                cr->menu.editVolt = true;
+                break;
+            case 2:
+                fastScreen = true;
+                cr->menu.editVolt = true;
+                cr->menu.editHalf = true;
+                break;
+            case 3:
+                fastScreen = true;
+                cr->menu.editAmps = true;
+                cr->menu.editHalf = true;
+                break;
+            case 4:
+                fastScreen = true;
+                cr->menu.editAmps = true;
+                break;
+            default:
+                break;
+        }
 
 
         if (!lcdEditing || !lcdBlinks) {
@@ -104,27 +129,27 @@ private:
             lcd->print(F("OUT "));
 
 
-            lcd->setCursor(6, 1);
-            voltFloat(cnr->getSetVolt(), printValues, editVolt, editHalf);
+            lcd->setCursor(6, 0);
+            voltFloat(cr->getSetVolt(), printValues, cr->menu.editVolt, cr->menu.editHalf);
             lcd->print(printValues);
             lcd->print(charV);
 
-            lcd->setCursor(13, 1);
-            ampsFloat(cnr->getSetAmps(), printValues, editAmps, editHalf);
+            lcd->setCursor(13, 0);
+            ampsFloat(cr->getSetAmps(), printValues, cr->menu.editAmps, cr->menu.editHalf);
             lcd->print(printValues);
             lcd->print(charA);
 
             lcdBlinks = !lcdBlinks;
         }
 
-        lcd->setCursor(6, 0);
-        voltFloat(cnr->getOutVolt(), printValues);
+        lcd->setCursor(6, 1);
+        voltFloat(cr->getOutVolt(), printValues);
         lcd->print(printValues);
         lcd->print(charV);
 
 
-        lcd->setCursor(13, 0);
-        ampsFloat(cnr->getOutAmps(), printValues);
+        lcd->setCursor(13, 1);
+        ampsFloat(cr->getOutAmps(), printValues);
         lcd->print(printValues);
         lcd->print(charA);
 
@@ -144,7 +169,7 @@ public:
      * @param ec
      * @param bt
      */
-    DisplayInterface(LiquidCrystal &lc, PowerController &cn, InputInterface &in) : lcd(&lc), cnr(&cn), inp(&in) {}
+    DisplayInterface(LiquidCrystal &lc, PowerController &cn, InputInterface &in) : lcd(&lc), cr(&cn), inp(&in) {}
 
     void draw() {
         drawMain();
@@ -162,21 +187,20 @@ public:
 
     void debug() {
         Serial.println();
-        Serial.print(F("Amp In: "));
-        Serial.print(cnr->getOutAmps());
+        Serial.print(F(" AO "));
+        Serial.print(cr->getOutAmps());
 
-        Serial.print(F(" //  Volt In: "));
-        Serial.print(cnr->getOutVolt());
+        Serial.print(F(" VO "));
+        Serial.print(cr->getOutVolt());
 
-        Serial.print(F(" TMP "));
+        Serial.print(F(" TP "));
         Serial.print(heatSwt);
-
-        Serial.print(F(" MN "));
-        Serial.print(inp->getCursor());
         Serial.print(F(" AB "));
         Serial.print(analogRead(A1));
-        Serial.print(F(" Cr "));
+        Serial.print(F(" CB "));
         Serial.print(currentButton);
+        Serial.print(F(" CR "));
+        Serial.print(inp->getCursor());
     }
 
 };

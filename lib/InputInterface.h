@@ -38,15 +38,11 @@
 void static interruptFunction();
 
 class InputInterface {
-    boolean openEdit = false;
-    boolean editVolt = false;
-    boolean editAmps = false;
     boolean isEdit = false;
-    boolean editCursor = 0;
     uint8_t cursor = 0;
 
 
-    unsigned long timeout, debounce = 0;
+    unsigned long timeout;
     PowerController *cnr;
     AnalogButtons *ab;
     RotaryEncoder *enc;
@@ -103,28 +99,39 @@ private:
         }
     }
 
+    void ping() {
+        timeout = millis() + editTimeout;
+        Serial.println();
+        Serial.print(timeout);
+        Serial.print(" ");
+        Serial.print(millis());
+    }
+
 
     void inputs() {
 
         int direction = enc->getDirection();
         if (direction != 0) {
-            timeout = currentLoops + editTimeout;
-            Serial.print(direction);
+            ping();
         }
 
     }
 
 
     void buttons() {
-
         switch (currentButton) {
             case 1:
                 cursor++;
+                if (cursor > 4) {
+                    cursor = 1;
+                }
+                ping();
                 break;
             default:
                 return;
         }
         currentButton = 0;
+
     }
 
 
@@ -155,6 +162,11 @@ public:
         terminal();
         ab->check();
         buttons();
+
+        if (cursor > 0 && timeout <= millis()) {
+            cursor = 0;
+            Serial.println(" timeout ");
+        }
     }
 
 

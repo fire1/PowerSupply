@@ -53,8 +53,8 @@ const uint8_t pinThermistorLin = A7;
 const uint8_t pinTone = 3; //alert pin INA
 const uint8_t pinFans = 11; // timer pwm
 
-const uint16_t screenNormalRefresh = 650;
-const uint16_t screenEditorRefresh = 160;
+const uint16_t screenNormalRefresh = 400;
+const uint16_t screenEditorRefresh = 300;
 const uint16_t editTimeout = 10000;
 const uint16_t holdTimeout = 400;
 const float thresholdVoltage = 0.05;

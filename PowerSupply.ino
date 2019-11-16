@@ -76,9 +76,7 @@ void loop() {
             fanToggle = 0;
         }
         blink();
-
         ui.debug();
-
         ui.draw();
 
     }
