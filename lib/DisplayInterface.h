@@ -88,38 +88,39 @@ private:
     }
 
 
-    void drawMain() {
-
+    void editing() {
         cr->menu.editAmps = false;
         cr->menu.editVolt = false;
         cr->menu.editHalf = false;
-
         uint8_t cur = inp->getCursor();
-        switch (cur) {
-            case 1:
-                fastScreen = true;
-                cr->menu.editVolt = true;
-                break;
-            case 2:
-                fastScreen = true;
-                cr->menu.editVolt = true;
-                cr->menu.editHalf = true;
-                break;
-            case 3:
-                fastScreen = true;
-                cr->menu.editAmps = true;
-                cr->menu.editHalf = true;
-                break;
-            case 4:
-                fastScreen = true;
-                cr->menu.editAmps = true;
-                break;
-            default:
-                break;
+        if (cur > 0) {
+            lcdEditing = true;
+            fastScreen = true;
+            switch (cur) {
+                case 1:
+                    cr->menu.editVolt = true;
+                    break;
+                case 2:
+                    cr->menu.editVolt = true;
+                    cr->menu.editHalf = true;
+                    break;
+                case 3:
+                    cr->menu.editAmps = true;
+                    cr->menu.editHalf = true;
+                    break;
+                case 4:
+                    cr->menu.editAmps = true;
+                    break;
+                default:
+                    break;
+            }
         }
+    }
 
+    void drawMain() {
+        this->editing();
 
-        if (!lcdEditing || !lcdBlinks) {
+        if (lcdEditing || !lcdBlinks) {
             lcd->clear();
 
             lcd->setCursor(1, 0);
