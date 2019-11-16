@@ -12,7 +12,7 @@
 ResponsiveAnalogRead rawVolt(pinVolInp, true);
 ResponsiveAnalogRead rawAmps(pinAmpInp, true);
 
-struct EditMenu{
+struct EditMenu {
     boolean editVolt = false;
     boolean editAmps = false;
     boolean editHalf = false;
@@ -46,8 +46,8 @@ struct EditMenu{
 class PowerController {
 
     boolean isPowered = true;
-    uint8_t pwmVolt, lastVolt;
-    uint8_t pwmAmps, lastAmps;
+    uint8_t pwmVolt = 31, lastVolt;
+    uint8_t pwmAmps = 8, lastAmps;
     float setVolt = 3.0;
     float setAmps = 0.100;
     float outVolt = 0;
@@ -89,13 +89,14 @@ public:
 
 
     void setVoltage(float value) {
-        outVolt = value;
-        if (value >= 0 && value < 26)
-            pwmVolt = value * 8.2;
+        setVolt = value;
+        if (value >= 0 && value < 26) {
+            pwmVolt = map(value*10, 10, 205, 15, 167);
+        }
     }
 
     void setAmperage(float value) {
-        outAmps = value;
+        setAmps = value;
         if (value >= 0 && value <= 3)
             pwmAmps = map(value * 100, 15, 150, 9, 94);
     }
@@ -106,6 +107,14 @@ public:
 
     void setPwmAmps(uint8_t value) {
         pwmAmps = value;
+    }
+
+    uint8_t getPwmAmps() {
+        return pwmAmps;
+    }
+
+    uint8_t getPwmVolt() {
+        return pwmVolt;
     }
 
     float getOutVolt() {
@@ -131,6 +140,7 @@ public:
     }
 
 };
+
 #endif //POWERSUPPLY_FUNCTIONS_H
 
 

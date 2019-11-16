@@ -171,12 +171,12 @@ public:
     }
 
     void listen() {
-        terminal();
+        this->terminal();
         ab->check();
-        buttons();
+        this->buttons();
 
         if (cursor > 0) {
-            input();
+            this->input();
             if (timeout <= millis()) {
                 cursor = 0;
                 Serial.println(F(" timeout "));

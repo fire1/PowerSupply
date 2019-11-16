@@ -190,9 +190,12 @@ public:
         Serial.println();
         Serial.print(F(" AO "));
         Serial.print(cr->getOutAmps());
-
+        Serial.print( F(" "));
+        Serial.print(cr->getPwmAmps());
         Serial.print(F(" VO "));
         Serial.print(cr->getOutVolt());
+        Serial.print( F(" "));
+        Serial.print(cr->getPwmVolt());
 
         Serial.print(F(" TP "));
         Serial.print(heatSwt);
