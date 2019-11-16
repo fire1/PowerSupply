@@ -91,14 +91,14 @@ public:
     void setVoltage(float value) {
         setVolt = value;
         if (value >= 0 && value < 26) {
-            pwmVolt = map(value*10, 10, 205, 15, 167);
+            pwmVolt = map(value * 10, 10, 205, 15, 167);
         }
     }
 
     void setAmperage(float value) {
         setAmps = value;
         if (value >= 0 && value <= 3)
-            pwmAmps = map(value * 100, 15, 150, 9, 94);
+            pwmAmps = map(value * 100, 10, 200, 8, 180);
     }
 
     void setPwmVolt(uint8_t value) {

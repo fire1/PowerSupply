@@ -101,10 +101,6 @@ private:
 
     void ping() {
         timeout = millis() + editTimeout;
-        Serial.println();
-        Serial.print(timeout);
-        Serial.print(" ");
-        Serial.print(millis());
     }
 
 
