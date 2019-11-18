@@ -156,7 +156,14 @@ public:
         ina.waitForConversion(deviceNumber);
     }
 
+////////////////////////////////////////////////////////////////
+///     Class I/O [Input/Output]
+////////////////////////////////////////////////////////////////
 
+/**
+ * Converts given voltage to PWM value
+ * @param value
+ */
     void setVoltage(float value) {
         setVolt = value;
         if (value >= 0 && value < 26) {
@@ -164,16 +171,26 @@ public:
         }
     }
 
+/**
+ * Converts given current to PWM value
+ * @param value
+ */
     void setAmperage(float value) {
         setAmps = value;
         if (value >= 0 && value <= 3)
             pwmAmps = map(value * 100, 10, 200, 8, 180);
     }
-
+/**
+ * Sets raw PWM voltage
+ * @param value
+ */
     void setPwmVolt(uint8_t value) {
         pwmVolt = value;
     }
-
+/**
+ * Sets raw PWM current
+ * @param value
+ */
     void setPwmAmps(uint8_t value) {
         pwmAmps = value;
     }
