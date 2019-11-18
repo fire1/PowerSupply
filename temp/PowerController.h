@@ -9,8 +9,6 @@
 #include "../PowerSupply.h"
 
 
-ResponsiveAnalogRead rawVolt(pinVolInp, true);
-ResponsiveAnalogRead rawAmps(pinAmpInp, true);
 
 //  pwm     / volt
 //

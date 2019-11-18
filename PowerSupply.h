@@ -4,9 +4,14 @@
 
 #ifndef POWER_SUPPLY_H
 #define POWER_SUPPLY_H
+/*
+ * Deprecated use of ResponsiveAnalogRead
+ * */
+
+
 
 #include <Arduino.h>
-#include <ResponsiveAnalogRead.h>
+
 
 #include <LiquidCrystal.h>
 
