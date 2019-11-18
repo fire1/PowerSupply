@@ -183,20 +183,25 @@ void blink() {
 }
 
 unsigned long startAlarmed = 0;
-
+int16_t soundLength = 0;
 void alarm() {
     if (startAlarmed == 0) {
         analogWrite(pinTone, 200);
         startAlarmed = currentLoops;
+        soundLength = 250;
     }
 }
 
-void alert() {
-    alarm();
+void tick() {
+    if (startAlarmed == 0) {
+        analogWrite(pinTone, 200);
+        startAlarmed = currentLoops;
+        soundLength = 50;
+    }
 }
 
 void noAlarm() {
-    if (currentLoops > startAlarmed + 250 ) {
+    if (currentLoops > startAlarmed + soundLength ) {
         analogWrite(pinTone, 0);
         startAlarmed = 0;
     }

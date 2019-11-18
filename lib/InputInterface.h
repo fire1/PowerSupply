@@ -133,6 +133,7 @@ private:
                 if (cursor > 4) {
                     cursor = 1;
                 }
+                tick();
                 ping();
                 break;
             default:
