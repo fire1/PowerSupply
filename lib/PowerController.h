@@ -83,7 +83,8 @@ class PowerController {
         uint8_t devicesFound = 0;
         while (deviceNumber == UINT8_MAX) // Loop until we find the first device
         {
-            devicesFound = ina.begin(1, 100000); // +/- 1 Amps maximum for 0.1 Ohm resistor
+            noTone(pinTone);
+            devicesFound = ina.begin(3, 1000000); // Set to an expected 1 Amp maximum and a 100000 microOhm resistor
             for (uint8_t i = 0; i < devicesFound; i++) {
                 // Change the "INA226" in the following statement to whatever device you have attached and want to measure //
                 if (strcmp(ina.getDeviceName(i), "INA226") == 0) {
@@ -94,6 +95,7 @@ class PowerController {
             } // of for-next loop through all devices found
             if (deviceNumber == UINT8_MAX) {
                 Serial.print(F("No ina found. Waiting 1s and retrying...\n"));
+                tone(pinTone, 1600);
                 delay(1000);
             } // of if-then no INA226 found
         }
@@ -180,6 +182,7 @@ public:
         if (value >= 0 && value <= 3)
             pwmAmps = map(value * 100, 10, 200, 8, 180);
     }
+
 /**
  * Sets raw PWM voltage
  * @param value
@@ -187,6 +190,7 @@ public:
     void setPwmVolt(uint8_t value) {
         pwmVolt = value;
     }
+
 /**
  * Sets raw PWM current
  * @param value
