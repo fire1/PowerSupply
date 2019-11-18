@@ -83,7 +83,6 @@ class PowerController {
         uint8_t devicesFound = 0;
         while (deviceNumber == UINT8_MAX) // Loop until we find the first device
         {
-            noTone(pinTone);
             devicesFound = ina.begin(3, 1000000); // Set to an expected 1 Amp maximum and a 100000 microOhm resistor
             for (uint8_t i = 0; i < devicesFound; i++) {
                 // Change the "INA226" in the following statement to whatever device you have attached and want to measure //
@@ -95,7 +94,7 @@ class PowerController {
             } // of for-next loop through all devices found
             if (deviceNumber == UINT8_MAX) {
                 Serial.print(F("No ina found. Waiting 1s and retrying...\n"));
-                tone(pinTone, 1600);
+                alarm();
                 delay(1000);
             } // of if-then no INA226 found
         }
