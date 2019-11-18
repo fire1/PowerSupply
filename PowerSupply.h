@@ -15,19 +15,11 @@
 
 #include <LiquidCrystal.h>
 
-
-
 #include <LiquidCrystal.h>
 
 #ifndef LiquidCrystal_4bit_h
 
 #include "../libraries/NewLiquidCrystal_lib/LiquidCrystal.h"
-
-#endif
-
-#ifndef RESPONSIVE_ANALOG_READ_H
-
-//#include "../libraries/ResponsiveAnalogRead/src/ResponsiveAnalogRead.h"
 
 #endif
 
@@ -49,8 +41,6 @@ boolean fastScreen = false;
 const uint8_t pinLed = 13;
 const uint8_t pinTone = 3;
 const uint8_t pinFans = 11; // timer pwm
-const uint8_t pinVolInp = 0;
-const uint8_t pinAmpInp = 0;
 const uint8_t pinAmpPwm = 9;
 const uint8_t pinVolPwm = 10;
 const uint8_t pinInaAlert = 12; // alert pin ina
@@ -66,7 +56,7 @@ const uint16_t editTimeout = 10000;
 const uint16_t holdTimeout = 400;
 unsigned long futureMillis = 0;
 volatile unsigned long currentLoops = 0;
-uint8_t temperature;
+int16_t temperature;
 
 
 char printValues[6];
@@ -135,18 +125,20 @@ boolean is250() {
     }
 }
 
-
+;
 void fansControl() {
     int rawTemp = analogRead(pinHeatTemp);
-    uint8_t heat = (uint8_t) map(rawTemp, 345, 656, 120, 18);
-    if (heat > 60) {
-        uint8_t fpw = (uint8_t) map(heat, 35, 100, 0, 254);
+    Serial.print("rw tp: ");
+    Serial.print(rawTemp);
+    temperature = (uint8_t) map(rawTemp, 325, 585, 120, 14);
+    if (temperature > 60) {
+        uint8_t fpw = (uint8_t) map(temperature, 35, 100, 25, 254);
         fpw = (fpw > 254) ? 254 : fpw;
         fpw = (fpw < 2) ? 1 : fpw;
         analogWrite(pinFans, fpw);
-    } else if (heat > 35 && heat < 60) {
-        analogWrite(pinFans, (int)map(heat, 35, 65, 1, 3));
-    } else if (heat < 25) {
+    } else if (temperature > 35 && temperature < 60) {
+        analogWrite(pinFans, (int)map(temperature, 35, 65, 1, 3));
+    } else if (temperature < 25) {
         analogWrite(pinFans, 0);
     }
 }
@@ -187,21 +179,21 @@ int16_t soundLength = 0;
 void alarm() {
     if (startAlarmed == 0) {
         analogWrite(pinTone, 200);
-        startAlarmed = currentLoops;
+        startAlarmed = millis();
         soundLength = 250;
     }
 }
 
 void tick() {
     if (startAlarmed == 0) {
-        analogWrite(pinTone, 200);
-        startAlarmed = currentLoops;
+        analogWrite(pinTone, 20);
+        startAlarmed = millis();
         soundLength = 50;
     }
 }
 
 void noAlarm() {
-    if (currentLoops > startAlarmed + soundLength ) {
+    if (millis() > startAlarmed + soundLength ) {
         analogWrite(pinTone, 0);
         startAlarmed = 0;
     }

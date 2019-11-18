@@ -95,7 +95,7 @@ class PowerController {
             if (deviceNumber == UINT8_MAX) {
                 Serial.print(F("No ina found. Waiting 1s and retrying...\n"));
                 alarm();
-                delay(1000);
+                delay(100);
             } // of if-then no INA226 found
         }
 
@@ -123,7 +123,7 @@ public:
     void begin() {
 
         enableInterrupt(pinInaAlert, inaAlertInterrupt, CHANGE);
-        this->setupIna();
+//        this->setupIna();
         pinMode(pinLed, OUTPUT);
 
         pinMode(pinVolPwm, OUTPUT);

@@ -37,27 +37,32 @@ void inaAlertInterrupt() {
 
 // do not use 10/11
 void setup() {
-    fastADC();
+    Serial.begin(115200);
+    Serial.println(F("Booting power supply ..."));
+    tick();
+    pinMode(pinFans, OUTPUT);
+    pinMode(pinTone, OUTPUT);
+//    fastADC();
+    ui.begin();
     pw.begin();
 
-    Serial.begin(115200);
 
     lcd.begin(20, 4);
 
     in.begin();
-    ui.begin();
     currentLoops = 0;
 
-    pinMode(pinFans, OUTPUT);
-    pinMode(pinTone, OUTPUT);
     analogWrite(pinFans, 50);
+    tick();
     delay(400);
+    noAlarm();
     analogWrite(pinFans, 200);
     delay(400);
     analogWrite(pinTone, 220);
     delay(165);
     analogWrite(pinFans, 0);
     analogWrite(pinTone, 0);
+
 }
 
 
