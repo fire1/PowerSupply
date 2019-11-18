@@ -166,8 +166,9 @@ public:
  * @param value
  */
     void setVoltage(float value) {
-        setVolt = value;
         if (value >= 0 && value < 26) {
+            setVolt = value;
+
             pwmVolt = map(value * 10, 10, 205, 15, 167);
         }
     }
@@ -177,9 +178,9 @@ public:
  * @param value
  */
     void setAmperage(float value) {
-        setAmps = value;
         if (value >= 0 && value <= 3)
-            pwmAmps = map(value * 100, 10, 200, 8, 180);
+            setAmps = value;
+        pwmAmps = map(value * 100, 10, 200, 8, 180);
     }
 
 /**

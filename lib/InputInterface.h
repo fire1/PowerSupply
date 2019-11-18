@@ -113,12 +113,12 @@ private:
         int direction = enc->getDirection();
         if (direction != 0) {
             if (cr->menu.editAmps) {
-                cr->setAmperage(changeValue(cr->getSetAmps(), direction, !cr->menu.editHalf ?: 0.01));
+                cr->setAmperage(changeValue(cr->getSetAmps(), direction, !cr->menu.editHalf ?: 0.010));
                 tick();
             }
 
             if (cr->menu.editVolt) {
-                cr->setVoltage(changeValue(cr->getSetVolt(), direction, !cr->menu.editHalf ?: 0.1));
+                cr->setVoltage(changeValue(cr->getSetVolt(), direction, !cr->menu.editHalf ?: 0.10));
                 tick();
             }
 
