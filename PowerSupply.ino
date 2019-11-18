@@ -26,8 +26,12 @@ InputInterface in(pw, ec, ab, pm);
 DisplayInterface ui(lcd, pw, in);
 //
 
-void interruptFunction() {
+void encoderInterrupt() {
     ec.tick();
+}
+
+void inaAlertInterrupt() {
+    pw.measure();
 }
 
 

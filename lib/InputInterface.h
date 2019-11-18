@@ -35,7 +35,7 @@
 #include "ButtonDrive.h"
 #include "PresetMemory.h"
 
-void static interruptFunction();
+void static encoderInterrupt();
 
 class InputInterface {
     boolean isEdit = false;
@@ -151,8 +151,8 @@ public:
     void begin() {
 
 
-        enableInterrupt(pinEncoderA, interruptFunction, CHANGE);
-        enableInterrupt(pinEncoderB, interruptFunction, CHANGE);
+        enableInterrupt(pinEncoderA, encoderInterrupt, CHANGE);
+        enableInterrupt(pinEncoderB, encoderInterrupt, CHANGE);
 
         pinMode(pinEncoderA, INPUT_PULLUP);
         pinMode(pinEncoderB, INPUT_PULLUP);

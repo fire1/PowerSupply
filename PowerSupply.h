@@ -39,30 +39,29 @@
  */
 LiquidCrystal lcd(2, 4, 5, 6, 7, 8);
 //Inputs/outputs
+// free pins A7
 boolean fastScreen = false;
+const uint8_t pinLed = 13;
+const uint8_t pinTone = 3;
+const uint8_t pinFans = 11; // timer pwm
 const uint8_t pinVolInp = 0;
 const uint8_t pinAmpInp = 0;
-const uint8_t pinVolPwm = 10;
 const uint8_t pinAmpPwm = 9;
-const uint8_t pinInaAlert = 12;
-const uint8_t pinCurrentI = A0;
+const uint8_t pinVolPwm = 10;
+const uint8_t pinInaAlert = 12; // alert pin ina
+const uint8_t pinAmpLimit = A0;
 const uint8_t pinAnalogBt = A1;
 const uint8_t pinEncoderB = A2;
-const uint8_t pinEncoderA = A3; // only input!
-const uint8_t pinLed = 13;
-const uint8_t pinThermistorSwt = A6;
-const // uint8_t pinThermistorLin = A7;
-const uint8_t pinTone = 3; //alert pin INA
-const uint8_t pinFans = 11; // timer pwm
+const uint8_t pinEncoderA = A3;
+const uint8_t pinHeatTemp = A6; // 4.7к pull up resistor
 
 const uint16_t screenNormalRefresh = 400;
-const uint16_t screenEditorRefresh = 300;
+const uint16_t screenEditorRefresh = 250;
 const uint16_t editTimeout = 10000;
 const uint16_t holdTimeout = 400;
-const float thresholdVoltage = 0.05;
 unsigned long futureMillis = 0;
 volatile unsigned long currentLoops = 0;
-uint8_t heatSwt, heatLin;
+uint8_t temperature;
 
 
 char printValues[6];
@@ -133,22 +132,16 @@ boolean is250() {
 
 
 void fansControl() {
-    int rawTempSwt = analogRead(pinThermistorSwt);
-    int rawTempLin = analogRead(pinThermistorLin);
-//    heatSwt = (uint8_t) map(rawTempSwt, 345, 460, 120, 70);
-//    heatLin = (uint8_t) map(rawTempLin, 345, 460, 120, 70);
-    heatSwt = (uint8_t) map(rawTempSwt, 345, 656, 120, 18);
-    heatLin = (uint8_t) map(rawTempLin, 345, 656, 120, 18);
-
-    uint8_t heat = (heatLin > heatSwt) ? heatLin : heatSwt;
+    int rawTemp = analogRead(pinHeatTemp);
+    uint8_t heat = (uint8_t) map(rawTemp, 345, 656, 120, 18);
     if (heat > 60) {
-        uint8_t fpw = map(heat, 35, 100, 0, 254);
+        uint8_t fpw = (uint8_t) map(heat, 35, 100, 0, 254);
         fpw = (fpw > 254) ? 254 : fpw;
         fpw = (fpw < 2) ? 1 : fpw;
         analogWrite(pinFans, fpw);
     } else if (heat > 35 && heat < 60) {
-        analogWrite(pinFans, map(heat, 35, 65, 1, 3));
-    } else if (heatSwt < 25 && heatLin < 25) {
+        analogWrite(pinFans, (int)map(heat, 35, 65, 1, 3));
+    } else if (heat < 25) {
         analogWrite(pinFans, 0);
     }
 }

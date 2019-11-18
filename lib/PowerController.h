@@ -6,11 +6,29 @@
 #define POWER_SUPPLY_FUNCTIONS_H
 
 #include <Arduino.h>
+#include <avr/io.h>
 #include "../PowerSupply.h"
 
+#include <EnableInterrupt.h>
 
-ResponsiveAnalogRead rawVolt(pinVolInp, true);
-ResponsiveAnalogRead rawAmps(pinAmpInp, true);
+#ifndef EnableInterrupt_h
+
+#include "../../libraries/EnableInterrupt/EnableInterrupt.h"
+
+#endif
+
+#include <INA.h>
+
+#ifndef INA__Class_h
+
+#include "../../libraries/INA2xx/src/INA.h"
+
+#endif
+
+INA_Class ina;
+
+void static inaAlertInterrupt();
+
 
 struct EditMenu {
     boolean editVolt = false;
@@ -53,27 +71,71 @@ class PowerController {
     float outVolt = 0;
     float outAmps = 0;
 
+    //
+    // Ina vars
+    volatile uint8_t deviceNumber = UINT8_MAX; ///< Device Number to use in example, init used for detection loop
+    volatile uint64_t sumBusMillVolts = 0; ///< Sum of bus voltage readings
+    volatile int64_t sumBusMicroAmps = 0; ///< Sum of bus amperage readings
+    volatile uint8_t readings = 0; ///< Number of measurements taken
 
-    void setupPwm() {
+
+    void setupIna() {
+        uint8_t devicesFound = 0;
+        while (deviceNumber == UINT8_MAX) // Loop until we find the first device
+        {
+            devicesFound = ina.begin(1, 100000); // +/- 1 Amps maximum for 0.1 Ohm resistor
+            for (uint8_t i = 0; i < devicesFound; i++) {
+                // Change the "INA226" in the following statement to whatever device you have attached and want to measure //
+                if (strcmp(ina.getDeviceName(i), "INA226") == 0) {
+                    deviceNumber = i;
+                    ina.reset(deviceNumber); // Reset device to default settings
+                    break;
+                } // of if-then we have found an INA226
+            } // of for-next loop through all devices found
+            if (deviceNumber == UINT8_MAX) {
+                Serial.print(F("No ina found. Waiting 1s and retrying...\n"));
+                delay(1000);
+            } // of if-then no INA226 found
+        }
+
+
+        ina.setAveraging(64, deviceNumber);                  // Average each reading 64 times
+        ina.setBusConversion(8244, deviceNumber);            // Maximum conversion time 8.244ms
+        ina.setShuntConversion(8244, deviceNumber);          // Maximum conversion time 8.244ms
+        ina.setMode(INA_MODE_CONTINUOUS_BOTH, deviceNumber); // Bus/shunt measured continuously
+        ina.AlertOnConversion(true, deviceNumber);
 
     }
+
+    void calculateOutput() {
+        if (readings >= 10) {
+            outVolt = (float) sumBusMillVolts / readings / 1000.0;
+            outAmps = (float) sumBusMicroAmps / readings / 1000.0;
+        }
+    }
+
 
 public:
 
     EditMenu menu;
 
     void begin() {
-        setupPwm();
-        pinMode(pinVolInp, INPUT);
-        pinMode(pinAmpInp, INPUT);
+
+        enableInterrupt(pinInaAlert, inaAlertInterrupt, CHANGE);
+        this->setupIna();
         pinMode(pinLed, OUTPUT);
 
         pinMode(pinVolPwm, OUTPUT);
         pinMode(pinAmpPwm, OUTPUT);
+        //
+        // Pin 9/10 timer setup
         TCCR1B = TCCR1B & B11111000 | B00000010;    // set timer 1 divisor to     8 for PWM frequency of  3921.16 Hz
     }
 
+
     void manage() {
+        this->calculateOutput();
+
         if (!isPowered) {
             return;
         }
@@ -85,6 +147,13 @@ public:
             analogWrite(pinVolPwm, pwmVolt);
             lastVolt = pwmVolt;
         }
+    }
+
+    void measure() {
+        sumBusMillVolts += ina.getBusMilliVolts(deviceNumber);    // Add current value to sum
+        sumBusMicroAmps += ina.getBusMicroAmps(deviceNumber);     // Add current value to sum
+        readings++;
+        ina.waitForConversion(deviceNumber);
     }
 
 

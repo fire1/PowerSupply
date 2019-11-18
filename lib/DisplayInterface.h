@@ -198,7 +198,7 @@ public:
         Serial.print(cr->getPwmVolt());
 
         Serial.print(F(" TP "));
-        Serial.print(heatSwt);
+        Serial.print(temperature);
         Serial.print(F(" AB "));
         Serial.print(analogRead(A1));
         Serial.print(F(" CB "));
