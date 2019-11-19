@@ -154,6 +154,13 @@ private:
         lcd->print(printValues);
         lcd->print(charA);
 
+        int8_t limit = cr->readLimit();
+        for (index = 0; index < limit; ++index) {
+            lcd->setCursor(index, 3);
+            lcd->print("-");
+        }
+
+
         if (!lcdEditing) {
             inp->setEditing(true);
             lcd->noCursor();

@@ -128,6 +128,7 @@ public:
 
         pinMode(pinVolPwm, OUTPUT);
         pinMode(pinAmpPwm, OUTPUT);
+        pinMode(pinAmpLimit, INPUT_PULLUP);
         //
         // Pin 9/10 timer setup
         TCCR1B = TCCR1B & B11111000 | B00000010;    // set timer 1 divisor to     8 for PWM frequency of  3921.16 Hz
@@ -222,6 +223,15 @@ public:
 
     float getSetAmps() {
         return setAmps;
+    }
+
+/**
+ *  Current limit
+ * @return 0,20
+ */
+    int8_t readLimit() {
+        int limit = analogRead(pinAmpLimit);
+        return (int8_t) map(limit, 0, 255, 0, 20);
     }
 
 

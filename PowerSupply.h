@@ -56,6 +56,7 @@ const uint16_t editTimeout = 10000;
 const uint16_t holdTimeout = 400;
 unsigned long futureMillis = 0;
 volatile unsigned long currentLoops = 0;
+volatile uint8_t index;
 int16_t temperature;
 
 
