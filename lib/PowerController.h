@@ -134,6 +134,7 @@ public:
         //
         // Pin 9/10 timer setup
         TCCR1B = TCCR1B & B11111000 | B00000010;    // set timer 1 divisor to     8 for PWM frequency of  3921.16 Hz
+//        TCCR1B = TCCR1B & B11111000 | B00000001; // set timer 1 divisor to 1 for PWM frequency of 31372.55 Hz
     }
 
 
@@ -169,9 +170,14 @@ public:
  * @param value
  */
     void setVoltage(float value) {
-        if (value >= 0 && value < 26) {
+        if (value > 26) {
+            value = 26;
+        }
+        if (value >= 0 && value <= 26) {
             setVolt = value;
-
+            if (value == 26) {
+                pwmVolt = 255;
+            }
             pwmVolt = map(value * 10, 10, 205, 15, 167);
         }
     }
@@ -181,7 +187,7 @@ public:
  * @param value
  */
     void setAmperage(float value) {
-        if(value > 3){
+        if (value > 3) {
             value = 3;
         }
         if (value >= 0 && value <= 3) {
