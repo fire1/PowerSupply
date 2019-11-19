@@ -65,7 +65,7 @@ class PowerController {
 
     boolean isPowered = true;
     uint8_t pwmVolt = 31, lastVolt;
-    uint8_t pwmAmps = 8, lastAmps;
+    uint8_t pwmAmps = 20 /*8*/, lastAmps;
     float setVolt = 3.0;
     float setAmps = 0.100;
     float outVolt = 0;
@@ -129,6 +129,8 @@ public:
         pinMode(pinVolPwm, OUTPUT);
         pinMode(pinAmpPwm, OUTPUT);
         pinMode(pinAmpLimit, INPUT_PULLUP);
+        digitalWrite(pinVolPwm, LOW);
+        digitalWrite(pinAmpPwm, HIGH);
         //
         // Pin 9/10 timer setup
         TCCR1B = TCCR1B & B11111000 | B00000010;    // set timer 1 divisor to     8 for PWM frequency of  3921.16 Hz
@@ -179,9 +181,14 @@ public:
  * @param value
  */
     void setAmperage(float value) {
-        if (value >= 0 && value <= 3)
+        if(value > 3){
+            value = 3;
+        }
+        if (value >= 0 && value <= 3) {
             setAmps = value;
-        pwmAmps = map(value * 100, 10, 200, 8, 180);
+//        pwmAmps = map(value * 100, 10, 200, 20/*8*/, 180);
+            pwmAmps = map(value * 100, 10, 300, 20/*8*/, 255);
+        }
     }
 
 /**
@@ -225,13 +232,28 @@ public:
         return setAmps;
     }
 
+    uint8_t cntFix = 0;
+
 /**
  *  Current limit
  * @return 0,20
  */
     int8_t readLimit() {
         int limit = analogRead(pinAmpLimit);
-        return (int8_t) map(limit, 0, 255, 0, 20);
+//        if (limit < 100) {
+//            analogWrite(pinVolPwm, LOW);
+//            digitalWrite(pinAmpPwm,HIGH);
+//            delayMicroseconds(100);
+//            digitalWrite(pinAmpPwm,pwmAmps);
+//            analogWrite(pinVolPwm, pwmVolt);
+//        }
+        Serial.print(" L ");
+        Serial.print(limit);
+        if (limit < 200) {
+            digitalWrite(pinLed, HIGH);
+
+        }
+        return (int8_t) map(limit, 0, 1024, 20, 0);
     }
 
 

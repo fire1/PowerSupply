@@ -113,7 +113,7 @@ private:
         int direction = enc->getDirection();
         if (direction != 0) {
             if (cr->menu.editAmps) {
-                cr->setAmperage(changeValue(cr->getSetAmps(), direction, !cr->menu.editHalf ?: 0.010));
+                cr->setAmperage(changeValue(cr->getSetAmps(), direction, !cr->menu.editHalf ?: 0.100));
                 tick();
             }
 

@@ -70,6 +70,7 @@ uint8_t fanToggle = 0;
 
 void loop() {
     currentLoops = millis();
+    digitalWrite(pinLed, LOW);
     noAlarm();
     in.listen();
     if (is10)
@@ -84,7 +85,6 @@ void loop() {
             fansControl();
             fanToggle = 0;
         }
-        blink();
         ui.debug();
         ui.draw();
 

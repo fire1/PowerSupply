@@ -50,8 +50,8 @@ const uint8_t pinEncoderB = A2;
 const uint8_t pinEncoderA = A3;
 const uint8_t pinHeatTemp = A6; // 4.7к pull up resistor
 
-const uint16_t screenNormalRefresh = 400;
-const uint16_t screenEditorRefresh = 250;
+const uint16_t screenNormalRefresh = 250;
+const uint16_t screenEditorRefresh = 450;
 const uint16_t editTimeout = 10000;
 const uint16_t holdTimeout = 400;
 unsigned long futureMillis = 0;
@@ -129,8 +129,6 @@ boolean is250() {
 ;
 void fansControl() {
     int rawTemp = analogRead(pinHeatTemp);
-    Serial.print("rw tp: ");
-    Serial.print(rawTemp);
     temperature = (uint8_t) map(rawTemp, 325, 585, 120, 14);
     if (temperature > 60) {
         uint8_t fpw = (uint8_t) map(temperature, 35, 100, 25, 254);

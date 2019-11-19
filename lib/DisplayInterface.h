@@ -155,9 +155,11 @@ private:
         lcd->print(charA);
 
         int8_t limit = cr->readLimit();
-        for (index = 0; index < limit; ++index) {
-            lcd->setCursor(index, 3);
-            lcd->print("-");
+
+        for (index = 0; index < 20; ++index) {
+            lcd->setCursor(index, 2);
+            if (index <= limit) lcd->print("-");
+            else lcd->print(" ");
         }
 
 
@@ -197,11 +199,11 @@ public:
         Serial.println();
         Serial.print(F(" AO "));
         Serial.print(cr->getOutAmps());
-        Serial.print( F(" "));
+        Serial.print(F(" "));
         Serial.print(cr->getPwmAmps());
         Serial.print(F(" VO "));
         Serial.print(cr->getOutVolt());
-        Serial.print( F(" "));
+        Serial.print(F(" "));
         Serial.print(cr->getPwmVolt());
 
         Serial.print(F(" TP "));
