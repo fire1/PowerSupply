@@ -214,6 +214,8 @@ public:
         Serial.print(currentButton);
         Serial.print(F(" CR "));
         Serial.print(inp->getCursor());
+//        Serial.print(F(" M "));
+//        Serial.print(cr->inaRaw());
     }
 
 };

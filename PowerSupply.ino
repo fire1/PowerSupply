@@ -6,7 +6,7 @@
 
 //#define DEBUG
 
-
+int cntMsr;
 #include <Arduino.h>
 #include "PowerSupply.h"
 #include "lib/PresetMemory.h"
@@ -30,8 +30,11 @@ void encoderInterrupt() {
     ec.tick();
 }
 
+
+
 void inaAlertInterrupt() {
-    pw.measure();
+//    pw.measure();
+    cntMsr++;
 }
 
 
@@ -73,10 +76,11 @@ void loop() {
     digitalWrite(pinLed, LOW);
     noAlarm();
     in.listen();
-    if (is10)
+    if (is80())
         pw.manage();
 
     if (currentLoops > futureMillis) {
+        pw.calculate();
         futureMillis = currentLoops;
         futureMillis += (fastScreen) ? screenEditorRefresh : screenNormalRefresh;
         fanToggle++;

@@ -50,8 +50,8 @@ const uint8_t pinEncoderB = A2;
 const uint8_t pinEncoderA = A3;
 const uint8_t pinHeatTemp = A6; // 4.7к pull up resistor
 
-const uint16_t screenNormalRefresh = 250;
-const uint16_t screenEditorRefresh = 450;
+const uint16_t screenNormalRefresh = 450;
+const uint16_t screenEditorRefresh = 350;
 const uint16_t editTimeout = 10000;
 const uint16_t holdTimeout = 400;
 unsigned long futureMillis = 0;

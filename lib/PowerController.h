@@ -16,16 +16,27 @@
 #include "../../libraries/EnableInterrupt/EnableInterrupt.h"
 
 #endif
-
+/*
 #include <INA.h>
 
 #ifndef INA__Class_h
 
 #include "../../libraries/INA2xx/src/INA.h"
 
-#endif
+#endif*/
 
-INA_Class ina;
+//INA_Class ina;
+
+
+#include <Wire.h>
+#include <INA226.h>
+
+#ifndef INA226_h
+
+#include "../../libraries/Arduino-INA226/INA226.h"
+
+#endif
+INA226 ina;
 
 void static inaAlertInterrupt();
 
@@ -79,41 +90,6 @@ class PowerController {
     volatile uint8_t readings = 0; ///< Number of measurements taken
 
 
-    void setupIna() {
-        uint8_t devicesFound = 0;
-        while (deviceNumber == UINT8_MAX) // Loop until we find the first device
-        {
-            devicesFound = ina.begin(3, 1000000); // Set to an expected 1 Amp maximum and a 100000 microOhm resistor
-            for (uint8_t i = 0; i < devicesFound; i++) {
-                // Change the "INA226" in the following statement to whatever device you have attached and want to measure //
-                if (strcmp(ina.getDeviceName(i), "INA226") == 0) {
-                    deviceNumber = i;
-                    ina.reset(deviceNumber); // Reset device to default settings
-                    break;
-                } // of if-then we have found an INA226
-            } // of for-next loop through all devices found
-            if (deviceNumber == UINT8_MAX) {
-                Serial.print(F("No ina found. Waiting 1s and retrying...\n"));
-                alarm();
-                delay(100);
-            } // of if-then no INA226 found
-        }
-
-
-        ina.setAveraging(64, deviceNumber);                  // Average each reading 64 times
-        ina.setBusConversion(8244, deviceNumber);            // Maximum conversion time 8.244ms
-        ina.setShuntConversion(8244, deviceNumber);          // Maximum conversion time 8.244ms
-        ina.setMode(INA_MODE_CONTINUOUS_BOTH, deviceNumber); // Bus/shunt measured continuously
-        ina.AlertOnConversion(true, deviceNumber);
-
-    }
-
-    void calculateOutput() {
-        if (readings >= 10) {
-            outVolt = (float) sumBusMillVolts / readings / 1000.0;
-            outAmps = (float) sumBusMicroAmps / readings / 1000.0;
-        }
-    }
 
 
 public:
@@ -125,6 +101,15 @@ public:
         enableInterrupt(pinInaAlert, inaAlertInterrupt, CHANGE);
 //        this->setupIna();
         pinMode(pinLed, OUTPUT);
+        ina.begin();
+
+        // Configure INA226
+        ina.configure(INA226_AVERAGES_1, INA226_BUS_CONV_TIME_140US, INA226_SHUNT_CONV_TIME_140US,
+                      INA226_MODE_SHUNT_BUS_CONT);
+
+        // Calibrate INA226. Rshunt = 0.01 ohm, Max excepted current = 4A
+        ina.calibrate(1.0, 3);
+
 
         pinMode(pinVolPwm, OUTPUT);
         pinMode(pinAmpPwm, OUTPUT);
@@ -138,8 +123,17 @@ public:
     }
 
 
+    void calculate() {
+        int16_t ma, mv, mw;
+        outVolt = (float) ina.readBusVoltage();
+        outAmps = (float) ina.readShuntCurrent();
+        Serial.print(" SHV ");
+        Serial.print(ina.readShuntVoltage());
+    }
+
+
     void manage() {
-        this->calculateOutput();
+
 
         if (!isPowered) {
             return;
@@ -154,12 +148,7 @@ public:
         }
     }
 
-    void measure() {
-        sumBusMillVolts += ina.getBusMilliVolts(deviceNumber);    // Add current value to sum
-        sumBusMicroAmps += ina.getBusMicroAmps(deviceNumber);     // Add current value to sum
-        readings++;
-        ina.waitForConversion(deviceNumber);
-    }
+
 
 ////////////////////////////////////////////////////////////////
 ///     Class I/O [Input/Output]
