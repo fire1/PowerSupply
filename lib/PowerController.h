@@ -16,27 +16,27 @@
 #include "../../libraries/EnableInterrupt/EnableInterrupt.h"
 
 #endif
-/*
+
 #include <INA.h>
 
 #ifndef INA__Class_h
 
 #include "../../libraries/INA2xx/src/INA.h"
 
-#endif*/
+#endif
 
-//INA_Class ina;
+INA_Class ina;
 
 
-#include <Wire.h>
-#include <INA226.h>
+/*#include <INA226.h>
 
 #ifndef INA226_h
 
 #include "../../libraries/Arduino-INA226/INA226.h"
 
 #endif
-INA226 ina;
+
+INA226 ina;*/
 
 void static inaAlertInterrupt();
 
@@ -101,14 +101,7 @@ public:
         enableInterrupt(pinInaAlert, inaAlertInterrupt, CHANGE);
 //        this->setupIna();
         pinMode(pinLed, OUTPUT);
-        ina.begin();
-
-        // Configure INA226
-        ina.configure(INA226_AVERAGES_1, INA226_BUS_CONV_TIME_140US, INA226_SHUNT_CONV_TIME_140US,
-                      INA226_MODE_SHUNT_BUS_CONT);
-
-        // Calibrate INA226. Rshunt = 0.01 ohm, Max excepted current = 4A
-        ina.calibrate(1.0, 3);
+        // Display configuration
 
 
         pinMode(pinVolPwm, OUTPUT);
@@ -124,17 +117,21 @@ public:
 
 
     void calculate() {
-        int16_t ma, mv, mw;
-        outVolt = (float) ina.readBusVoltage();
-        outAmps = (float) ina.readShuntCurrent();
-        Serial.print(" SHV ");
-        Serial.print(ina.readShuntVoltage());
+
+/*        outVolt = (float) ina.readBusVoltage();
+        outAmps = (float) ina.readShuntCurrent();*/
+
+        outVolt = (float) ina.getBusMilliVolts() / 1000.0;
+        outAmps = (float) ina.getBusMicroAmps() / 1000.0;
+
+
+        Serial.println("  ");
+
+        Serial.println("");
     }
 
 
     void manage() {
-
-
         if (!isPowered) {
             return;
         }
@@ -147,7 +144,6 @@ public:
             lastVolt = pwmVolt;
         }
     }
-
 
 
 ////////////////////////////////////////////////////////////////

@@ -43,6 +43,17 @@ void setup() {
     Serial.begin(115200);
     Serial.println(F("Booting power supply ..."));
     tick();
+ /*   if (!ina.begin()) Serial.println(F("No ina found ..."));
+    ina.configure(INA226_AVERAGES_1, INA226_BUS_CONV_TIME_1100US, INA226_SHUNT_CONV_TIME_1100US, INA226_MODE_SHUNT_BUS_CONT);
+    ina.calibrate(0.01, 3.0);*/
+    ina.begin(4, 1000000);
+    ina.setBusConversion(8500);            // Maximum conversion time 8.244ms
+    ina.setShuntConversion(8500);          // Maximum conversion time 8.244ms
+    ina.setAveraging(128);                 // Average each reading n-times
+    ina.setMode(INA_MODE_CONTINUOUS_BOTH); // Bus/shunt measured continuously
+
+
+    delay(500);
     pinMode(pinFans, OUTPUT);
     pinMode(pinTone, OUTPUT);
 //    fastADC();
