@@ -46,10 +46,10 @@ void setup() {
  /*   if (!ina.begin()) Serial.println(F("No ina found ..."));
     ina.configure(INA226_AVERAGES_1, INA226_BUS_CONV_TIME_1100US, INA226_SHUNT_CONV_TIME_1100US, INA226_MODE_SHUNT_BUS_CONT);
     ina.calibrate(0.01, 3.0);*/
-    ina.begin(4, 1000000);
+    ina.begin(4,28100);
     ina.setBusConversion(8500);            // Maximum conversion time 8.244ms
     ina.setShuntConversion(8500);          // Maximum conversion time 8.244ms
-    ina.setAveraging(128);                 // Average each reading n-times
+//    ina.setAveraging(32);                 // Average each reading n-times
     ina.setMode(INA_MODE_CONTINUOUS_BOTH); // Bus/shunt measured continuously
 
 

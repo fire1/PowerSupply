@@ -76,9 +76,9 @@ class PowerController {
 
     boolean isPowered = true;
     uint8_t pwmVolt = 31, lastVolt;
-    uint8_t pwmAmps = 20 /*8*/, lastAmps;
+    uint8_t pwmAmps = 21 /*8*/, lastAmps;
     float setVolt = 3.0;
-    float setAmps = 0.100;
+    float setAmps = 0.200;
     float outVolt = 0;
     float outAmps = 0;
 
@@ -122,7 +122,7 @@ public:
         outAmps = (float) ina.readShuntCurrent();*/
 
         outVolt = (float) ina.getBusMilliVolts() / 1000.0;
-        outAmps = (float) ina.getBusMicroAmps() / 1000.0;
+        outAmps = (float) ina.getBusMicroAmps() / 1000000.0;
 
 
         Serial.println("  ");
@@ -178,7 +178,7 @@ public:
         if (value >= 0 && value <= 3) {
             setAmps = value;
 //        pwmAmps = map(value * 100, 10, 200, 20/*8*/, 180);
-            pwmAmps = map(value * 100, 10, 300, 20/*8*/, 255);
+            pwmAmps = map(value * 100, 20, 300, 20/*8*/, 255);
         }
     }
 
