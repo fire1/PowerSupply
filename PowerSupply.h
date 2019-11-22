@@ -131,12 +131,11 @@ void fansControl() {
     int rawTemp = analogRead(pinHeatTemp);
     temperature = (uint8_t) map(rawTemp, 325, 585, 120, 14);
     if (temperature > 60) {
-        uint8_t fpw = (uint8_t) map(temperature, 35, 100, 25, 254);
+        uint8_t fpw = (uint8_t) map(temperature, 35, 120, 25, 254);
         fpw = (fpw > 254) ? 254 : fpw;
         fpw = (fpw < 2) ? 1 : fpw;
         analogWrite(pinFans, fpw);
-    } else if (temperature > 35 && temperature < 60) {
-        analogWrite(pinFans, (int)map(temperature, 35, 65, 1, 3));
+
     } else if (temperature < 25) {
         analogWrite(pinFans, 0);
     }
