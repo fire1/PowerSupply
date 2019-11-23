@@ -23,7 +23,7 @@ private:
     unsigned long timeout;
     LiquidCrystal *lcd;
     PowerController *pc;
-    InputInterface *inp;
+    InputInterface *in;
 
 /**
  *
@@ -92,9 +92,9 @@ private:
         pc->menu.editAmps = false;
         pc->menu.editVolt = false;
         pc->menu.editHalf = false;
-        uint8_t cur = inp->getCursor();
+        uint8_t cur = in->getCursor();
         if (cur > 0) {
-            inp->edit = true;
+            in->edit = true;
             fastScreen = true;
             switch (cur) {
                 case 1:
@@ -120,7 +120,7 @@ private:
     void drawMain() {
         this->editing();
 
-        if (inp->edit || !lcdBlinks) {
+        if (in->edit || !lcdBlinks) {
             lcd->clear();
 
             lcd->setCursor(1, 0);
@@ -141,7 +141,7 @@ private:
             lcd->print(charA);
 
             lcd->setCursor(1, 3);
-            lcd->write(pc->mode.dynamic ? 0 : 1);
+            lcd->write(pc->mode.dynamic ? iconLock : iconUnlock);
 
             lcdBlinks = !lcdBlinks;
         }
@@ -167,10 +167,8 @@ private:
         }
 
 
-        if (!lcdEditing) {
-//            inp->setEditing(true);
-            lcd->noCursor();
-        }
+        lcd->setCursor(3, 3);
+        pc->mode.protect ? lcd->write(iconHart) : lcd->write(iconSkull);
 
 
     }
@@ -183,7 +181,7 @@ public:
      * @param ec
      * @param bt
      */
-    DisplayInterface(LiquidCrystal &lc, PowerController &cn, InputInterface &in) : lcd(&lc), pc(&cn), inp(&in) {}
+    DisplayInterface(LiquidCrystal &lc, PowerController &cn, InputInterface &in) : lcd(&lc), pc(&cn), in(&in) {}
 
     void draw() {
         drawMain();
@@ -191,9 +189,11 @@ public:
 
 
     void begin() {
-        lcd->createChar(0, charLock);
-        lcd->createChar(1, charUnlock);
-        lcd->createChar(2, charPlugin);
+        lcd->createChar(iconLock, charLock);
+        lcd->createChar(iconUnlock, charUnlock);
+        lcd->createChar(iconPlug, charPlugin);
+        lcd->createChar(iconHart, charHart);
+        lcd->createChar(iconSkull, charSkull);
         lcd->noAutoscroll();
     }
 
@@ -214,9 +214,9 @@ public:
         Serial.print(F(" AB "));
         Serial.print(analogRead(A1));
         Serial.print(F(" CB "));
-        Serial.print(currentButton);
+        Serial.print(in->lastButton);
         Serial.print(F(" CR "));
-        Serial.print(inp->getCursor());
+        Serial.print(in->getCursor());
 //        Serial.print(F(" M "));
 //        Serial.print(pc->inaRaw());
     }

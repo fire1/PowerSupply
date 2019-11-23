@@ -55,7 +55,9 @@ void btn2Click() {
 }
 
 void btn2Hold() {
-    driveHold(22);
+    if (currentButton != 22) {
+        currentButton = 22;
+    }
 }
 
 void btn3Click() {
@@ -105,7 +107,7 @@ void btn6Hold() {
 }
 
 Button btnBlinker = Button(20, &btn2Click, &btn2Hold);
-Button btnEncoder = Button(227, &btn1Click, &btn1Hold);
+Button btnEncoder = Button(227, &btn1Click, &btn1Hold, 1200);
 //Button btnEncoder = Button(610, &btn1Click, &btn1Hold);
 Button btnMemSetA = Button(765, &btn3Click, &btn3Hold);
 Button btnMemSetB = Button(512, &btn4Click, &btn4Hold);

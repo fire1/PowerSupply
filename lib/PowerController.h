@@ -50,6 +50,7 @@ struct EditMenu {
 struct PowerMode {
     boolean powered = true;
     boolean dynamic = true;
+    boolean protect = true;
 };
 
 
@@ -118,11 +119,19 @@ public:
 
 
     void manage() {
+        if (mode.protect && outVolt < 0.5 && outAmps > 0.25) {
+            mode.powered = false;
+            alarm();
+        }
+
+
         if (!mode.powered) {
             lastVolt = 0;
             analogWrite(pinVolPwm, 0);
             return;
         }
+
+
         if (lastAmps != pwmAmps) {
             analogWrite(pinAmpPwm, pwmAmps);
             lastAmps = pwmAmps;
@@ -211,13 +220,16 @@ public:
         return setAmps;
     }
 
-    uint8_t cntFix = 0;
 
 /**
  *  Current limit
  * @return 0,20
  */
     int8_t readLimit() {
+        if (mode.protect && outVolt < 1) {
+            blink();
+        }
+
         int limit = analogRead(pinAmpLimit);
         Serial.print(" L ");
         Serial.print(limit);

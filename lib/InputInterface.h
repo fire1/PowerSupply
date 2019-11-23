@@ -40,8 +40,6 @@ void static encoderInterrupt();
 class InputInterface {
 
     uint8_t cursor = 0;
-
-
     unsigned long timeout;
     PowerController *pc;
     AnalogButtons *ab;
@@ -147,9 +145,15 @@ private:
                 }
                 tick();
                 break;
+            case 22:
+                pc->mode.protect = (bool) !pc->mode.protect;
+                alarm();
+                break;
+
             default:
                 return;
         }
+        lastButton = currentButton;
         currentButton = 0;
 
     }
@@ -157,6 +161,8 @@ private:
 
 public:
     boolean edit = false;
+    uint8_t lastButton = 0;
+
 
     InputInterface(PowerController &cn, RotaryEncoder &ec, AnalogButtons &bt, PresetMemory &pm)
             : pc(&cn), enc(&ec), ab(&bt), prm(&pm) {}
@@ -198,8 +204,6 @@ public:
     uint8_t getCursor() {
         return cursor;
     }
-
-
 
 
 };
