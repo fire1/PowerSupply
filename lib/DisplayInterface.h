@@ -208,6 +208,9 @@ public:
         lcd->createChar(iconHart, charHart);
         lcd->createChar(iconSkull, charSkull);
         lcd->noAutoscroll();
+        delay(100);
+        lcd->clear();
+        lcd->home();
     }
 
 

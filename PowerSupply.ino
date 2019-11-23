@@ -41,23 +41,22 @@ void inaAlertInterrupt() {
 // do not use 10/11
 void setup() {
     Serial.begin(115200);
-    Serial.println(F("Booting setPowerState supply ..."));
+    lcd.begin(20, 4);
+    delay(100);
+    ui.begin();
+
     tick();
     ina.begin(4, 28100);
     ina.setBusConversion(8500);            // Maximum conversion time 8.244ms
     ina.setShuntConversion(8500);          // Maximum conversion time 8.244ms
     ina.setMode(INA_MODE_CONTINUOUS_BOTH); // Bus/shunt measured continuously
-
-
+    Serial.println(F("Booting setPowerState supply ..."));
     delay(500);
     pinMode(pinFans, OUTPUT);
     pinMode(pinTone, OUTPUT);
-//    fastADC();
-    ui.begin();
     pc.begin();
 
 
-    lcd.begin(20, 4);
 
     in.begin();
     currentLoops = 0;
