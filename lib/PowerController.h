@@ -47,6 +47,11 @@ struct EditMenu {
     boolean editHalf = false;
 };
 
+struct PowerMode {
+    boolean powered = true;
+    boolean dynamic = true;
+};
+
 
 // voltage table
 // V    Value
@@ -73,27 +78,17 @@ struct EditMenu {
 // step 8.2
 
 class PowerController {
-
-    boolean isPowered = true;
     uint8_t pwmVolt = 31, lastVolt;
-    uint8_t pwmAmps = 21 /*8*/, lastAmps;
+    uint8_t pwmAmps = 19 /*8*/, lastAmps;
     float setVolt = 3.0;
     float setAmps = 0.200;
     float outVolt = 0;
     float outAmps = 0;
 
-    //
-    // Ina vars
-    volatile uint8_t deviceNumber = UINT8_MAX; ///< Device Number to use in example, init used for detection loop
-    volatile uint64_t sumBusMillVolts = 0; ///< Sum of bus voltage readings
-    volatile int64_t sumBusMicroAmps = 0; ///< Sum of bus amperage readings
-    volatile uint8_t readings = 0; ///< Number of measurements taken
-
-
-
 
 public:
 
+    PowerMode mode;
     EditMenu menu;
 
     void begin() {
@@ -117,22 +112,15 @@ public:
 
 
     void calculate() {
-
-/*        outVolt = (float) ina.readBusVoltage();
-        outAmps = (float) ina.readShuntCurrent();*/
-
         outVolt = (float) ina.getBusMilliVolts() / 1000.0;
         outAmps = (float) ina.getBusMicroAmps() / 1000000.0;
-
-
-        Serial.println("  ");
-
-        Serial.println("");
     }
 
 
     void manage() {
-        if (!isPowered) {
+        if (!mode.powered) {
+            lastVolt = 0;
+            analogWrite(pinVolPwm, 0);
             return;
         }
         if (lastAmps != pwmAmps) {
@@ -178,7 +166,7 @@ public:
         if (value >= 0 && value <= 3) {
             setAmps = value;
 //        pwmAmps = map(value * 100, 10, 200, 20/*8*/, 180);
-            pwmAmps = map(value * 100, 20, 300, 20/*8*/, 255);
+            pwmAmps = map(value * 100, 20, 300, 19/*8*/, 255);
         }
     }
 
@@ -231,26 +219,14 @@ public:
  */
     int8_t readLimit() {
         int limit = analogRead(pinAmpLimit);
-//        if (limit < 100) {
-//            analogWrite(pinVolPwm, LOW);
-//            digitalWrite(pinAmpPwm,HIGH);
-//            delayMicroseconds(100);
-//            digitalWrite(pinAmpPwm,pwmAmps);
-//            analogWrite(pinVolPwm, pwmVolt);
-//        }
         Serial.print(" L ");
         Serial.print(limit);
         if (limit < 200) {
             digitalWrite(pinLed, HIGH);
-
         }
-        return (int8_t) map(limit, 0, 1024, 20, 0);
+        return (int8_t) map(limit, 0, 950, 20, 0);
     }
 
-
-    void power(boolean state) {
-        isPowered = state;
-    }
 
 };
 

@@ -62,36 +62,6 @@ int16_t temperature;
 
 char printValues[6];
 
-byte charLinear[] = {
-        B00000,
-        B11111,
-        B00000,
-        B10101,
-        B00000,
-        B00000,
-        B00000,
-        B00000
-};
-byte charLimits[] = {
-        B00000,
-        B11111,
-        B00000,
-        B01110,
-        B01010,
-        B01010,
-        B11011,
-        B00000
-};
-byte charSwitch[] = {
-        B00000,
-        B01110,
-        B01010,
-        B01010,
-        B01010,
-        B01010,
-        B11011,
-        B00000
-};
 byte charPlugin[] = {
         B01010,
         B01010,
@@ -102,6 +72,29 @@ byte charPlugin[] = {
         B00100,
         B00000
 };
+
+byte charLock[] = {
+        0b01110,
+        0b10001,
+        0b10001,
+        0b11111,
+        0b11011,
+        0b11011,
+        0b11111,
+        0b00000
+};
+
+byte charUnlock[]={
+        0b01110,
+        0b10000,
+        0b10000,
+        0b11111,
+        0b11011,
+        0b11011,
+        0b11111,
+        0b00000
+};
+
 
 unsigned long amplitude10, amplitude100, amplitude350;
 
@@ -124,9 +117,8 @@ boolean is250() {
         amplitude350 = currentLoops + 250;
         return true;
     }
-}
+};
 
-;
 void fansControl() {
     int rawTemp = analogRead(pinHeatTemp);
     temperature = (uint8_t) map(rawTemp, 325, 585, 120, 14);
@@ -174,6 +166,7 @@ void blink() {
 
 unsigned long startAlarmed = 0;
 int16_t soundLength = 0;
+
 void alarm() {
     if (startAlarmed == 0) {
         analogWrite(pinTone, 200);
@@ -191,7 +184,7 @@ void tick() {
 }
 
 void noAlarm() {
-    if (millis() > startAlarmed + soundLength ) {
+    if (millis() > startAlarmed + soundLength) {
         analogWrite(pinTone, 0);
         startAlarmed = 0;
     }

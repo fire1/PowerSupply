@@ -22,7 +22,7 @@ private:
     boolean lcdEditing = false;
     unsigned long timeout;
     LiquidCrystal *lcd;
-    PowerController *cr;
+    PowerController *pc;
     InputInterface *inp;
 
 /**
@@ -89,27 +89,27 @@ private:
 
 
     void editing() {
-        cr->menu.editAmps = false;
-        cr->menu.editVolt = false;
-        cr->menu.editHalf = false;
+        pc->menu.editAmps = false;
+        pc->menu.editVolt = false;
+        pc->menu.editHalf = false;
         uint8_t cur = inp->getCursor();
         if (cur > 0) {
-            lcdEditing = true;
+            inp->edit = true;
             fastScreen = true;
             switch (cur) {
                 case 1:
-                    cr->menu.editVolt = true;
+                    pc->menu.editVolt = true;
                     break;
                 case 2:
-                    cr->menu.editVolt = true;
-                    cr->menu.editHalf = true;
+                    pc->menu.editVolt = true;
+                    pc->menu.editHalf = true;
                     break;
                 case 3:
-                    cr->menu.editAmps = true;
-                    cr->menu.editHalf = true;
+                    pc->menu.editAmps = true;
+                    pc->menu.editHalf = true;
                     break;
                 case 4:
-                    cr->menu.editAmps = true;
+                    pc->menu.editAmps = true;
                     break;
                 default:
                     break;
@@ -120,7 +120,7 @@ private:
     void drawMain() {
         this->editing();
 
-        if (lcdEditing || !lcdBlinks) {
+        if (inp->edit || !lcdBlinks) {
             lcd->clear();
 
             lcd->setCursor(1, 0);
@@ -131,31 +131,35 @@ private:
 
 
             lcd->setCursor(6, 0);
-            voltFloat(cr->getSetVolt(), printValues, cr->menu.editVolt, cr->menu.editHalf);
+            voltFloat(pc->getSetVolt(), printValues, pc->menu.editVolt, pc->menu.editHalf);
             lcd->print(printValues);
             lcd->print(charV);
 
             lcd->setCursor(13, 0);
-            ampsFloat(cr->getSetAmps(), printValues, cr->menu.editAmps, cr->menu.editHalf);
+            ampsFloat(pc->getSetAmps(), printValues, pc->menu.editAmps, pc->menu.editHalf);
             lcd->print(printValues);
             lcd->print(charA);
+
+            lcd->setCursor(1, 3);
+            lcd->write(pc->mode.dynamic ? 0 : 1);
 
             lcdBlinks = !lcdBlinks;
         }
 
         lcd->setCursor(6, 1);
-        voltFloat(cr->getOutVolt(), printValues);
+        voltFloat(pc->getOutVolt(), printValues);
         lcd->print(printValues);
         lcd->print(charV);
 
 
         lcd->setCursor(13, 1);
-        ampsFloat(cr->getOutAmps(), printValues);
+        ampsFloat(pc->getOutAmps(), printValues);
         lcd->print(printValues);
         lcd->print(charA);
 
-        int8_t limit = cr->readLimit();
-
+        int8_t limit = pc->readLimit();
+        Serial.print(" LN ");
+        Serial.print(limit);
         for (index = 0; index < 20; ++index) {
             lcd->setCursor(index, 2);
             if (index <= limit) lcd->print("-");
@@ -164,7 +168,7 @@ private:
 
 
         if (!lcdEditing) {
-            inp->setEditing(true);
+//            inp->setEditing(true);
             lcd->noCursor();
         }
 
@@ -179,7 +183,7 @@ public:
      * @param ec
      * @param bt
      */
-    DisplayInterface(LiquidCrystal &lc, PowerController &cn, InputInterface &in) : lcd(&lc), cr(&cn), inp(&in) {}
+    DisplayInterface(LiquidCrystal &lc, PowerController &cn, InputInterface &in) : lcd(&lc), pc(&cn), inp(&in) {}
 
     void draw() {
         drawMain();
@@ -187,10 +191,9 @@ public:
 
 
     void begin() {
-        lcd->createChar(0, charLinear);
-        lcd->createChar(1, charSwitch);
-        lcd->createChar(2, charLimits);
-        lcd->createChar(3, charPlugin);
+        lcd->createChar(0, charLock);
+        lcd->createChar(1, charUnlock);
+        lcd->createChar(2, charPlugin);
         lcd->noAutoscroll();
     }
 
@@ -198,13 +201,13 @@ public:
     void debug() {
         Serial.println();
         Serial.print(F(" AO "));
-        Serial.print(cr->getOutAmps());
+        Serial.print(pc->getOutAmps());
         Serial.print(F(" "));
-        Serial.print(cr->getPwmAmps());
+        Serial.print(pc->getPwmAmps());
         Serial.print(F(" VO "));
-        Serial.print(cr->getOutVolt());
+        Serial.print(pc->getOutVolt());
         Serial.print(F(" "));
-        Serial.print(cr->getPwmVolt());
+        Serial.print(pc->getPwmVolt());
 
         Serial.print(F(" TP "));
         Serial.print(temperature);
@@ -215,7 +218,7 @@ public:
         Serial.print(F(" CR "));
         Serial.print(inp->getCursor());
 //        Serial.print(F(" M "));
-//        Serial.print(cr->inaRaw());
+//        Serial.print(pc->inaRaw());
     }
 
 };

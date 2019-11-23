@@ -41,9 +41,6 @@ void driveHold(uint8_t button) {
 void btn1Click() {
     if (currentButton != 1) {
         currentButton = 1;
-#ifdef DEBUG
-        Serial.println(F("button 1 clicked"));
-#endif
     }
 }
 
@@ -54,9 +51,6 @@ void btn1Hold() {
 void btn2Click() {
     if (currentButton != 2) {
         currentButton = 2;
-#ifdef DEBUG
-        Serial.println(F("button 2 clicked"));
-#endif
     }
 }
 
@@ -110,7 +104,7 @@ void btn6Hold() {
     driveHold(66);
 }
 
-Button btnBlinker = Button(27, &btn2Click, &btn2Hold);
+Button btnBlinker = Button(20, &btn2Click, &btn2Hold);
 Button btnEncoder = Button(227, &btn1Click, &btn1Hold);
 //Button btnEncoder = Button(610, &btn1Click, &btn1Hold);
 Button btnMemSetA = Button(765, &btn3Click, &btn3Hold);

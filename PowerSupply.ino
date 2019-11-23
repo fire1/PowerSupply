@@ -7,6 +7,7 @@
 //#define DEBUG
 
 int cntMsr;
+
 #include <Arduino.h>
 #include "PowerSupply.h"
 #include "lib/PresetMemory.h"
@@ -21,9 +22,9 @@ int cntMsr;
 RotaryEncoder ec(pinEncoderA, pinEncoderB);
 AnalogButtons ab(pinAnalogBt, INPUT, 10);
 PresetMemory pm;
-PowerController pw;
-InputInterface in(pw, ec, ab, pm);
-DisplayInterface ui(lcd, pw, in);
+PowerController pc;
+InputInterface in(pc, ec, ab, pm);
+DisplayInterface ui(lcd, pc, in);
 //
 
 void encoderInterrupt() {
@@ -31,9 +32,8 @@ void encoderInterrupt() {
 }
 
 
-
 void inaAlertInterrupt() {
-//    pw.measure();
+//    pc.measure();
     cntMsr++;
 }
 
@@ -41,15 +41,11 @@ void inaAlertInterrupt() {
 // do not use 10/11
 void setup() {
     Serial.begin(115200);
-    Serial.println(F("Booting power supply ..."));
+    Serial.println(F("Booting setPowerState supply ..."));
     tick();
- /*   if (!ina.begin()) Serial.println(F("No ina found ..."));
-    ina.configure(INA226_AVERAGES_1, INA226_BUS_CONV_TIME_1100US, INA226_SHUNT_CONV_TIME_1100US, INA226_MODE_SHUNT_BUS_CONT);
-    ina.calibrate(0.01, 3.0);*/
-    ina.begin(4,28100);
+    ina.begin(4, 28100);
     ina.setBusConversion(8500);            // Maximum conversion time 8.244ms
     ina.setShuntConversion(8500);          // Maximum conversion time 8.244ms
-//    ina.setAveraging(32);                 // Average each reading n-times
     ina.setMode(INA_MODE_CONTINUOUS_BOTH); // Bus/shunt measured continuously
 
 
@@ -58,7 +54,7 @@ void setup() {
     pinMode(pinTone, OUTPUT);
 //    fastADC();
     ui.begin();
-    pw.begin();
+    pc.begin();
 
 
     lcd.begin(20, 4);
@@ -84,14 +80,12 @@ uint8_t fanToggle = 0;
 
 void loop() {
     currentLoops = millis();
-    digitalWrite(pinLed, LOW);
     noAlarm();
     in.listen();
-    if (is80())
-        pw.manage();
+    pc.manage();
 
     if (currentLoops > futureMillis) {
-        pw.calculate();
+        pc.calculate();
         futureMillis = currentLoops;
         futureMillis += (fastScreen) ? screenEditorRefresh : screenNormalRefresh;
         fanToggle++;
@@ -101,8 +95,8 @@ void loop() {
             fanToggle = 0;
         }
         ui.debug();
+        digitalWrite(pinLed, LOW);
         ui.draw();
-
     }
 
 }//end of void loop

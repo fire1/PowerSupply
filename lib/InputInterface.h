@@ -38,12 +38,12 @@
 void static encoderInterrupt();
 
 class InputInterface {
-    boolean isEdit = false;
+
     uint8_t cursor = 0;
 
 
     unsigned long timeout;
-    PowerController *cr;
+    PowerController *pc;
     AnalogButtons *ab;
     RotaryEncoder *enc;
     PresetMemory *prm;
@@ -59,7 +59,7 @@ private:
                 analogWrite(pinVolPwm, Serial.readStringUntil('\n').toInt());
                 Serial.println();
                 Serial.print(F("VOLTAGE: "));
-                Serial.print(cr->getSetVolt());
+                Serial.print(pc->getSetVolt());
                 Serial.println();
             }
 
@@ -67,23 +67,23 @@ private:
                 analogWrite(pinAmpPwm, Serial.readStringUntil('\n').toInt());
                 Serial.println();
                 Serial.print(F("CURRENT: "));
-                Serial.print(cr->getSetAmps());
+                Serial.print(pc->getSetAmps());
                 Serial.println();
             }
 
             if (where == F("volt")) {
-                cr->setVoltage(Serial.readStringUntil('\n').toFloat());
+                pc->setVoltage(Serial.readStringUntil('\n').toFloat());
                 Serial.println();
                 Serial.print(F("VOLTAGE: "));
-                Serial.print(cr->getSetVolt());
+                Serial.print(pc->getSetVolt());
                 Serial.println();
             }
 
             if (where == F("amp")) {
-                cr->setAmperage(Serial.readStringUntil('\n').toFloat());
+                pc->setAmperage(Serial.readStringUntil('\n').toFloat());
                 Serial.println();
                 Serial.print(F("CURRENT: "));
-                Serial.print(cr->getSetAmps());
+                Serial.print(pc->getSetAmps());
                 Serial.println();
             }
 
@@ -112,13 +112,13 @@ private:
 
         int direction = enc->getDirection();
         if (direction != 0) {
-            if (cr->menu.editAmps) {
-                cr->setAmperage(changeValue(cr->getSetAmps(), direction, !cr->menu.editHalf ?: 0.050));
+            if (pc->menu.editAmps) {
+                pc->setAmperage(changeValue(pc->getSetAmps(), direction, !pc->menu.editHalf ?: 0.050));
                 tick();
             }
 
-            if (cr->menu.editVolt) {
-                cr->setVoltage(changeValue(cr->getSetVolt(), direction, !cr->menu.editHalf ?: 0.10));
+            if (pc->menu.editVolt) {
+                pc->setVoltage(changeValue(pc->getSetVolt(), direction, !pc->menu.editHalf ?: 0.10));
                 tick();
             }
 
@@ -138,6 +138,15 @@ private:
                 tick();
                 ping();
                 break;
+
+            case 2:
+                if (edit) {
+                    pc->mode.dynamic = (bool) !pc->mode.dynamic;
+                } else {
+                    pc->mode.powered = (bool) !pc->mode.powered;
+                }
+                tick();
+                break;
             default:
                 return;
         }
@@ -147,9 +156,10 @@ private:
 
 
 public:
+    boolean edit = false;
 
     InputInterface(PowerController &cn, RotaryEncoder &ec, AnalogButtons &bt, PresetMemory &pm)
-            : cr(&cn), enc(&ec), ab(&bt), prm(&pm) {}
+            : pc(&cn), enc(&ec), ab(&bt), prm(&pm) {}
 
     void begin() {
 
@@ -178,7 +188,7 @@ public:
             this->input();
             if (timeout <= millis()) {
                 cursor = 0;
-                Serial.println(F(" timeout "));
+                edit = false;
             }
         }
 
@@ -190,13 +200,6 @@ public:
     }
 
 
-/**
- *
- * @param state
- */
-    void setEditing(boolean state) {
-        isEdit = state;
-    }
 
 
 };
