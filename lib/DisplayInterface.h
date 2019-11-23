@@ -143,6 +143,21 @@ private:
             lcd->setCursor(1, 3);
             lcd->write(pc->mode.dynamic ? iconLock : iconUnlock);
 
+            lcd->setCursor(6, 3);
+            lcd->print(F("M1"));
+
+
+            lcd->setCursor(10, 3);
+            lcd->print(F("M2"));
+
+
+            lcd->setCursor(14, 3);
+            lcd->print(F("M3"));
+
+
+            lcd->setCursor(18, 3);
+            lcd->print(F("M4"));
+
             lcdBlinks = !lcdBlinks;
         }
 
@@ -169,8 +184,6 @@ private:
 
         lcd->setCursor(3, 3);
         pc->mode.protect ? lcd->write(iconHart) : lcd->write(iconSkull);
-
-
     }
 
 public:
@@ -217,8 +230,8 @@ public:
         Serial.print(in->lastButton);
         Serial.print(F(" CR "));
         Serial.print(in->getCursor());
-//        Serial.print(F(" M "));
-//        Serial.print(pc->inaRaw());
+        Serial.print(F(" MD "));
+        Serial.print(pc->mode.dynamic);
     }
 
 };
