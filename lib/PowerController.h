@@ -86,10 +86,6 @@ class PowerController {
     unsigned long lastControl = 0;
 
 
-    boolean controlInterval() {
-        return millis() > lastControl + CONTROL_INTERVAL;
-    }
-
     void controller() {
         unsigned long interval = millis();
         if (interval > lastControl + CONTROL_INTERVAL) {
