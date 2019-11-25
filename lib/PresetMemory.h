@@ -37,7 +37,7 @@ public:
     }
 
 
-    void set(uint8_t setIndex, float voltage, float amperage, uint8_t mode) {
+/*    void set(uint8_t setIndex, float voltage, float amperage, uint8_t mode) {
         Preset save = {
                 voltage, amperage, mode
         };
@@ -47,7 +47,7 @@ public:
             lastSave = save;
             lastIndexSave = setIndex;
         }
-    }
+    }*/
 
     void get(uint8_t setIndex, Preset &output) {
         EEPROM.get(setIndex * sizeof(Preset), output);
