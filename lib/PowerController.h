@@ -27,18 +27,16 @@
 
 INA_Class ina;
 
+void static inaAlertInterrupt();
 
-/*#include <INA226.h>
 
-#ifndef INA226_h
-
-#include "../../libraries/Arduino-INA226/INA226.h"
-
+#ifndef CONTROL_INTERVAL
+#define CONTROL_INTERVAL 300
 #endif
 
-INA226 ina;*/
-
-void static inaAlertInterrupt();
+#ifndef CONTROL_TOLERANCE
+#define CONTROL_TOLERANCE 3
+#endif
 
 
 struct EditMenu {
@@ -79,13 +77,35 @@ struct PowerMode {
 // step 8.2
 
 class PowerController {
-    uint8_t pwmVolt = 31, lastVolt;
-    uint8_t pwmAmps = 19 /*8*/, lastAmps;
+    uint8_t pwmVolt = 31, lastVolt, ctrVolt;
+    uint8_t pwmAmps = 19, lastAmps, ctrAmps;
     float setVolt = 3.0;
     float setAmps = 0.200;
     float outVolt = 0;
     float outAmps = 0;
+    unsigned long lastControl = 0;
 
+
+    boolean controlInterval() {
+        return millis() > lastControl + CONTROL_INTERVAL;
+    }
+
+    void controller() {
+        if (outVolt > setVolt && outAmps == 0 && controlInterval()) {
+            pwmVolt--;
+            pwmVolt = constrain(pwmVolt, ctrVolt - CONTROL_TOLERANCE, ctrVolt + CONTROL_TOLERANCE);
+        }
+
+        if (outVolt < setVolt && outAmps == 0 && controlInterval()) {
+            pwmVolt++;
+            pwmVolt = constrain(pwmVolt, ctrVolt - CONTROL_TOLERANCE, ctrVolt + CONTROL_TOLERANCE);
+        }
+
+/*        if (outAmps > setAmps && controlInterval()) {
+            pwmAmps--;
+            pwmAmps = constrain(pwmAmps, 10, 150);
+        }*/
+    }
 
 public:
 
@@ -124,6 +144,9 @@ public:
             alarm();
         }
 
+        if (mode.dynamic) {
+            controller();
+        }
 
         if (!mode.powered) {
             lastVolt = 0;
@@ -179,6 +202,7 @@ public:
                 pwmVolt = 255;
             }
             pwmVolt = map(value * 10, 10, 205, 15, 167);
+            ctrVolt = pwmVolt;
         }
     }
 
@@ -193,6 +217,7 @@ public:
         if (value >= 0 && value <= 3) {
             setAmps = value;
             pwmAmps = map(value * 100, 20, 300, 19, 255);
+            ctrAmps = pwmAmps;
         }
     }
 
@@ -242,7 +267,6 @@ public:
     PowerMode getMode() {
         return mode;
     }
-
 
 
 };
