@@ -44,7 +44,7 @@ class InputInterface {
     PowerController *pc;
     AnalogButtons *ab;
     RotaryEncoder *enc;
-    PresetMemory *prm;
+    PresetMemory *pm;
     Preset preset;
 private:
 
@@ -77,7 +77,7 @@ private:
                 Serial.println();
             }
 
-            if (where == F("amp")) {
+            if (where == F("amps")) {
                 pc->setAmperage(Serial.readStringUntil('\n').toFloat());
                 Serial.println();
                 Serial.print(F("CURRENT: "));
@@ -111,15 +111,16 @@ private:
         int direction = enc->getDirection();
         if (direction != 0) {
             if (pc->menu.editAmps) {
-                pc->setAmperage(changeValue(pc->getSetAmps(), direction, !pc->menu.editHalf ?: 0.050));
+                double value = !pc->menu.editHalf ?: 0.050;
+                pc->setAmperage(changeValue(pc->getSetAmps(), direction, value));
                 tick();
             }
 
             if (pc->menu.editVolt) {
-                pc->setVoltage(changeValue(pc->getSetVolt(), direction, !pc->menu.editHalf ?: 0.10));
+                float value = !pc->menu.editHalf ?: 0.10;
+                pc->setVoltage(changeValue(pc->getSetVolt(), direction, value));
                 tick();
             }
-
             ping();
         }
 
@@ -150,12 +151,66 @@ private:
                 alarm();
                 break;
 
+//// Load presets
+            case 3:
+                pm->get(1, preset);
+                setPreset(preset);
+                tick();
+                break;
+            case 4:
+                pm->get(2, preset);
+                setPreset(preset);
+                tick();
+                break;
+            case 5:
+                pm->get(3, preset);
+                setPreset(preset);
+                tick();
+                break;
+            case 6:
+                pm->get(4, preset);
+                setPreset(preset);
+                tick();
+                break;
+
+//// Save presets
+            case 33:
+                pm->set(1, this->getPreset());
+                alarm();
+                break;
+            case 44:
+                pm->set(2, this->getPreset());
+                alarm();
+                break;
+            case 55:
+                pm->set(3, this->getPreset());
+                alarm();
+                break;
+            case 66:
+                pm->set(4, this->getPreset());
+                alarm();
+                break;
             default:
                 return;
         }
         lastButton = currentButton;
         currentButton = 0;
 
+    }
+
+    Preset getPreset() {
+        preset.amps = pc->getPwmAmps();
+        preset.volt = pc->getPwmVolt();
+        preset.mode = pc->getMode();
+        return preset;
+    }
+
+    void setPreset(Preset preset) {
+        pc->mode.powered = false;
+        pc->setPwmVolt(preset.volt);
+        pc->setPwmAmps(preset.amps);
+        pc->mode = preset.mode;
+        pc->mode.powered = false;
     }
 
 
@@ -165,7 +220,7 @@ public:
 
 
     InputInterface(PowerController &cn, RotaryEncoder &ec, AnalogButtons &bt, PresetMemory &pm)
-            : pc(&cn), enc(&ec), ab(&bt), prm(&pm) {}
+            : pc(&cn), enc(&ec), ab(&bt), pm(&pm) {}
 
     void begin() {
 

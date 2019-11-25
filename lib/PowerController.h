@@ -143,6 +143,24 @@ public:
     }
 
 
+    /**
+ *  Current limit
+ * @return 0,20
+ */
+    int8_t readLimit() {
+        if (mode.protect && outVolt < 1) {
+            blink();
+        }
+
+        int limit = analogRead(pinAmpLimit);
+        Serial.print(" L ");
+        Serial.print(limit);
+        if (limit < 200) {
+            digitalWrite(pinLed, HIGH);
+        }
+        return (int8_t) map(limit, 0, 950, 20, 0);
+    }
+
 ////////////////////////////////////////////////////////////////
 ///     Class I/O [Input/Output]
 ////////////////////////////////////////////////////////////////
@@ -174,8 +192,7 @@ public:
         }
         if (value >= 0 && value <= 3) {
             setAmps = value;
-//        pwmAmps = map(value * 100, 10, 200, 20/*8*/, 180);
-            pwmAmps = map(value * 100, 20, 300, 19/*8*/, 255);
+            pwmAmps = map(value * 100, 20, 300, 19, 255);
         }
     }
 
@@ -184,6 +201,7 @@ public:
  * @param value
  */
     void setPwmVolt(uint8_t value) {
+        setVolt = (float) map(value * 10, 15, 167, 10, 205) / 10.0;
         pwmVolt = value;
     }
 
@@ -192,6 +210,7 @@ public:
  * @param value
  */
     void setPwmAmps(uint8_t value) {
+        setAmps = (float) map(value, 19, 255, 20, 300) / 100.0;
         pwmAmps = value;
     }
 
@@ -220,23 +239,12 @@ public:
         return setAmps;
     }
 
+    PowerMode getMode() {
+        return mode;
+    }
 
-/**
- *  Current limit
- * @return 0,20
- */
-    int8_t readLimit() {
-        if (mode.protect && outVolt < 1) {
-            blink();
-        }
+    void loadPreset(Preset set) {
 
-        int limit = analogRead(pinAmpLimit);
-        Serial.print(" L ");
-        Serial.print(limit);
-        if (limit < 200) {
-            digitalWrite(pinLed, HIGH);
-        }
-        return (int8_t) map(limit, 0, 950, 20, 0);
     }
 
 

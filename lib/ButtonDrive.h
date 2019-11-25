@@ -45,7 +45,9 @@ void btn1Click() {
 }
 
 void btn1Hold() {
-    driveHold(11);
+    if (currentButton != 11) {
+        currentButton = 11;
+    }
 }
 
 void btn2Click() {
@@ -63,54 +65,55 @@ void btn2Hold() {
 void btn3Click() {
     if (currentButton != 3) {
         currentButton = 3;
-#ifdef DEBUG
-        Serial.println(F("button 3 clicked"));
-#endif
     }
 }
 
 void btn3Hold() {
-    driveHold(33);
+    if (currentButton != 3) {
+        currentButton = 33;
+    }
 }
 
 void btn4Click() {
     if (currentButton != 4) {
         currentButton = 4;
-        Serial.println(F("button 4 clicked"));
     }
 }
 
 void btn4Hold() {
-    driveHold(44);
+    if (currentButton != 44) {
+        currentButton = 44;
+    }
 }
 
 void btn5Click() {
     if (currentButton != 5) {
         currentButton = 5;
-        Serial.println(F("button 5 clicked"));
     }
 }
 
 void btn5Hold() {
-    driveHold(55);
+    if (currentButton != 55) {
+        currentButton = 6;
+    }
 }
 
 void btn6Click() {
     if (currentButton != 6) {
         currentButton = 6;
-        Serial.println(F("button 6 clicked"));
     }
 }
 
 void btn6Hold() {
-    driveHold(66);
+    if (currentButton != 66) {
+        currentButton = 66;
+    }
 }
 
 Button btnBlinker = Button(20, &btn2Click, &btn2Hold, 1200, 350);
 Button btnEncoder = Button(227, &btn1Click, &btn1Hold, 1200, 350);
-//Button btnEncoder = Button(610, &btn1Click, &btn1Hold);
-Button btnMemSetA = Button(765, &btn3Click, &btn3Hold);
-Button btnMemSetB = Button(512, &btn4Click, &btn4Hold);
-Button btnMemSetD = Button(420, &btn6Click, &btn6Hold);
-Button btnMemSetC = Button(264, &btn5Click, &btn5Hold);
+Button btnMemSetA = Button(765, &btn3Click, &btn3Hold, 1200, 450);
+Button btnMemSetB = Button(512, &btn4Click, &btn4Hold, 1200, 450);
+Button btnMemSetD = Button(420, &btn6Click, &btn6Hold, 1200, 450);
+Button btnMemSetC = Button(264, &btn5Click, &btn5Hold, 1200, 450);
 #endif //POWERSUPPLY_BUTTONDRIVE_H

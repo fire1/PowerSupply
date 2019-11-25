@@ -14,8 +14,8 @@
 
 struct Preset {
     float volt;
-    float amp;
-    uint8_t mode;
+    float amps;
+    PowerMode mode;
 };
 
 class PresetMemory {
@@ -28,7 +28,7 @@ public:
 
     void set(uint8_t setIndex, Preset save) {
 
-        if (lastSave.volt != save.volt || lastSave.amp != save.amp || lastIndexSave != setIndex) {
+        if (lastSave.volt != save.volt || lastSave.amps != save.amps || lastIndexSave != setIndex) {
             EEPROM.put(setIndex * sizeof(Preset), save);
             lastSave = save;
             lastIndexSave = setIndex;
@@ -42,7 +42,7 @@ public:
                 voltage, amperage, mode
         };
 
-        if (lastSave.volt != save.volt || lastSave.amp != save.amp || lastIndexSave != setIndex) {
+        if (lastSave.volt != save.volt || lastSave.amps != save.amps || lastIndexSave != setIndex) {
             EEPROM.put(setIndex * sizeof(Preset), save);
             lastSave = save;
             lastIndexSave = setIndex;
