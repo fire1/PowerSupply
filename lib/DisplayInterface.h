@@ -235,7 +235,7 @@ private:
             lcd->print(charA);
 
             lcd->setCursor(1, 3);
-            lcd->write(pc->mode.dynamic ? iconLock : iconUnlock);
+            lcd->write(pc->mode.dynamic ?   iconUnlock : iconLock);
 
             lcd->setCursor(6, 3);
             lcd->print(F("M1"));
@@ -278,20 +278,20 @@ private:
                 lcd->setCursor(5, 3);
                 break;
             case 2:
+                lcd->setCursor(9, 3);
                 break;
             case 3:
-                lcd->setCursor(9, 3);
+                lcd->setCursor(13, 3);
                 break;
 
             case 4:
-                lcd->setCursor(13, 3);
+                lcd->setCursor(17, 3);
                 break;
 
             default:
                 break;
         }
-//        lcd->print((char) 126);
-        lcd->write(126);
+        lcd->write(icon);
     }
 
 public:
@@ -305,7 +305,10 @@ public:
     DisplayInterface(LiquidCrystal &lc, PowerController &cn, InputInterface &in) : lcd(&lc), pc(&cn), in(&in) {}
 
     void draw() {
+        //
+        // Memory UI
         drawMain();
+        drawMemory();
 
         lcd->setCursor(6, 1);
         voltFloat(pc->getOutVolt(), printValues);
@@ -322,22 +325,20 @@ public:
         // Draw bar
         // symbols: https://learn.robotgeek.com/getting-started/59-lcd-special-characters.html
         int8_t limit = pc->readLimit();
-        Serial.print(" LN ");
+        Serial.print(F(" LN "));
         Serial.print(limit);
         for (index = 0; index < 20; ++index) {
             lcd->setCursor(index, 2);
-            lcd->print(F("|"));
-            if (index <= limit) lcd->write(255)/*lcd->print("-")*/;
-            else lcd->print(" ");
+
+            if (index <= limit) lcd->write("=")/*lcd->print("-")*/;
+            else lcd->print("-");
         }
 
         //
         // Protection mode
         lcd->setCursor(3, 3);
         pc->mode.protect ? lcd->write(iconHart) : lcd->write(iconSkull);
-        //
-        // Memory UI
-        drawMemory();
+
 
     }
 

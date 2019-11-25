@@ -47,7 +47,7 @@ struct EditMenu {
 
 struct PowerMode {
     boolean powered = true;
-    boolean dynamic = true;
+    boolean dynamic = false;
     boolean protect = true;
 };
 
@@ -227,7 +227,7 @@ public:
  * @param value
  */
     void setPwmVolt(uint8_t value) {
-        setVolt = (float) map(value * 10, 15, 167, 10, 205) / 10.0;
+        setVolt = (float) map(value, 15, 167, 10, 205) * 0.1;
         pwmVolt = value;
     }
 
@@ -236,7 +236,7 @@ public:
  * @param value
  */
     void setPwmAmps(uint8_t value) {
-        setAmps = (float) map(value, 19, 255, 20, 300) / 100.0;
+        setAmps = (float) map(value, 19, 255, 20, 300) * 0.01;
         pwmAmps = value;
     }
 

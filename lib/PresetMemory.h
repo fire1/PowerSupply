@@ -13,8 +13,8 @@
 
 
 struct Preset {
-    float volt;
-    float amps;
+    uint8_t volt;
+    uint8_t amps;
     PowerMode mode;
 };
 
@@ -33,6 +33,13 @@ public:
             EEPROM.put(setIndex * sizeof(Preset), save);
             saved = save;
             lastIndexSave = setIndex;
+            Serial.println();
+            Serial.print(F(" MEM SET "));
+            Serial.print(setIndex);
+            Serial.print(F(" vol "));
+            Serial.print(save.volt);
+            Serial.print(F(" amp "));
+            Serial.print(save.amps);
         }
         delay(5);
     }
@@ -53,6 +60,13 @@ public:
     void get(uint8_t setIndex, Preset &output) {
         lastIndexLoad = setIndex;
         EEPROM.get(setIndex * sizeof(Preset), output);
+        Serial.println();
+        Serial.print(F(" MEM GET "));
+        Serial.print(setIndex);
+        Serial.print(F(" vol "));
+        Serial.print(output.volt);
+        Serial.print(F(" amp "));
+        Serial.print(output.amps);
     }
 
 
@@ -61,15 +75,12 @@ public:
     }
 
 
-    void clearLastLoaded() {
-        lastIndexLoad = 0;
-    }
-
     uint8_t getLastSaved() {
         return lastIndexSave;
     }
 
-    void clearLastSaved() {
+    void clearLast() {
+        lastIndexLoad = 0;
         lastIndexSave = 0;
     }
 

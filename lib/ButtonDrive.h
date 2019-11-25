@@ -94,7 +94,7 @@ void btn5Click() {
 
 void btn5Hold() {
     if (currentButton != 55) {
-        currentButton = 6;
+        currentButton = 55;
     }
 }
 
@@ -112,8 +112,8 @@ void btn6Hold() {
 
 Button btnBlinker = Button(20, &btn2Click, &btn2Hold, 1200, 350);
 Button btnEncoder = Button(227, &btn1Click, &btn1Hold, 1200, 350);
-Button btnMemSetA = Button(765, &btn3Click, &btn3Hold, 1200, 450);
-Button btnMemSetB = Button(512, &btn4Click, &btn4Hold, 1200, 450);
-Button btnMemSetD = Button(420, &btn6Click, &btn6Hold, 1200, 450);
-Button btnMemSetC = Button(264, &btn5Click, &btn5Hold, 1200, 450);
+Button btnMemSetA = Button(368, &btn3Click, &btn3Hold, 1200, 2600);
+Button btnMemSetB = Button(172, &btn4Click, &btn4Hold, 1200, 2600);
+Button btnMemSetC = Button(76, &btn5Click, &btn5Hold, 1200, 2600);
+Button btnMemSetD = Button(129, &btn6Click, &btn6Hold, 1200, 2600);
 #endif //POWERSUPPLY_BUTTONDRIVE_H

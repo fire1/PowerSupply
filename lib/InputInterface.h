@@ -103,6 +103,11 @@ private:
         }
     }
 
+    void editing() {
+        ping();
+        edit = true;
+    }
+
     void ping() {
         timeout = millis() + editTimeout;
     }
@@ -205,6 +210,7 @@ private:
     }
 
     Preset getPreset() {
+        noEdit();
         preset.amps = pc->getPwmAmps();
         preset.volt = pc->getPwmVolt();
         preset.mode = pc->getMode();
@@ -212,15 +218,23 @@ private:
     }
 
     void setPreset(Preset preset) {
-        pc->mode.powered = false;
         pc->setPwmVolt(preset.volt);
         pc->setPwmAmps(preset.amps);
         pc->mode = preset.mode;
-        pc->mode.powered = false;
+
+    }
+
+    void noEdit() {
+        cursor = 0;
+        edit = false;
     }
 
     void resetFrames() {
         frames = FRAMES_PREVIEW;
+    }
+
+    boolean isFramesEnding() {
+        return frames - 1 == 0;
     }
 
 public:
@@ -258,9 +272,17 @@ public:
         if (cursor > 0) {
             this->input();
             if (timeout <= millis()) {
-                cursor = 0;
-                edit = false;
+                noEdit();
+                pm->clearLast();
             }
+        }
+        if (isFramesEnding()) {
+            edit = true;
+        }
+        if (frames == 0) {
+            resetFrames();
+            edit = false;
+            pm->clearLast();
         }
 
     }
@@ -272,21 +294,19 @@ public:
 
     uint8_t getSaved() {
         uint8_t saved = pm->getLastSaved();
+        pm->clearLast();
         frames--;
-        if (frames == 0) {
-            pm->clearLastSaved();
-            this->resetFrames();
-        }
         return saved;
     }
 
     uint8_t getLoaded() {
+
         uint8_t loaded = pm->getLastLoaded();
-        frames--;
-        if (frames == 0) {
-            pm->clearLastLoaded();
-            this->resetFrames();
+        if (loaded > 0) {
+            pm->clearLast();
+            pc->mode.powered = false;
         }
+        frames--;
         return loaded;
     }
 
