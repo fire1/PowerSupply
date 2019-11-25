@@ -255,42 +255,7 @@ private:
             lcdBlinks = !lcdBlinks;
         }
 
-        lcd->setCursor(6, 1);
-        voltFloat(pc->getOutVolt(), printValues);
-        lcd->print(printValues);
-        lcd->print(charV);
 
-
-        lcd->setCursor(13, 1);
-        ampsFloat(pc->getOutAmps(), printValues);
-        lcd->print(printValues);
-        lcd->print(charA);
-
-        //
-        // Draw bar
-        // symbols: https://learn.robotgeek.com/getting-started/59-lcd-special-characters.html
-        int8_t limit = pc->readLimit();
-        Serial.print(" LN ");
-        Serial.print(limit);
-        for (index = 0; index < 20; ++index) {
-            lcd->setCursor(index, 2);
-            if(index == 0){
-                lcd->print(F("["));
-            }
-            if(index == 20){
-                lcd->print(F("]"));
-            }
-            if (index <= limit) lcd->write(255)/*lcd->print("-")*/;
-            else lcd->print(" ");
-        }
-
-        //
-        // Protection mode
-        lcd->setCursor(3, 3);
-        pc->mode.protect ? lcd->write(iconHart) : lcd->write(iconSkull);
-        //
-        // Memory UI
-        drawMemory();
 
     }
 
@@ -341,6 +306,39 @@ public:
 
     void draw() {
         drawMain();
+
+        lcd->setCursor(6, 1);
+        voltFloat(pc->getOutVolt(), printValues);
+        lcd->print(printValues);
+        lcd->print(charV);
+
+
+        lcd->setCursor(13, 1);
+        ampsFloat(pc->getOutAmps(), printValues);
+        lcd->print(printValues);
+        lcd->print(charA);
+
+        //
+        // Draw bar
+        // symbols: https://learn.robotgeek.com/getting-started/59-lcd-special-characters.html
+        int8_t limit = pc->readLimit();
+        Serial.print(" LN ");
+        Serial.print(limit);
+        for (index = 0; index < 20; ++index) {
+            lcd->setCursor(index, 2);
+            lcd->print(F("|"));
+            if (index <= limit) lcd->write(255)/*lcd->print("-")*/;
+            else lcd->print(" ");
+        }
+
+        //
+        // Protection mode
+        lcd->setCursor(3, 3);
+        pc->mode.protect ? lcd->write(iconHart) : lcd->write(iconSkull);
+        //
+        // Memory UI
+        drawMemory();
+
     }
 
 
