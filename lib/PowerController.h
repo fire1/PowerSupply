@@ -104,7 +104,7 @@ class PowerController {
             pwmAmps = constrain(pwmAmps, 10, 150);
         }*/
 
-            lastControl = millis();
+            lastControl = interval;
         }
     }
 
