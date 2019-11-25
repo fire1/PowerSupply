@@ -14,12 +14,106 @@
 const char charV[2] = "V";
 const char charA[2] = "A";
 
+
+////////////////////////////////////
+//// Icons
+const byte iconLock = 0;
+byte charLock[] = {
+        0b01110,
+        0b10001,
+        0b10001,
+        0b11111,
+        0b11011,
+        0b11011,
+        0b11111,
+        0b00000
+};
+const byte iconUnlock = 1;
+byte charUnlock[] = {
+        0b01110,
+        0b10000,
+        0b10000,
+        0b11111,
+        0b11011,
+        0b11011,
+        0b11111,
+        0b00000
+};
+const byte iconPlug = 2;
+byte charPlugin[] = {
+        B01010,
+        B01010,
+        B11111,
+        B10001,
+        B01110,
+        B00100,
+        B00100,
+        B00000
+};
+
+
+const byte iconHart = 3;
+byte charHart[] = {
+        B01010,
+        B11111,
+        B11111,
+        B11111,
+        B01110,
+        B00100,
+        B00000,
+        B00000
+};
+const byte iconSkull = 4;
+byte charSkull[] = {
+        B01110,
+        B10101,
+        B10101,
+        B11011,
+        B01110,
+        B01110,
+        B00000,
+        B00000
+};
+const byte iconLamp = 5;
+byte charLamp[] = {
+        B01110,
+        B10001,
+        B10101,
+        B10001,
+        B01110,
+        B01110,
+        B00100,
+        B00000
+};
+const byte iconBar2 = 6;
+byte charBar2[] = {
+        B00000,
+        B11111,
+        B00000,
+        B00000,
+        B00000,
+        B00000,
+        B11111,
+        B00000
+};
+const byte iconBar3 = 7;
+byte charBar3[] = {
+        B00000,
+        B00011,
+        B00100,
+        B00100,
+        B00100,
+        B00100,
+        B00011,
+        B00000
+};
+
+
 class DisplayInterface {
 private:
 
 
     boolean lcdBlinks = false;
-    boolean lcdEditing = false;
     unsigned long timeout;
     LiquidCrystal *lcd;
     PowerController *pc;
@@ -172,18 +266,67 @@ private:
         lcd->print(printValues);
         lcd->print(charA);
 
+        //
+        // Draw bar
+        // symbols: https://learn.robotgeek.com/getting-started/59-lcd-special-characters.html
         int8_t limit = pc->readLimit();
         Serial.print(" LN ");
         Serial.print(limit);
         for (index = 0; index < 20; ++index) {
             lcd->setCursor(index, 2);
-            if (index <= limit) lcd->print("-");
+            if(index == 0){
+                lcd->print(F("["));
+            }
+            if(index == 20){
+                lcd->print(F("]"));
+            }
+            if (index <= limit) lcd->write(255)/*lcd->print("-")*/;
             else lcd->print(" ");
         }
 
-
+        //
+        // Protection mode
         lcd->setCursor(3, 3);
         pc->mode.protect ? lcd->write(iconHart) : lcd->write(iconSkull);
+        //
+        // Memory UI
+        drawMemory();
+
+    }
+
+    void drawMemory() {
+        uint8_t mem = in->getLoaded();
+        if (mem > 0) {
+            drawMemCursor(mem, 126);
+        }
+
+        uint8_t set = in->getSaved();
+        if (set > 0) {
+            drawMemCursor(set, iconHart);
+        }
+
+    }
+
+    void drawMemCursor(uint8_t index, byte icon) {
+        switch (index) {
+            case 1:
+                lcd->setCursor(5, 3);
+                break;
+            case 2:
+                break;
+            case 3:
+                lcd->setCursor(9, 3);
+                break;
+
+            case 4:
+                lcd->setCursor(13, 3);
+                break;
+
+            default:
+                break;
+        }
+//        lcd->print((char) 126);
+        lcd->write(126);
     }
 
 public:
@@ -207,6 +350,7 @@ public:
         lcd->createChar(iconPlug, charPlugin);
         lcd->createChar(iconHart, charHart);
         lcd->createChar(iconSkull, charSkull);
+        lcd->createChar(iconLamp, charLamp);
         lcd->noAutoscroll();
         delay(100);
         lcd->clear();

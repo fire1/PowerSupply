@@ -63,65 +63,6 @@ int16_t temperature;
 char printValues[6];
 
 
-////////////////////////////////////
-//// Icons
-const byte iconLock = 0;
-byte charLock[] = {
-        0b01110,
-        0b10001,
-        0b10001,
-        0b11111,
-        0b11011,
-        0b11011,
-        0b11111,
-        0b00000
-};
-const byte iconUnlock = 1;
-byte charUnlock[] = {
-        0b01110,
-        0b10000,
-        0b10000,
-        0b11111,
-        0b11011,
-        0b11011,
-        0b11111,
-        0b00000
-};
-const byte iconPlug = 2;
-byte charPlugin[] = {
-        B01010,
-        B01010,
-        B11111,
-        B10001,
-        B01110,
-        B00100,
-        B00100,
-        B00000
-};
-
-
-const byte iconHart = 3;
-byte charHart[] = {
-        B01010,
-        B11111,
-        B11111,
-        B11111,
-        B01110,
-        B00100,
-        B00000,
-        B00000
-};
-const byte iconSkull = 4;
-byte charSkull[] = {
-        B01110,
-        B10101,
-        B10101,
-        B11011,
-        B01110,
-        B01110,
-        B00000,
-        B00000
-};
 
 
 unsigned long amplitude10, amplitude100, amplitude350;

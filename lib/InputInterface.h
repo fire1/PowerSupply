@@ -35,11 +35,17 @@
 #include "ButtonDrive.h"
 #include "PresetMemory.h"
 
+
+#ifndef FRAMES_PREVIEW
+#define FRAMES_PREVIEW 4
+#endif
+
 void static encoderInterrupt();
 
 class InputInterface {
 
     uint8_t cursor = 0;
+    uint8_t frames = FRAMES_PREVIEW; // frames
     unsigned long timeout;
     PowerController *pc;
     AnalogButtons *ab;
@@ -213,6 +219,9 @@ private:
         pc->mode.powered = false;
     }
 
+    void resetFrames() {
+        frames = FRAMES_PREVIEW;
+    }
 
 public:
     boolean edit = false;
@@ -240,6 +249,7 @@ public:
         ab->add(btnMemSetD);
     }
 
+
     void listen() {
         this->terminal();
         ab->check();
@@ -260,6 +270,25 @@ public:
         return cursor;
     }
 
+    uint8_t getSaved() {
+        uint8_t saved = pm->getLastSaved();
+        frames--;
+        if (frames == 0) {
+            pm->clearLastSaved();
+            this->resetFrames();
+        }
+        return saved;
+    }
+
+    uint8_t getLoaded() {
+        uint8_t loaded = pm->getLastLoaded();
+        frames--;
+        if (frames == 0) {
+            pm->clearLastLoaded();
+            this->resetFrames();
+        }
+        return loaded;
+    }
 
 };
 
