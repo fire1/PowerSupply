@@ -210,7 +210,6 @@ private:
     }
 
     Preset getPreset() {
-        noEdit();
         preset.amps = pc->getPwmAmps();
         preset.volt = pc->getPwmVolt();
         preset.mode = pc->getMode();
@@ -269,22 +268,12 @@ public:
         ab->check();
         this->buttons();
 
-        if (cursor > 0) {
+        if (edit) {
             this->input();
             if (timeout <= millis()) {
                 noEdit();
-                pm->clearLast();
             }
         }
-        if (isFramesEnding()) {
-            edit = true;
-        }
-        if (frames == 0) {
-            resetFrames();
-            edit = false;
-            pm->clearLast();
-        }
-
     }
 
 
@@ -294,20 +283,25 @@ public:
 
     uint8_t getSaved() {
         uint8_t saved = pm->getLastSaved();
-        pm->clearLast();
-        frames--;
+        if (saved > 0) {
+            edit = true;
+            timeout = millis() + 200;
+        }
         return saved;
     }
 
     uint8_t getLoaded() {
-
         uint8_t loaded = pm->getLastLoaded();
         if (loaded > 0) {
-            pm->clearLast();
+            edit = true;
+            timeout = millis() + 200;
             pc->mode.powered = false;
         }
-        frames--;
         return loaded;
+    }
+
+    void closeMem() {
+        pm->clearLast();
     }
 
 };

@@ -235,7 +235,8 @@ private:
             lcd->print(charA);
 
             lcd->setCursor(1, 3);
-            lcd->write(pc->mode.dynamic ?   iconUnlock : iconLock);
+            lcd->write(pc->mode.dynamic ? iconUnlock : iconLock);
+/*
 
             lcd->setCursor(6, 3);
             lcd->print(F("M1"));
@@ -251,10 +252,10 @@ private:
 
             lcd->setCursor(18, 3);
             lcd->print(F("M4"));
+*/
 
             lcdBlinks = !lcdBlinks;
         }
-
 
 
     }
@@ -291,7 +292,13 @@ private:
             default:
                 break;
         }
-        lcd->write(icon);
+        if (!in->edit) {
+            in->closeMem();
+            lcd->write(icon);
+            lcd->print(F("M"));
+            lcd->print(index);
+        }
+
     }
 
 public:
