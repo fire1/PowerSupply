@@ -91,20 +91,25 @@ class PowerController {
     }
 
     void controller() {
-        if (outVolt > setVolt && outAmps == 0 && controlInterval()) {
-            pwmVolt--;
-            pwmVolt = constrain(pwmVolt, ctrVolt - CONTROL_TOLERANCE, ctrVolt + CONTROL_TOLERANCE);
-        }
+        unsigned long interval = millis();
+        if (interval > lastControl + CONTROL_INTERVAL) {
+            if (outVolt > setVolt && outAmps == 0) {
+                pwmVolt--;
+                pwmVolt = constrain(pwmVolt, ctrVolt - CONTROL_TOLERANCE, ctrVolt + CONTROL_TOLERANCE);
+            }
 
-        if (outVolt < setVolt && outAmps == 0 && controlInterval()) {
-            pwmVolt++;
-            pwmVolt = constrain(pwmVolt, ctrVolt - CONTROL_TOLERANCE, ctrVolt + CONTROL_TOLERANCE);
-        }
+            if (outVolt < setVolt && outAmps == 0) {
+                pwmVolt++;
+                pwmVolt = constrain(pwmVolt, ctrVolt - CONTROL_TOLERANCE, ctrVolt + CONTROL_TOLERANCE);
+            }
 
 /*        if (outAmps > setAmps && controlInterval()) {
             pwmAmps--;
             pwmAmps = constrain(pwmAmps, 10, 150);
         }*/
+
+            lastControl = millis();
+        }
     }
 
 public:
