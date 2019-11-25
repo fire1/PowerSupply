@@ -243,9 +243,6 @@ public:
         return mode;
     }
 
-    void loadPreset(Preset set) {
-
-    }
 
 
 };
