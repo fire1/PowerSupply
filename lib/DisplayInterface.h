@@ -296,7 +296,7 @@ private:
 
         if (!in->edit) {
             lcd->write(icon);
-            lcd->print(F("M"));
+            lcd->write(iconLamp);
             lcd->print(index);
             in->edit = true;
         } else {
