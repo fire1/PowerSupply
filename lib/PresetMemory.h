@@ -71,11 +71,13 @@ public:
 
 
     uint8_t getLastLoaded() {
+        lastIndexSave = 0;
         return lastIndexLoad;
     }
 
 
     uint8_t getLastSaved() {
+        lastIndexLoad = 0;
         return lastIndexSave;
     }
 

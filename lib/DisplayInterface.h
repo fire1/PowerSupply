@@ -112,7 +112,7 @@ byte charBar3[] = {
 class DisplayInterface {
 private:
 
-
+    uint8_t frames = 0;
     boolean lcdBlinks = false;
     unsigned long timeout;
     LiquidCrystal *lcd;
@@ -213,10 +213,11 @@ private:
 
     void drawMain() {
         this->editing();
-        drawMemory();
+
 
         if (in->edit || !lcdBlinks) {
             lcd->clear();
+            frames = 0;
 
             lcd->setCursor(1, 0);
             lcd->print(F("SET "));
@@ -265,6 +266,7 @@ private:
         uint8_t mem = in->getLoaded();
         if (mem > 0) {
             drawMemCursor(mem, 126);
+            return;
         }
 
         uint8_t set = in->getSaved();
@@ -285,7 +287,6 @@ private:
             case 3:
                 lcd->setCursor(13, 3);
                 break;
-
             case 4:
                 lcd->setCursor(17, 3);
                 break;
@@ -294,15 +295,19 @@ private:
                 break;
         }
 
-        if (!in->edit) {
-            lcd->write(icon);
-            lcd->write(iconLamp);
-            lcd->print(index);
-            in->edit = true;
-        } else {
+        if (frames > 4) {
             in->closeMem();
-            in->edit = false;
+            frames = 0;
         }
+
+        if (!in->edit) {
+            in->edit = true;
+        }
+
+
+        lcd->write(icon);
+        lcd->write(iconLamp);
+        lcd->print(index);
 
     }
 
@@ -317,10 +322,14 @@ public:
     DisplayInterface(LiquidCrystal &lc, PowerController &cn, InputInterface &in) : lcd(&lc), pc(&cn), in(&in) {}
 
     void draw() {
+        frames++;
+        if (frames >= 10) {
+            frames = 0;
+        }
         //
         // Memory UI
         drawMain();
-
+        drawMemory();
 
         lcd->setCursor(6, 1);
         voltFloat(pc->getOutVolt(), printValues);
@@ -335,6 +344,7 @@ public:
 
         //
         // Draw bar
+
         // symbols: https://learn.robotgeek.com/getting-started/59-lcd-special-characters.html
         int8_t limit = pc->readLimit();
         Serial.print(F(" LN "));
