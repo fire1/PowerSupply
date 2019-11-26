@@ -213,6 +213,7 @@ private:
 
     void drawMain() {
         this->editing();
+        drawMemory();
 
         if (in->edit || !lcdBlinks) {
             lcd->clear();
@@ -292,11 +293,15 @@ private:
             default:
                 break;
         }
+
         if (!in->edit) {
-            in->closeMem();
             lcd->write(icon);
             lcd->print(F("M"));
             lcd->print(index);
+            in->edit = true;
+        } else {
+            in->closeMem();
+            in->edit = false;
         }
 
     }
@@ -315,7 +320,7 @@ public:
         //
         // Memory UI
         drawMain();
-        drawMemory();
+
 
         lcd->setCursor(6, 1);
         voltFloat(pc->getOutVolt(), printValues);

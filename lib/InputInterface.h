@@ -283,20 +283,11 @@ public:
 
     uint8_t getSaved() {
         uint8_t saved = pm->getLastSaved();
-        if (saved > 0) {
-            edit = true;
-            timeout = millis() + 200;
-        }
         return saved;
     }
 
     uint8_t getLoaded() {
         uint8_t loaded = pm->getLastLoaded();
-        if (loaded > 0) {
-            edit = true;
-            timeout = millis() + 200;
-            pc->mode.powered = false;
-        }
         return loaded;
     }
 
