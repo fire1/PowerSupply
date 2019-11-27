@@ -112,6 +112,7 @@ byte charBar3[] = {
 class DisplayInterface {
 private:
 
+    uint8_t memSet = 0, memGet = 0;
     uint8_t frames = 0;
     boolean lcdBlinks = false;
     unsigned long timeout;
@@ -181,6 +182,10 @@ private:
 
     }
 
+    void numShow(uint8_t val, char *out) {
+        sprintf(out, "%03d", val);
+    }
+
 
     void editing() {
         pc->menu.editAmps = false;
@@ -213,7 +218,7 @@ private:
 
     void drawMain() {
         this->editing();
-
+        this->resolveMem();
 
         if (in->edit || !lcdBlinks) {
             lcd->clear();
@@ -238,23 +243,20 @@ private:
 
             lcd->setCursor(1, 3);
             lcd->write(pc->mode.dynamic ? iconUnlock : iconLock);
-/*
 
-            lcd->setCursor(6, 3);
-            lcd->print(F("M1"));
-
-
-            lcd->setCursor(10, 3);
-            lcd->print(F("M2"));
-
-
-            lcd->setCursor(14, 3);
-            lcd->print(F("M3"));
+            uint8_t av;
+            av = pc->getPwmVolt();
+            numShow(av, printValues);
+            lcd->setCursor(9, 3);
+            lcd->print(charV);
+            lcd->print(printValues);
 
 
-            lcd->setCursor(18, 3);
-            lcd->print(F("M4"));
-*/
+            av = pc->getPwmAmps();
+            numShow(av, printValues);
+            lcd->setCursor(15, 3);
+            lcd->print(charA);
+            lcd->print(printValues);
 
             lcdBlinks = !lcdBlinks;
         }
@@ -262,53 +264,34 @@ private:
 
     }
 
+
+    void resolveMem() {
+        memSet = in->getSaved();
+        memGet = in->getLoaded();
+        if (memGet > 0 || memSet > 0) {
+            in->edit = true;
+
+        }
+    }
+
     void drawMemory() {
-        uint8_t mem = in->getLoaded();
-        if (mem > 0) {
-            drawMemCursor(mem, 126);
+
+        if (memSet > 0) {
+            drawMemCursor(memSet, 126);
             return;
         }
 
-        uint8_t set = in->getSaved();
-        if (set > 0) {
-            drawMemCursor(set, iconHart);
+        if (memGet > 0) {
+            drawMemCursor(memGet, iconLamp);
         }
 
     }
 
     void drawMemCursor(uint8_t index, byte icon) {
-        switch (index) {
-            case 1:
-                lcd->setCursor(5, 3);
-                break;
-            case 2:
-                lcd->setCursor(9, 3);
-                break;
-            case 3:
-                lcd->setCursor(13, 3);
-                break;
-            case 4:
-                lcd->setCursor(17, 3);
-                break;
-
-            default:
-                break;
-        }
-
-        if (frames > 4) {
-            in->closeMem();
-            frames = 0;
-        }
-
-        if (!in->edit) {
-            in->edit = true;
-        }
-
-
+        lcd->setCursor(6, 3);
         lcd->write(icon);
-        lcd->write(iconLamp);
         lcd->print(index);
-
+        in->edit = false;
     }
 
 public:
@@ -326,8 +309,7 @@ public:
         if (frames >= 10) {
             frames = 0;
         }
-        //
-        // Memory UI
+
         drawMain();
         drawMemory();
 

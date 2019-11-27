@@ -148,6 +148,9 @@ private:
                 tick();
                 ping();
                 break;
+            case 11:
+
+                break;
 
             case 2:
                 if (edit) {
@@ -283,17 +286,11 @@ public:
 
     uint8_t getSaved() {
         uint8_t saved = pm->getLastSaved();
-        if (saved > 0) {
-            edit = true;
-        }
         return saved;
     }
 
     uint8_t getLoaded() {
         uint8_t loaded = pm->getLastLoaded();
-        if (loaded > 0) {
-            edit = true;
-        }
         return loaded;
     }
 
