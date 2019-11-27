@@ -306,7 +306,7 @@ public:
 
     void draw() {
         frames++;
-        if (frames >= 10) {
+        if (frames >= 5) {
             frames = 0;
         }
 
@@ -329,20 +329,19 @@ public:
 
         // symbols: https://learn.robotgeek.com/getting-started/59-lcd-special-characters.html
         int8_t limit = pc->readLimit();
-        Serial.print(F(" LN "));
-        Serial.print(limit);
         for (index = 0; index < 20; ++index) {
             lcd->setCursor(index, 2);
 
-            if (index <= limit) lcd->write("=")/*lcd->print("-")*/;
+            if (index <= limit) lcd->write("+")/*lcd->print("-")*/;
             else lcd->print("-");
         }
 
-        //
-        // Protection mode
-        lcd->setCursor(3, 3);
-        pc->mode.protect ? lcd->write(iconHart) : lcd->write(iconSkull);
-
+        if (frames % 2 == 0) {
+            //
+            // Protection mode
+            lcd->setCursor(3, 3);
+            pc->mode.protect ? lcd->write(iconHart) : lcd->write(iconSkull);
+        }
 
     }
 

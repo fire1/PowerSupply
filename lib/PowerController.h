@@ -182,7 +182,7 @@ public:
         if (limit < 200) {
             digitalWrite(pinLed, HIGH);
         }
-        return (int8_t) map(limit, 0, 950, 20, 0);
+        return (int8_t) map(limit, 50, 17, 0, 20);
     }
 
 ////////////////////////////////////////////////////////////////
