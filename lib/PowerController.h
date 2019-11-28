@@ -77,6 +77,7 @@ struct PowerMode {
 // step 8.2
 
 class PowerController {
+    boolean charging = false;
     uint8_t pwmVolt = 31, lastVolt, ctrVolt;
     uint8_t pwmAmps = 19, lastAmps, ctrAmps;
     float setVolt = 3.0;
@@ -108,19 +109,27 @@ class PowerController {
         }
     }
 
+    void charge() {
+        if (outAmps < 0.10 || outVolt >= setVolt) {
+            charging = false;
+            mode.powered = false;
+            alarm();
+        } else {
+            mode.powered = true;
+            charging = true;
+        }
+    }
+
 public:
 
     PowerMode mode;
     EditMenu menu;
+    boolean isBat = false;
 
     void begin() {
 
         enableInterrupt(pinInaAlert, inaAlertInterrupt, CHANGE);
-//        this->setupIna();
         pinMode(pinLed, OUTPUT);
-        // Display configuration
-
-
         pinMode(pinVolPwm, OUTPUT);
         pinMode(pinAmpPwm, OUTPUT);
         pinMode(pinAmpLimit, INPUT_PULLUP);
@@ -147,6 +156,10 @@ public:
 
         if (mode.dynamic) {
             controller();
+        }
+
+        if (isBat) {
+            charge();
         }
 
         if (!mode.powered) {

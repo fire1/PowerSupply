@@ -85,26 +85,26 @@ byte charLamp[] = {
         B00100,
         B00000
 };
-const byte iconBar2 = 6;
-byte charBar2[] = {
-        B00000,
-        B11111,
-        B00000,
-        B00000,
-        B00000,
-        B00000,
+const byte iconBatC = 6;
+byte charBatC[] = {
+        B01110,
+        B11011,
+        B11101,
+        B10001,
+        B10111,
+        B11011,
         B11111,
         B00000
 };
-const byte iconBar3 = 7;
-byte charBar3[] = {
-        B00000,
-        B00011,
-        B00100,
-        B00100,
-        B00100,
-        B00100,
-        B00011,
+const byte iconBatD = 7;
+byte charBatD[] = {
+        B01110,
+        B11111,
+        B11101,
+        B10101,
+        B11011,
+        B11111,
+        B11111,
         B00000
 };
 
@@ -365,7 +365,10 @@ public:
             //
             // Protection mode
             lcd->setCursor(3, 3);
-            pc->mode.protect ? lcd->write(iconHart) : lcd->write(iconSkull);
+            if (pc->isBat) {
+                pc->mode.powered ? lcd->write(iconBatC) : lcd->write(iconBatD);
+            } else
+                pc->mode.protect ? lcd->write(iconHart) : lcd->write(iconSkull);
         }
 
     }
@@ -378,8 +381,10 @@ public:
         lcd->createChar(iconHart, charHart);
         lcd->createChar(iconSkull, charSkull);
         lcd->createChar(iconLamp, charLamp);
+        lcd->createChar(iconBatC, charBatC);
+        lcd->createChar(iconBatD, charBatD);
         lcd->noAutoscroll();
-        delay(100);
+        delay(10);
         lcd->clear();
         lcd->home();
     }

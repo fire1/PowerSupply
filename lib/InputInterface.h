@@ -172,7 +172,15 @@ private:
                 ping();
                 break;
             case 11:
-                isPwm = !isPwm;
+                if (isPwm) {
+                    pc->isBat = true;
+                    isPwm = false;
+                    cursor = 0;
+                } else {
+                    cursor++;
+                    isPwm = !isPwm;
+                    pc->isBat = false;
+                }
                 alarm();
                 break;
 
@@ -184,6 +192,7 @@ private:
                 }
                 tick();
                 break;
+
             case 22:
                 pc->mode.protect = (bool) !pc->mode.protect;
                 alarm();
@@ -257,6 +266,7 @@ private:
 
 public:
     boolean isPwm = false;
+
     boolean edit = false;
     uint8_t lastButton = 0;
 
