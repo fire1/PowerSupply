@@ -266,7 +266,6 @@ private:
 
 public:
     boolean isPwm = false;
-
     boolean edit = false;
     uint8_t lastButton = 0;
 
