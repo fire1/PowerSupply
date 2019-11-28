@@ -187,7 +187,7 @@ private:
     }
 
 
-    void editing() {
+    void editingSet() {
         pc->menu.editAmps = false;
         pc->menu.editVolt = false;
         pc->menu.editHalf = false;
@@ -216,8 +216,33 @@ private:
         }
     }
 
+    void editingPwm() {
+        uint8_t cur = in->getCursor();
+        if (cur > 0) {
+            in->edit = true;
+            fastScreen = true;
+            switch (cur) {
+                case 1:
+                    pc->menu.editVolt = true;
+                    pc->menu.editHalf = true;
+                    break;
+                case 2:
+                    pc->menu.editAmps = true;
+                    pc->menu.editHalf = true;
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
+
+
     void drawMain() {
-        this->editing();
+        if (!in->isPwm) {
+            this->editingSet();
+        } else {
+            this->editingPwm();
+        }
         this->resolveMem();
 
         if (in->edit || !lcdBlinks) {

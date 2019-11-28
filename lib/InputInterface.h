@@ -103,10 +103,6 @@ private:
         }
     }
 
-    void editing() {
-        ping();
-        edit = true;
-    }
 
     void ping() {
         timeout = millis() + editTimeout;
@@ -121,16 +117,38 @@ private:
 
         int direction = enc->getDirection();
         if (direction != 0) {
-            if (pc->menu.editAmps) {
-                double value = !pc->menu.editHalf ?: 0.050;
-                pc->setAmperage(changeValue(pc->getSetAmps(), direction, value));
-                tick();
-            }
+            //
+            // Editing SET
+            if (!isPwm) {
+                if (pc->menu.editAmps) {
+                    double value = !pc->menu.editHalf ?: 0.050;
+                    pc->setAmperage(changeValue(pc->getSetAmps(), direction, value));
+                    tick();
+                }
 
-            if (pc->menu.editVolt) {
-                float value = !pc->menu.editHalf ?: 0.10;
-                pc->setVoltage(changeValue(pc->getSetVolt(), direction, value));
-                tick();
+                if (pc->menu.editVolt) {
+                    float value = !pc->menu.editHalf ?: 0.10;
+                    pc->setVoltage(changeValue(pc->getSetVolt(), direction, value));
+                    tick();
+                }
+                //
+                // Editing PWM
+            } else {
+
+                uint8_t pwm;
+                if (pc->menu.editVolt) {
+                    uint8_t pwmV = pc->getPwmVolt();
+                    pwm = (direction > 0) ? pwmV + 1 : pwmV - 1;
+                    pc->setPwmVolt(pwm);
+                    tick();
+                }
+
+                if (pc->menu.editAmps) {
+                    uint8_t pwmA = pc->getPwmVolt();
+                    pwm = (direction > 0) ? pwmA + 1 : pwmA - 1;
+                    pc->setPwmAmps(pwm);
+                    tick();
+                }
             }
             ping();
         }
@@ -142,14 +160,20 @@ private:
         switch (currentButton) {
             case 1:
                 cursor++;
-                if (cursor > 4) {
-                    cursor = 1;
+                if (!isPwm) {
+                    if (cursor > 4)
+                        cursor = 1;
+                } else {
+                    if (cursor > 2)
+                        cursor = 1;
                 }
+
                 tick();
                 ping();
                 break;
             case 11:
-
+                isPwm = !isPwm;
+                alarm();
                 break;
 
             case 2:
@@ -231,15 +255,8 @@ private:
         edit = false;
     }
 
-    void resetFrames() {
-        frames = FRAMES_PREVIEW;
-    }
-
-    boolean isFramesEnding() {
-        return frames - 1 == 0;
-    }
-
 public:
+    boolean isPwm = false;
     boolean edit = false;
     uint8_t lastButton = 0;
 
@@ -292,10 +309,6 @@ public:
     uint8_t getLoaded() {
         uint8_t loaded = pm->getLastLoaded();
         return loaded;
-    }
-
-    void closeMem() {
-        pm->clearLast();
     }
 
 };
