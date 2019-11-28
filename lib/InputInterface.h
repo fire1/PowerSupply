@@ -144,7 +144,7 @@ private:
                 }
 
                 if (pc->menu.editAmps) {
-                    uint8_t pwmA = pc->getPwmVolt();
+                    uint8_t pwmA = pc->getPwmAmps();
                     pwm = (direction > 0) ? pwmA + 1 : pwmA - 1;
                     pc->setPwmAmps(pwm);
                     tick();
@@ -178,7 +178,7 @@ private:
                     cursor = 0;
                 } else {
                     cursor++;
-                    isPwm = !isPwm;
+                    isPwm = true;
                     pc->isBat = false;
                 }
                 alarm();
@@ -187,6 +187,8 @@ private:
             case 2:
                 if (edit) {
                     pc->mode.dynamic = (bool) !pc->mode.dynamic;
+                    isPwm = false;
+                    pc->isBat = false;
                 } else {
                     pc->mode.powered = (bool) !pc->mode.powered;
                 }

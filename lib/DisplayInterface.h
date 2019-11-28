@@ -225,8 +225,10 @@ private:
                 case 1:
                     pc->menu.editVolt = true;
                     pc->menu.editHalf = true;
+                    pc->menu.editAmps = false;
                     break;
                 case 2:
+                    pc->menu.editVolt = false;
                     pc->menu.editAmps = true;
                     pc->menu.editHalf = true;
                     break;
