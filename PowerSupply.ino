@@ -2,6 +2,10 @@
 /**
  * Based on "Electronoobs" power supply
  * version $Id$
+ *
+ *
+ *  TODO attach int to am limiting in and update dislay more frq-tly
+ *  Check unlocked control
  */
 
 //#define DEBUG

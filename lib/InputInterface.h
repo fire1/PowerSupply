@@ -121,7 +121,7 @@ private:
             // Editing SET
             if (!isPwm) {
                 if (pc->menu.editAmps) {
-                    double value = !pc->menu.editHalf ?: 0.050;
+                    double value = !pc->menu.editHalf ?: 0.010;
                     pc->setAmperage(changeValue(pc->getSetAmps(), direction, value));
                     tick();
                 }
