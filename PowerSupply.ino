@@ -41,12 +41,15 @@ void inaAlertInterrupt() {
     cntMsr++;
 }
 
+void ampLimitInterrupt() {
+    ampLimiter = ampLimiter = (uint8_t) (analogRead(A0) / 10);
+}
+
 
 // do not use 10/11
 void setup() {
     Serial.begin(115200);
     lcd.begin(20, 4);
-    delay(100);
     ui.begin();
 
     tick();
@@ -55,11 +58,10 @@ void setup() {
     ina.setShuntConversion(8500);          // Maximum conversion time 8.244ms
     ina.setMode(INA_MODE_CONTINUOUS_BOTH); // Bus/shunt measured continuously
     Serial.println(F("Booting setPowerState supply ..."));
-    delay(500);
+    delay(300);
     pinMode(pinFans, OUTPUT);
     pinMode(pinTone, OUTPUT);
     pc.begin();
-
 
 
     in.begin();
@@ -86,6 +88,8 @@ void loop() {
     noAlarm();
     in.listen();
     pc.manage();
+
+    if (is80() && pc.isLimited()) ui.drawBar(pc.getLimit());
 
     if (currentLoops > futureMillis) {
         pc.calculate();

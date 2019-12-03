@@ -29,6 +29,8 @@ INA_Class ina;
 
 void static inaAlertInterrupt();
 
+void static ampLimitInterrupt();
+
 
 #ifndef CONTROL_INTERVAL
 #define CONTROL_INTERVAL 300
@@ -80,6 +82,7 @@ class PowerController {
     boolean charging = false;
     uint8_t pwmVolt = 31, lastVolt, ctrVolt;
     uint8_t pwmAmps = 19, lastAmps, ctrAmps;
+    uint8_t lastLimit = 0;
     float setVolt = 3.0;
     float setAmps = 0.200;
     float outVolt = 0;
@@ -129,6 +132,7 @@ public:
     void begin() {
 
         enableInterrupt(pinInaAlert, inaAlertInterrupt, CHANGE);
+        enableInterrupt(pinInaAlert, ampLimitInterrupt, CHANGE);
         pinMode(pinLed, OUTPUT);
         pinMode(pinVolPwm, OUTPUT);
         pinMode(pinAmpPwm, OUTPUT);
@@ -196,6 +200,26 @@ public:
             digitalWrite(pinLed, HIGH);
         }
         return (int8_t) map(limit, 50, 17, 0, 20);
+    }
+
+/**
+ *
+ * @param ui
+ */
+    boolean isLimited() {
+        if (mode.protect && outVolt < 1) {
+            blink();
+        }
+
+        return lastLimit != ampLimiter;
+    }
+
+    int8_t getLimit() {
+        if (ampLimiter < 30) {
+            digitalWrite(pinLed, HIGH);
+        }
+
+        return (int8_t) map(ampLimiter, 50, 17, 0, 20);
     }
 
 ////////////////////////////////////////////////////////////////

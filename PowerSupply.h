@@ -57,6 +57,7 @@ const uint16_t holdTimeout = 400;
 unsigned long futureMillis = 0;
 volatile unsigned long currentLoops = 0;
 volatile uint8_t index;
+volatile uint8_t ampLimiter = 0;
 int16_t temperature;
 
 

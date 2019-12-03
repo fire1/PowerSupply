@@ -390,7 +390,18 @@ public:
         lcd->clear();
         lcd->home();
     }
+/**
+ *
+ * @param limit
+ */
+    void drawBar(int8_t limit) {
+        for (index = 0; index < 20; ++index) {
+            lcd->setCursor(index, 2);
 
+            if (index <= limit) lcd->write("+")/*lcd->print("-")*/;
+            else lcd->print("-");
+        }
+    }
 
     void debug() {
         Serial.println();
