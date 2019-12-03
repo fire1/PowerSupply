@@ -66,11 +66,11 @@ char printValues[6];
 
 
 
-unsigned long amplitude10, amplitude100, amplitude350;
+unsigned long amplitude40, amplitude100, amplitude350;
 
-boolean is10() {
-    if (amplitude10 < currentLoops) {
-        amplitude10 = currentLoops + 10;
+boolean is40() {
+    if (amplitude40 < currentLoops) {
+        amplitude40 = currentLoops + 40;
         return true;
     }
 }

@@ -89,7 +89,9 @@ void loop() {
     in.listen();
     pc.manage();
 
-    if (is80() && pc.isLimited()) ui.drawBar(pc.getLimit());
+    //
+    // Update bar
+    if (is40() && pc.isLimited()) ui.drawBar(pc.getLimit());
 
     if (currentLoops > futureMillis) {
         pc.calculate();
