@@ -116,6 +116,7 @@ private:
     uint8_t frames = 0;
     boolean lcdBlinks = false;
     unsigned long timeout;
+    unsigned long lastUdate;
     LiquidCrystal *lcd;
     PowerController *pc;
     InputInterface *in;
@@ -240,6 +241,8 @@ private:
 
 
     void drawMain() {
+
+        unsigned long time = millis();
         if (!in->isPwm) {
             this->editingSet();
         } else {
@@ -247,7 +250,7 @@ private:
         }
         this->resolveMem();
 
-        if (in->edit || !lcdBlinks) {
+        if (in->edit || !lcdBlinks || pc->mode.dynamic && time > lastUdate + CONTROL_INTERVAL) {
             lcd->clear();
             frames = 0;
 
@@ -286,6 +289,7 @@ private:
             lcd->print(printValues);
 
             lcdBlinks = !lcdBlinks;
+            lastUdate = time;
         }
 
 

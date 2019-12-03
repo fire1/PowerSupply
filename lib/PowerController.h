@@ -33,7 +33,7 @@ void static ampLimitInterrupt();
 
 
 #ifndef CONTROL_INTERVAL
-#define CONTROL_INTERVAL 300
+#define CONTROL_INTERVAL 500
 #endif
 
 #ifndef CONTROL_TOLERANCE
@@ -90,15 +90,17 @@ class PowerController {
     unsigned long lastControl = 0;
 
 
-    void controller() {
-        unsigned long interval = millis();
-        if (interval > lastControl + CONTROL_INTERVAL) {
-            if (outVolt > setVolt && outAmps == 0) {
+    void dinamic() {
+        unsigned long time = millis();
+        if (time > lastControl + CONTROL_INTERVAL) {
+            if (outVolt > setVolt) {
+                ctrVolt = pwmVolt;
                 pwmVolt--;
                 pwmVolt = constrain(pwmVolt, ctrVolt - CONTROL_TOLERANCE, ctrVolt + CONTROL_TOLERANCE);
             }
 
-            if (outVolt < setVolt && outAmps == 0) {
+            if (outVolt < (setVolt - 0.1) && outAmps < (setAmps - 0.5)) {
+                ctrVolt = pwmVolt;
                 pwmVolt++;
                 pwmVolt = constrain(pwmVolt, ctrVolt - CONTROL_TOLERANCE, ctrVolt + CONTROL_TOLERANCE);
             }
@@ -108,15 +110,14 @@ class PowerController {
             pwmAmps = constrain(pwmAmps, 10, 150);
         }*/
 
-            lastControl = interval;
+            lastControl = time;
         }
     }
 
     void charge() {
-        if (outAmps < 0.10 || outVolt >= setVolt) {
+        if (outAmps < 0.10) {
             charging = false;
             mode.powered = false;
-            alarm();
         } else {
             mode.powered = true;
             charging = true;
@@ -162,7 +163,7 @@ public:
         }
 
         if (mode.dynamic) {
-            controller();
+            dinamic();
         }
 
         if (isBat) {
