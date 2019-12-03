@@ -42,7 +42,10 @@ void inaAlertInterrupt() {
 }
 
 void ampLimitInterrupt() {
-    ampLimiter = ampLimiter = (uint8_t) (analogRead(A0) / 10);
+    ampLimiter =  (uint8_t) (analogRead(A0) / 10);
+    if (ampLimiter < 30) {
+        digitalWrite(pinLed, HIGH);
+    }
 }
 
 
@@ -91,7 +94,7 @@ void loop() {
 
     //
     // Update bar
-    if (is40() && pc.isLimited()) ui.drawBar(pc.getLimit());
+    if (is20() && pc.isLimited()) ui.drawBar(pc.getLimit());
 
     if (currentLoops > futureMillis) {
         pc.calculate();

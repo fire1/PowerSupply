@@ -131,14 +131,17 @@ public:
 
     void begin() {
 
-        enableInterrupt(pinInaAlert, inaAlertInterrupt, CHANGE);
-        enableInterrupt(pinInaAlert, ampLimitInterrupt, CHANGE);
         pinMode(pinLed, OUTPUT);
         pinMode(pinVolPwm, OUTPUT);
         pinMode(pinAmpPwm, OUTPUT);
         pinMode(pinAmpLimit, INPUT_PULLUP);
         digitalWrite(pinVolPwm, LOW);
         digitalWrite(pinAmpPwm, HIGH);
+
+
+        enableInterrupt(pinInaAlert, inaAlertInterrupt, CHANGE);
+        enableInterrupt(pinAmpLimit, ampLimitInterrupt, CHANGE);
+        ampLimitInterrupt();
         //
         // Pin 9/10 timer setup
         TCCR1B = TCCR1B & B11111000 | B00000010;    // set timer 1 divisor to     8 for PWM frequency of  3921.16 Hz
@@ -215,9 +218,7 @@ public:
     }
 
     int8_t getLimit() {
-        if (ampLimiter < 30) {
-            digitalWrite(pinLed, HIGH);
-        }
+
 
         return (int8_t) map(ampLimiter, 50, 17, 0, 20);
     }

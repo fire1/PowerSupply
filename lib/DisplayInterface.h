@@ -355,13 +355,13 @@ public:
         // Draw bar
 
         // symbols: https://learn.robotgeek.com/getting-started/59-lcd-special-characters.html
-        int8_t limit = pc->readLimit();
+/*        int8_t limit = pc->readLimit();
         for (index = 0; index < 20; ++index) {
             lcd->setCursor(index, 2);
 
-            if (index <= limit) lcd->write("+")/*lcd->print("-")*/;
+            if (index <= limit) lcd->write("+")*//*lcd->print("-")*//*;
             else lcd->print("-");
-        }
+        }*/
 
         if (frames % 2 == 0) {
             //
@@ -390,6 +390,7 @@ public:
         lcd->clear();
         lcd->home();
     }
+
 /**
  *
  * @param limit
@@ -424,6 +425,10 @@ public:
         Serial.print(in->getCursor());
         Serial.print(F(" MD "));
         Serial.print(pc->mode.dynamic);
+        Serial.print(F(" L "));
+        Serial.print(ampLimiter);
+        Serial.print(" ");
+        Serial.print(analogRead(A0));
     }
 
 };
