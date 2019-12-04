@@ -68,7 +68,7 @@ void setup() {
 
 
     in.begin();
-    currentLoops = 0;
+    currentTime = 0;
 
     analogWrite(pinFans, 50);
     tick();
@@ -87,7 +87,7 @@ void setup() {
 uint8_t fanToggle = 0;
 
 void loop() {
-    currentLoops = millis();
+    currentTime = millis();
     noAlarm();
     in.listen();
     pc.manage();
@@ -96,9 +96,9 @@ void loop() {
     // Update bar
     if (is20() && pc.isLimited()) ui.drawBar(pc.getLimit());
 
-    if (currentLoops > futureMillis) {
+    if (currentTime > futureMillis) {
         pc.calculate();
-        futureMillis = currentLoops;
+        futureMillis = currentTime;
         futureMillis += (fastScreen) ? screenEditorRefresh : screenNormalRefresh;
         fanToggle++;
 

@@ -55,7 +55,7 @@ const uint16_t screenEditorRefresh = 350;
 const uint16_t editTimeout = 6000;
 const uint16_t holdTimeout = 400;
 unsigned long futureMillis = 0;
-volatile unsigned long currentLoops = 0;
+volatile unsigned long currentTime = 0;
 volatile uint8_t index;
 volatile uint8_t ampLimiter = 0;
 int16_t temperature;
@@ -69,22 +69,22 @@ char printValues[6];
 unsigned long amplitude20, amplitude100, amplitude350;
 
 boolean is20() {
-    if (amplitude20 < currentLoops) {
-        amplitude20 = currentLoops + 10;
+    if (amplitude20 < currentTime) {
+        amplitude20 = currentTime + 10;
         return true;
     }
 }
 
 boolean is80() {
-    if (amplitude100 < currentLoops) {
-        amplitude100 = currentLoops + 80;
+    if (amplitude100 < currentTime) {
+        amplitude100 = currentTime + 80;
         return true;
     }
 }
 
 boolean is250() {
-    if (amplitude100 < currentLoops) {
-        amplitude350 = currentLoops + 250;
+    if (amplitude100 < currentTime) {
+        amplitude350 = currentTime + 250;
         return true;
     }
 };

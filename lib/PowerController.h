@@ -90,7 +90,7 @@ class PowerController {
     unsigned long lastControl = 0;
 
 
-    void dinamic() {
+    void dynamic() {
         unsigned long time = millis();
         if (time > lastControl + CONTROL_INTERVAL) {
             if (outVolt > setVolt) {
@@ -163,7 +163,7 @@ public:
         }
 
         if (mode.dynamic) {
-            dinamic();
+            dynamic();
         }
 
         if (isBat) {

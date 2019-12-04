@@ -431,8 +431,7 @@ public:
         Serial.print(pc->mode.dynamic);
         Serial.print(F(" L "));
         Serial.print(ampLimiter);
-        Serial.print(" ");
-        Serial.print(analogRead(A0));
+
     }
 
 };
